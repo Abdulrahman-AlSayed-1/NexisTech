@@ -5,6 +5,11 @@ export const getAllUsers = async (params = {}) => {
   return response.data
 }
 
+export const getUserById = async (id) => {
+  const response = await api.get(`/users/${id}`)
+  return response.data
+}
+
 export const addAdminUser = async (userData) => {
   const response = await api.post('/users/add', userData)
   return response.data

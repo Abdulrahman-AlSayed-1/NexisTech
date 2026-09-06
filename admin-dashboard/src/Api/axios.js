@@ -23,6 +23,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // If the response status is 401, clear local storage and redirect to login
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
