@@ -1,38 +1,33 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-
-// export default function ProtectedRoute() {
-//   const { isAuthenticated, user } = useSelector((state) => state.auth)
-
-//   // Verify token exists and role is admin (or fallback to authenticated in dev/mock)
-//   if (!isAuthenticated) {
-//     return <Navigate to="/login" replace />
-//   }
-
-//   // If user role is present and not admin, redirect
-//   if (user?.role && user.role !== 'admin') {
-//     return <Navigate to="/login" replace />
-//   }
-
-//   return <Outlet />
-// }
-
+import { toast } from 'react-toastify'
 
 export default function ProtectedRoute() {
-  // Comment out or remove the Redux selector for now
-  // const { isAuthenticated, user } = useSelector((state) => state.auth)
+  const { isAuthenticated, user } = useSelector((state) => state.auth)
+  const location = useLocation()
 
-  // TEMPORARILY COMMENTED OUT FOR LOCAL DEVELOPMENT UI TESTING:
-  /*
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.warn('Please sign in to access the admin dashboard.', {
+        toastId: 'auth-required-toast',
+      })
+    } else if (user?.role && user.role !== 'admin') {
+      toast.error('Access denied. Administrator privileges are required.', {
+        toastId: 'admin-required-toast',
+      })
+    }
+  }, [isAuthenticated, user])
+
+  // Verify token exists and role is admin
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  // If user role is present and not admin, redirect
   if (user?.role && user.role !== 'admin') {
     return <Navigate to="/login" replace />
   }
-  */
 
-  // This forces React to let you through to any admin page automatically
   return <Outlet />
 }
