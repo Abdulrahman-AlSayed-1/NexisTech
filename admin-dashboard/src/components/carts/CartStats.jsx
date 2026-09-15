@@ -1,8 +1,8 @@
 import { ShoppingCart, DollarSign, Package, TrendingUp } from 'lucide-react'
-import { formatPrice } from '@/utils/formatters'
+import Counter from '@/components/common/Counter'
 
 export default function CartStats({ stats, currency = 'EGP' }) {
-  const { totalActive = 0, totalPipelineValue = 0, totalItemsCount = 0, avgValue = '0.00' } = stats || {}
+  const { totalActive = 0, totalPipelineValue = 0, totalItemsCount = 0, avgValue = 0 } = stats || {}
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -17,7 +17,7 @@ export default function CartStats({ stats, currency = 'EGP' }) {
           </div>
         </div>
         <p className="text-2xl font-bold text-primary-dark dark:text-white mt-2 font-heading">
-          {totalActive}
+          <Counter value={totalActive} />
         </p>
         <p className="text-xs text-text-secondary dark:text-slate-400 mt-1 flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
@@ -36,8 +36,7 @@ export default function CartStats({ stats, currency = 'EGP' }) {
           </div>
         </div>
         <p className="text-2xl font-bold text-primary-dark dark:text-white mt-2 font-heading">
-          {formatPrice(totalPipelineValue)}{' '}
-          <span className="text-sm font-normal text-accent-gold">{currency}</span>
+          <Counter value={totalPipelineValue} currency={currency} />
         </p>
         <p className="text-xs text-text-secondary dark:text-slate-400 mt-1">
           Total active merchandise pipeline
@@ -55,7 +54,7 @@ export default function CartStats({ stats, currency = 'EGP' }) {
           </div>
         </div>
         <p className="text-2xl font-bold text-primary-dark dark:text-white mt-2 font-heading">
-          {totalItemsCount}
+          <Counter value={totalItemsCount} />
         </p>
         <p className="text-xs text-text-secondary dark:text-slate-400 mt-1">
           Products awaiting checkout
@@ -73,10 +72,7 @@ export default function CartStats({ stats, currency = 'EGP' }) {
           </div>
         </div>
         <p className="text-2xl font-bold text-primary-dark dark:text-white mt-2 font-heading">
-          {formatPrice(avgValue)}{' '}
-          <span className="text-sm font-normal text-text-secondary dark:text-slate-400">
-            {currency}
-          </span>
+          <Counter value={Number(avgValue) || 0} currency={currency} />
         </p>
         <p className="text-xs text-text-secondary dark:text-slate-400 mt-1">
           Average value per shopper

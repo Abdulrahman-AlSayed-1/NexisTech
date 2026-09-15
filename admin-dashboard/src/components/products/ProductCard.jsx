@@ -152,22 +152,22 @@ export default function ProductCard({
         <div className="absolute left-3 top-3 z-10 flex flex-col items-start gap-1.5 pointer-events-none">
           {featured && (
             <Badge
-              variant="gold"
+              variant="solid-gold"
               size="sm"
-              className="bg-amber-400 text-slate-950 border-amber-300/80 shadow-md backdrop-blur-xs font-heading font-extrabold"
+              className="shadow-md backdrop-blur-xs font-heading font-extrabold"
             >
-              <Star className="h-3 w-3 fill-slate-950 text-slate-950" />
+              <Star className="h-3 w-3 fill-slate-950 text-slate-950 dark:text-slate-950" />
               Featured
             </Badge>
           )}
           {isActive === false && (
             <Badge
-              variant="draft"
+              variant="solid-draft"
               size="sm"
-              className="!bg-slate-900 dark:!bg-slate-800 !text-white !border-slate-600 shadow-md backdrop-blur-xs font-heading font-extrabold flex items-center gap-1.5 px-2.5 py-0.5"
+              className="shadow-md backdrop-blur-xs font-heading font-extrabold flex items-center gap-1.5 px-2.5 py-0.5"
             >
-              <EyeOff className="h-3 w-3 !text-white stroke-[2.5]" />
-              <span className="!text-white">Draft</span>
+              <EyeOff className="h-3 w-3 stroke-[2.5]" />
+              <span>Draft</span>
             </Badge>
           )}
         </div>
@@ -176,9 +176,9 @@ export default function ProductCard({
         {hasDiscount && (
           <div className="absolute right-3 top-3 z-10">
             <Badge
-              variant="danger"
+              variant="solid-danger"
               size="sm"
-              className="bg-rose-600 text-white border-rose-500 shadow-md font-heading tabular-nums"
+              className="shadow-md font-heading tabular-nums"
             >
               -{discountPercentage}%
             </Badge>
@@ -189,17 +189,17 @@ export default function ProductCard({
         <div className="absolute bottom-3 left-3">
           {isOutOfStock ? (
             <Badge
-              variant="danger"
+              variant="solid-danger"
               size="sm"
-              className="bg-rose-600/90 text-white border-rose-500/80 shadow-sm backdrop-blur-xs"
+              className="bg-rose-600/95 border-rose-500/80 shadow-sm backdrop-blur-xs"
             >
               Out of stock
             </Badge>
           ) : (
             <Badge
-              variant="success"
+              variant="solid-success"
               size="sm"
-              className="bg-emerald-600/90 text-white border-emerald-500/80 shadow-sm backdrop-blur-xs"
+              className="bg-emerald-600/95 border-emerald-500/80 shadow-sm backdrop-blur-xs"
             >
               {stock} in stock
             </Badge>

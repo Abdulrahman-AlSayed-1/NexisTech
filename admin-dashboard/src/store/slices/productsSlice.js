@@ -9,25 +9,6 @@ import {
 import { isElectronicsOrHardwareProduct } from '@/constants/categories'
 import { buildStoreCatalogLookup } from '@/utils/storeCatalog'
 
-const DRAFTS_STORAGE_KEY = 'nexis_draft_products'
-
-function getStoredDrafts() {
-  try {
-    const raw = localStorage.getItem(DRAFTS_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-function saveStoredDrafts(drafts) {
-  try {
-    localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts))
-  } catch {
-    // Ignore storage quota error
-  }
-}
-
 // Async Thunks - Service Layer via Redux
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
@@ -176,16 +157,9 @@ const productsSlice = createSlice({
           payload.data ||
           (Array.isArray(payload) ? payload : [])
 
-        // Hydrate drafts saved in localStorage so they persist across reloads
-        const storedDrafts = getStoredDrafts()
-        const existingIds = new Set(rawItems.map((p) => String(p._id || p.id)))
-        const validDrafts = storedDrafts.filter(
-          (d) => !existingIds.has(String(d._id || d.id)) && d.isActive === false
-        )
-        const combined = [...rawItems, ...validDrafts]
-
-        // Strict category filter: Electronics & Hardware products ONLY
-        state.items = combined.filter(isElectronicsOrHardwareProduct)
+        // Strict category filter: Electronics & Hardware products ONLY.
+        // Active and Draft/Inactive products are retrieved directly from the live API and filtered via isActive field.
+        state.items = rawItems.filter(isElectronicsOrHardwareProduct)
         state.total = state.items.length
         state.page = payload.currentPage || payload.page || 1
         state.totalPages = payload.totalPages || 1
@@ -222,14 +196,6 @@ const productsSlice = createSlice({
           (created._id || created.id) &&
           isElectronicsOrHardwareProduct(created)
         ) {
-          const cId = created._id || created.id
-          if (created.isActive === false) {
-            const currentDrafts = getStoredDrafts().filter(
-              (d) => String(d._id || d.id) !== String(cId)
-            )
-            currentDrafts.push(created)
-            saveStoredDrafts(currentDrafts)
-          }
           state.items.unshift(created)
           state.total += 1
         }
@@ -249,16 +215,6 @@ const productsSlice = createSlice({
         const updated = action.payload?.product || action.payload
         if (updated) {
           const updatedId = updated._id || updated.id
-
-          // Sync with localStorage drafts
-          const currentDrafts = getStoredDrafts().filter(
-            (d) => String(d._id || d.id) !== String(updatedId)
-          )
-          if (updated.isActive === false) {
-            currentDrafts.push(updated)
-          }
-          saveStoredDrafts(currentDrafts)
-
           const idx = state.items.findIndex(
             (p) => (p._id || p.id) === updatedId
           )
@@ -286,13 +242,6 @@ const productsSlice = createSlice({
       .addCase(deleteProductById.fulfilled, (state, action) => {
         state.isLoading = false
         const deletedId = action.payload.id
-
-        // Remove from localStorage drafts if present
-        const currentDrafts = getStoredDrafts().filter(
-          (d) => String(d._id || d.id) !== String(deletedId)
-        )
-        saveStoredDrafts(currentDrafts)
-
         state.items = state.items.filter(
           (p) => (p._id || p.id) !== deletedId
         )
@@ -331,7 +280,10 @@ export const selectProductCatalogStats = createSelector(
     const inStock = valid.filter((p) => Number(p.stock) > 0).length
     const outOfStock = valid.filter((p) => Number(p.stock) === 0).length
     const featured = valid.filter((p) => Boolean(p.featured)).length
-    const drafts = valid.filter((p) => p.isActive === false).length
+    const drafts = valid.filter(
+      (p) => p.isActive === false || p.active === false
+    ).length
+    const inactive = drafts
 
     return {
       total,
@@ -342,12 +294,14 @@ export const selectProductCatalogStats = createSelector(
       outOfStockProducts: outOfStock,
       featured,
       drafts,
+      inactive,
       counts: {
         all: total,
         featured,
         inStock,
         outOfStock,
         draft: drafts,
+        inactive: drafts,
       },
       isProductsLoading: isLoading,
     }

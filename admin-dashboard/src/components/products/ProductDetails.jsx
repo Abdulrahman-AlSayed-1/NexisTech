@@ -124,22 +124,22 @@ export default function ProductDetails({
               <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5 pointer-events-none">
                 {featured && (
                   <Badge
-                    variant="gold"
+                    variant="solid-gold"
                     size="sm"
-                    className="bg-amber-400 text-slate-950 border-amber-300/80 shadow-md backdrop-blur-xs font-heading font-extrabold"
+                    className="shadow-md backdrop-blur-xs font-heading font-extrabold"
                   >
-                    <Sparkles className="h-3 w-3 fill-slate-950 text-slate-950" />
+                    <Sparkles className="h-3 w-3 fill-slate-950 text-slate-950 dark:text-slate-950" />
                     Featured
                   </Badge>
                 )}
                 {isActive === false && (
                   <Badge
-                    variant="draft"
+                    variant="solid-draft"
                     size="sm"
-                    className="!bg-slate-900 dark:!bg-slate-800 !text-white !border-slate-600 shadow-md backdrop-blur-xs font-heading font-extrabold flex items-center gap-1.5 px-2.5 py-0.5"
+                    className="shadow-md backdrop-blur-xs font-heading font-extrabold flex items-center gap-1.5 px-2.5 py-0.5"
                   >
-                    <EyeOff className="h-3 w-3 !text-white stroke-[2.5]" />
-                    <span className="!text-white">Draft / Hidden</span>
+                    <EyeOff className="h-3 w-3 stroke-[2.5]" />
+                    <span>Draft / Hidden</span>
                   </Badge>
                 )}
               </div>

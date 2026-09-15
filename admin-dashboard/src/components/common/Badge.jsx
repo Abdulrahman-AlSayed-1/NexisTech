@@ -39,6 +39,16 @@ const VARIANTS = {
     'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/25',
   draft:
     'bg-slate-900 text-white dark:bg-slate-800 dark:text-white border-slate-700 shadow-2xs',
+  'solid-success':
+    'bg-emerald-600 text-white dark:text-white border-emerald-500/80 shadow-xs',
+  'solid-danger':
+    'bg-rose-600 text-white dark:text-white border-rose-500/80 shadow-xs',
+  'solid-gold':
+    'bg-amber-400 text-slate-950 dark:text-slate-950 border-amber-300 shadow-xs',
+  'solid-draft':
+    'bg-slate-900 text-white dark:text-white border-slate-700 shadow-xs',
+  custom: '',
+  none: '',
 }
 
 const SIZES = {

@@ -126,3 +126,128 @@ export function filterStoreCart(cart, lookup) {
     itemCount,
   }
 }
+
+/**
+ * Validates whether a user is an authorized Nexis Tech Administrator.
+ * Only accounts with emails ending with @nexis.com are recognized as Nexis admins.
+ *
+ * @param {object} user
+ * @returns {boolean}
+ */
+export function isNexisStaffUser(user) {
+  if (!user) return false
+  const email = (user.email || '').trim().toLowerCase()
+  const role = (user.role || '').toLowerCase()
+  return email.endsWith('@nexis.com') && (role === 'admin' || email === 'admin@nexis.com')
+}
+
+/**
+ * Builds lookup sets of customer IDs and emails that have ordered or carted Nexis Tech products.
+ *
+ * @param {Array} storeOrders - Nexis-scoped orders
+ * @param {Array} storeCarts - Nexis-scoped active carts
+ * @returns {{ ids: Set<string>, emails: Set<string> }}
+ */
+export function buildNexisCustomerLookup(storeOrders = [], storeCarts = []) {
+  const ids = new Set()
+  const emails = new Set()
+
+  const registerCustomer = (customerObj, directEmail, directUserId) => {
+    if (directUserId) {
+      ids.add(String(directUserId))
+    }
+    if (directEmail && typeof directEmail === 'string' && directEmail.includes('@')) {
+      emails.add(directEmail.trim().toLowerCase())
+    }
+
+    if (customerObj) {
+      if (typeof customerObj === 'string' && customerObj.length > 5) {
+        ids.add(String(customerObj))
+      } else if (typeof customerObj === 'object') {
+        const id = customerObj._id || customerObj.id
+        if (id) ids.add(String(id))
+        const email = customerObj.email
+        if (email && typeof email === 'string' && email.includes('@')) {
+          emails.add(email.trim().toLowerCase())
+        }
+      }
+    }
+  }
+
+  if (Array.isArray(storeOrders)) {
+    storeOrders.forEach((order) => {
+      const directUserId =
+        order.user?._id ||
+        (typeof order.user === 'string' ? order.user : null) ||
+        order.userId
+      registerCustomer(order.customer, order.email, directUserId)
+      if (order.user && typeof order.user === 'object') {
+        registerCustomer(order.user)
+      }
+      if (order.createdBy) {
+        registerCustomer(order.createdBy)
+      }
+    })
+  }
+
+  if (Array.isArray(storeCarts)) {
+    storeCarts.forEach((cart) => {
+      const directUserId =
+        cart.user?._id ||
+        (typeof cart.user === 'string' ? cart.user : null) ||
+        cart.userId
+      registerCustomer(cart.customer, cart.email, directUserId)
+      if (cart.user && typeof cart.user === 'object') {
+        registerCustomer(cart.user)
+      }
+    })
+  }
+
+  return { ids, emails }
+}
+
+/**
+ * Validates whether a user is an active Nexis Tech customer (has ordered or carted store products).
+ *
+ * @param {object} user
+ * @param {{ ids: Set<string>, emails: Set<string> }} customerLookup
+ * @returns {boolean}
+ */
+export function isNexisCustomer(user, customerLookup) {
+  if (!user || !customerLookup) return false
+  const id = String(user._id || user.id || '')
+  const email = (user.email || '').trim().toLowerCase()
+
+  if (id && customerLookup.ids?.has(id)) return true
+  if (email && customerLookup.emails?.has(email)) return true
+  return false
+}
+
+/**
+ * Filters and maps a list of users to strictly Nexis Tech personnel and store customers.
+ * - Only @nexis.com accounts are displayed as ADMIN.
+ * - Only customers who have placed a Nexis order or hold a Nexis cart are displayed as CUSTOMER.
+ * - Strangers/admins from other stores who never interacted with Nexis are excluded.
+ *
+ * @param {Array} rawUsers
+ * @param {{ ids: Set<string>, emails: Set<string> }} customerLookup
+ * @returns {Array}
+ */
+export function filterNexisUsers(rawUsers = [], customerLookup) {
+  if (!Array.isArray(rawUsers)) return []
+
+  return rawUsers
+    .filter((u) => {
+      if (isNexisStaffUser(u)) return true
+      if (isNexisCustomer(u, customerLookup)) return true
+      return false
+    })
+    .map((u) => {
+      const isStaff = isNexisStaffUser(u)
+      return {
+        ...u,
+        role: isStaff ? 'ADMIN' : 'CUSTOMER',
+        isNexisStaff: isStaff,
+      }
+    })
+}

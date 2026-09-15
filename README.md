@@ -176,8 +176,7 @@ Both projects are wired to centralized Redux Toolkit stores wrapped at the entry
 - **`productsSlice`**: 
   - **Single Source of Truth**: Manages inventory items, multi-criteria filters (category, brand, search query), pagination state, and CRUD operations.
   - **Memoized Catalog Stats Selector (`selectProductCatalogStats`)**: Uses `createSelector` to derive catalog totals, in-stock, out-of-stock, featured, and draft counts in a single memoized pass for `ProductStats.jsx` and `Products.jsx`.
-  - **Universal Catalog Lookup (`selectStoreCatalogLookup`)**: Pre-computes $O(1)$ `Set` lookup structure across the entire app for instant order/cart line item matching.
-  - **Draft / Inactive Persistence**: Slice-level `localStorage` hydration (`nexis_draft_products`) ensures unpublished/draft products persist across page reloads without disappearing due to backend public-only filters.
+  - **Pure Live API Catalog (Active & Draft/Inactive)**: Products (both active and draft/inactive) are retrieved directly from the live MongoDB API (`GET /products`), with zero `localStorage` mock workarounds. The client isolates draft products seamlessly by evaluating the native `isActive` boolean response property.
 - **`ordersSlice`**: Customer orders list, order status filter pills, status update pipeline (`pending`, `processing`, `confirmed`, `shipped`, `delivered`, `cancelled`), and selected order inspection.
 - **`cartsSlice`**: Active customer carts directory, abandoned cart analytics, and live cart contents drawer.
 - **`usersSlice`**: Complete user directory, administrator vs customer role toggles, search, and pagination.

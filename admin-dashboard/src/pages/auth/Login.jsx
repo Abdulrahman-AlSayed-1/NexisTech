@@ -5,7 +5,8 @@ import { Mail, Lock, Eye, EyeOff, Sparkles, ShieldCheck, CheckCircle2 } from 'lu
 import { toast } from 'react-toastify'
 import Logo from '@/components/common/Logo'
 import Button from '@/components/common/Button'
-import { loginUser, loginSuccess } from '@/store/slices/authSlice'
+import { loginUser, loginSuccess, logoutUser } from '@/store/slices/authSlice'
+import { isNexisStaffUser } from '@/utils/storeCatalog'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -22,15 +23,9 @@ export default function Login() {
     (state) => state.ui?.preferences?.defaultLanding || '/dashboard'
   )
 
-  const userRole = (user?.role || '').toLowerCase()
-  const userEmail = (user?.email || '').toLowerCase()
-  const isAdmin =
-    !user?.role ||
-    userRole === 'admin' ||
-    userEmail === 'admin@nexis.com' ||
-    userEmail === 'admin@koda.com'
+  const isAdmin = isNexisStaffUser(user)
 
-  // Redirect if already authenticated as an admin
+  // Redirect if already authenticated as a Nexis admin
   useEffect(() => {
     if (isAuthenticated && isAdmin) {
       let redirectPath = location.state?.from?.pathname || defaultLanding
@@ -70,6 +65,17 @@ export default function Login() {
           password: cleanPassword,
         })
       ).unwrap()
+
+      const loggedUser = response?.user || {}
+      const loggedEmail = (loggedUser.email || cleanEmail).toLowerCase().trim()
+
+      if (!loggedEmail.endsWith('@nexis.com')) {
+        await dispatch(logoutUser())
+        const deniedMsg = 'Access denied: Only @nexis.com administrators can access this portal.'
+        setFormError(deniedMsg)
+        toast.error(deniedMsg)
+        return
+      }
 
       toast.dismiss()
       toast.success(response?.message || 'Logged in successfully!')

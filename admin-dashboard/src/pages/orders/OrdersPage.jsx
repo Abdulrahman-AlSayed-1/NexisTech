@@ -78,7 +78,10 @@ const formatOrder = (order) => {
   const customerNote = (order.customerNote || order.note || order.customer?.note || '').trim()
 
   const isStripe =
-    String(order.paymentMethod || order.method || '').toLowerCase() === 'stripe' ||
+    String(order.paymentMethod || order.method || order.paymentType || '').toLowerCase().includes('stripe') ||
+    String(order.paymentMethod || order.method || order.paymentType || '').toLowerCase().includes('card') ||
+    adminNote.toLowerCase().includes('stripe') ||
+    adminNote.toLowerCase().includes('card') ||
     customerNote.toLowerCase().includes('stripe') ||
     customerNote.toLowerCase().includes('card')
 

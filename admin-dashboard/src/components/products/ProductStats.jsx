@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux'
 import { Boxes, CheckCircle2, AlertTriangle, Star, EyeOff } from 'lucide-react'
 import { selectProductCatalogStats } from '@/store/slices/productsSlice'
+import Counter from '@/components/common/Counter'
 
 export default function ProductStats({ stats: propStats }) {
   const reduxStats = useSelector(selectProductCatalogStats)
@@ -71,7 +72,7 @@ export default function ProductStats({ stats: propStats }) {
                 {item.label}
               </p>
               <p className="mt-0.5 text-xl font-extrabold text-text-primary font-heading sm:text-2xl dark:text-white">
-                {item.value}
+                <Counter value={item.value ?? 0} />
               </p>
             </div>
           </div>

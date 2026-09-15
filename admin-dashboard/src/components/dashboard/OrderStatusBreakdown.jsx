@@ -8,6 +8,7 @@ import {
   Activity,
 } from 'lucide-react'
 import Badge from '@/components/common/Badge'
+import Counter from '@/components/common/Counter'
 
 const STATUS_CONFIGS = [
   {
@@ -101,7 +102,7 @@ export default function OrderStatusBreakdown({ stats }) {
 
               <div className="mt-2 sm:mt-3">
                 <span className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-primary-dark dark:text-text-light font-heading tracking-tight">
-                  {count.toLocaleString()}
+                  <Counter value={count} />
                 </span>
               </div>
             </div>

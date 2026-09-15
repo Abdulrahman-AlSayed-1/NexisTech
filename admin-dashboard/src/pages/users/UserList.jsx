@@ -23,13 +23,21 @@ import {
   fetchUsers,
   createNewUser,
   removeUser,
+  selectNexisUsers,
 } from '@/store/slices/usersSlice'
+import { fetchAdminOrders } from '@/store/slices/ordersSlice'
+import { fetchAdminCarts } from '@/store/slices/cartsSlice'
+import { fetchProducts } from '@/store/slices/productsSlice'
 
 export default function UserList() {
   const dispatch = useDispatch()
-  const { items = [], total, isLoading, isActionLoading, error } = useSelector(
+  const { isLoading, isActionLoading, error } = useSelector(
     (state) => state.users
   )
+  const nexisUsers = useSelector(selectNexisUsers)
+  const ordersLoaded = useSelector((state) => (state.orders?.items || []).length > 0)
+  const cartsLoaded = useSelector((state) => (state.carts?.items || []).length > 0)
+  const productsLoaded = useSelector((state) => (state.products?.items || []).length > 0)
 
   const preferences = useSelector((state) => state.ui?.preferences)
   const pageSize = Number(preferences?.defaultPageSize) || 25
@@ -39,14 +47,17 @@ export default function UserList() {
 
   useEffect(() => {
     dispatch(fetchUsers())
-  }, [dispatch])
+    if (!ordersLoaded) dispatch(fetchAdminOrders({ limit: 100 }))
+    if (!cartsLoaded) dispatch(fetchAdminCarts({ limit: 100 }))
+    if (!productsLoaded) dispatch(fetchProducts({ limit: 100 }))
+  }, [dispatch, ordersLoaded, cartsLoaded, productsLoaded])
 
   // Filter users naturally by role and search query
   const filteredUsers = useMemo(() => {
-    let result = items
+    let result = nexisUsers
     if (roleFilter !== 'ALL') {
       result = result.filter(
-        (u) => (u.role || 'customer').toUpperCase() === roleFilter
+        (u) => (u.role || 'CUSTOMER').toUpperCase() === roleFilter
       )
     }
     if (searchTerm.trim()) {
@@ -58,7 +69,7 @@ export default function UserList() {
       })
     }
     return result
-  }, [items, roleFilter, searchTerm])
+  }, [nexisUsers, roleFilter, searchTerm])
 
   const totalUsers = filteredUsers.length
   const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize))
@@ -185,12 +196,12 @@ export default function UserList() {
         {/* Metric Pill */}
         <div className="flex items-center justify-between md:flex-col md:items-start p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-bg-main/70 dark:bg-dark-bg-main/60 border border-border-medium dark:border-primary-medium/30 md:min-w-[200px] shrink-0">
           <span className="text-[10px] font-bold text-primary-dark dark:text-text-gold tracking-widest uppercase font-heading">
-            REGISTERED ACCOUNTS
+            NEXIS ACCOUNTS
           </span>
           <p className="text-lg sm:text-2xl font-bold font-heading text-primary-dark dark:text-text-light leading-none">
-            {total || items.length}{' '}
+            {nexisUsers.length}{' '}
             <span className="text-xs font-normal font-body text-text-secondary">
-              users
+              accounts
             </span>
           </p>
         </div>
@@ -200,9 +211,14 @@ export default function UserList() {
       <div className="bg-white dark:bg-[var(--color-dark-bg-card)] rounded-2xl p-6 sm:p-8 shadow-xs border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30">
         <div className="flex items-center gap-2 mb-5 pb-3 border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30">
           <UserPlus className="w-5 h-5 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]" />
-          <h2 className="text-base font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
-            Create Account
-          </h2>
+          <div>
+            <h2 className="text-base font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+              Create Account
+            </h2>
+            <p className="text-xs text-[var(--color-text-secondary)]">
+              Register store customers or administrators. Use an <span className="font-semibold text-primary-dark dark:text-text-gold">@nexis.com</span> email for admin privileges.
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleAddUser} className="space-y-4">
@@ -229,7 +245,7 @@ export default function UserList() {
               label="Email Address"
               type="email"
               name="email"
-              placeholder="john.doe@example.com"
+              placeholder="name@nexis.com or customer@email.com"
               value={formData.email}
               onChange={handleChange}
               error={formErrors.email}
@@ -250,12 +266,21 @@ export default function UserList() {
           <div className="flex items-center justify-end pt-2">
             <Button
               type="submit"
-              isLoading={isActionLoading}
               variant="primary"
+              disabled={isActionLoading}
               className="w-full sm:w-auto"
             >
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              Add User
+              {isActionLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                  Create Account
+                </>
+              )}
             </Button>
           </div>
         </form>
@@ -266,10 +291,10 @@ export default function UserList() {
         <div className="p-4 sm:p-5 border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
-              Registered Users Directory
+              Nexis Personnel & Customers Directory
             </h3>
             <span className="text-xs text-[var(--color-text-secondary)] font-body">
-              Showing {filteredUsers.length} of {items.length} accounts
+              Showing {filteredUsers.length} of {nexisUsers.length} accounts
             </span>
           </div>
 
@@ -288,7 +313,7 @@ export default function UserList() {
               />
             </div>
 
-            <div className="w-full sm:w-44">
+            <div className="w-full sm:w-48">
               <Dropdown
                 value={roleFilter}
                 onChange={(val) => {
@@ -296,9 +321,9 @@ export default function UserList() {
                   setCurrentPage(1)
                 }}
                 options={[
-                  { value: 'ALL', label: 'All Roles' },
-                  { value: 'ADMIN', label: 'Admins Only' },
-                  { value: 'CUSTOMER', label: 'Customers Only' },
+                  { value: 'ALL', label: 'All Accounts' },
+                  { value: 'ADMIN', label: 'Admins (@nexis.com)' },
+                  { value: 'CUSTOMER', label: 'Nexis Customers' },
                 ]}
                 ariaLabel="Filter by Role"
               />
@@ -326,7 +351,7 @@ export default function UserList() {
               Try Again
             </Button>
           </div>
-        ) : items.length === 0 ? (
+        ) : nexisUsers.length === 0 ? (
           <div className="p-12 text-center space-y-2">
             <div className="w-12 h-12 rounded-2xl bg-bg-input/50 dark:bg-dark-bg-main text-text-secondary flex items-center justify-center mx-auto mb-3">
               <Users className="w-6 h-6" />

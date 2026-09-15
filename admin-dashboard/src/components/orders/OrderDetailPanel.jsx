@@ -58,10 +58,17 @@ function OrderDetailPanel({ order, currency = 'EGP', onClose, onUpdated }) {
           .join(', ')
     : '—'
 
+  const adminNoteText = String(note || order.adminNote || '').toLowerCase()
+  const customerNoteText = String(customerNote).toLowerCase()
+  const rawMethodText = String(order.method || order.paymentMethod || order.paymentType || '').toLowerCase()
+
   const isStripe =
-    String(order.method || order.paymentMethod || '').toLowerCase() === 'stripe' ||
-    customerNote.toLowerCase().includes('stripe') ||
-    customerNote.toLowerCase().includes('card')
+    rawMethodText.includes('stripe') ||
+    rawMethodText.includes('card') ||
+    adminNoteText.includes('stripe') ||
+    adminNoteText.includes('card') ||
+    customerNoteText.includes('stripe') ||
+    customerNoteText.includes('card')
 
   const currentStatus = String(status || order.status || '').toLowerCase()
   const derivedPayment = ['cancelled', 'returned'].includes(currentStatus)
@@ -142,7 +149,7 @@ function OrderDetailPanel({ order, currency = 'EGP', onClose, onUpdated }) {
         </div>
 
         <span className="text-sm text-[var(--color-text-secondary)] dark:text-slate-300">
-          {order.method || (isStripe ? 'Stripe' : 'Cash')}
+          {isStripe ? 'Stripe' : (order.method || order.paymentMethod || 'Cash')}
         </span>
       </div>
 

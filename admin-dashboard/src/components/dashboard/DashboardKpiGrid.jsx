@@ -6,10 +6,9 @@ import {
   Award,
   Users,
 } from 'lucide-react'
-import { formatCurrency } from '@/utils/formatters'
+import Counter from '@/components/common/Counter'
 
 export default function DashboardKpiGrid({ stats, currency = 'EGP' }) {
-
   const topProductName = stats.topProduct?.name || '—'
   const topProductUnits = stats.topProduct?.totalSold ?? 0
 
@@ -17,7 +16,7 @@ export default function DashboardKpiGrid({ stats, currency = 'EGP' }) {
     {
       id: 'total-orders',
       title: 'Total Orders',
-      value: (stats.totalOrders ?? 0).toLocaleString(),
+      rawNumber: stats.totalOrders ?? 0,
       subtitle: 'All orders received',
       icon: ShoppingBag,
       iconStyle: 'bg-primary-dark/10 dark:bg-primary-medium/30 text-primary-dark dark:text-text-gold border border-primary-medium/20',
@@ -26,7 +25,7 @@ export default function DashboardKpiGrid({ stats, currency = 'EGP' }) {
     {
       id: 'pending-orders',
       title: 'Pending Orders',
-      value: (stats.pendingOrders ?? 0).toLocaleString(),
+      rawNumber: stats.pendingOrders ?? 0,
       subtitle: 'Awaiting fulfillment',
       icon: Clock,
       iconStyle: 'bg-accent-gold/15 text-accent-gold border border-accent-gold/25',
@@ -35,7 +34,8 @@ export default function DashboardKpiGrid({ stats, currency = 'EGP' }) {
     {
       id: 'total-revenue',
       title: 'Revenue',
-      value: formatCurrency(stats.totalRevenue, currency),
+      rawNumber: stats.totalRevenue ?? 0,
+      currency,
       subtitle: 'Total gross revenue',
       icon: DollarSign,
       iconStyle: 'bg-accent-gold/15 text-accent-gold border border-accent-gold/25',
@@ -44,7 +44,8 @@ export default function DashboardKpiGrid({ stats, currency = 'EGP' }) {
     {
       id: 'this-month',
       title: 'This Month',
-      value: formatCurrency(stats.thisMonthRevenue, currency),
+      rawNumber: stats.thisMonthRevenue ?? 0,
+      currency,
       subtitle: 'Monthly sales target',
       icon: TrendingUp,
       iconStyle: 'bg-primary-dark/10 dark:bg-primary-medium/30 text-primary-dark dark:text-text-gold border border-primary-medium/20',
@@ -63,7 +64,7 @@ export default function DashboardKpiGrid({ stats, currency = 'EGP' }) {
     {
       id: 'users',
       title: 'Registered Users',
-      value: (stats.totalCustomers ?? stats.totalUsers ?? 0).toLocaleString(),
+      rawNumber: stats.totalCustomers ?? stats.totalUsers ?? 0,
       subtitle: 'Customer accounts',
       icon: Users,
       iconStyle: 'bg-primary-dark/10 dark:bg-primary-medium/30 text-primary-dark dark:text-text-gold border border-primary-medium/20',
@@ -94,7 +95,11 @@ export default function DashboardKpiGrid({ stats, currency = 'EGP' }) {
                   }`}
                   title={kpi.isText ? kpi.value : undefined}
                 >
-                  {kpi.value}
+                  {kpi.isText ? (
+                    kpi.value
+                  ) : (
+                    <Counter value={kpi.rawNumber} currency={kpi.currency} />
+                  )}
                 </h3>
 
                 <p className="text-[11px] sm:text-xs text-text-secondary dark:text-slate-400 font-body">

@@ -100,8 +100,10 @@ export default function Products() {
         matchesFilter = Number(product.stock) > 0
       } else if (filter === 'outOfStock') {
         matchesFilter = Number(product.stock) === 0
-      } else if (filter === 'draft') {
-        matchesFilter = product.isActive === false
+      } else if (filter === 'draft' || filter === 'inactive') {
+        matchesFilter = product.isActive === false || product.active === false
+      } else if (filter === 'active') {
+        matchesFilter = product.isActive !== false && product.active !== false
       }
 
       return matchesSearch && matchesFilter
