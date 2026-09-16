@@ -1,6 +1,26 @@
+import React from 'react'
+
+/**
+ * @typedef {'dark' | 'light' | 'auto'} LogoVariant
+ * @typedef {'sm' | 'md' | 'lg'} LogoSize
+ *
+ * @typedef {Object} LogoProps
+ * @property {LogoVariant} [variant='dark'] - Visual contrast mode: 'dark' (for light bg), 'light' (for dark bg), 'auto' (responsive with system/dark class)
+ * @property {LogoSize} [size='md'] - Scaling dimension for emblem & text
+ * @property {boolean} [showText=true] - Whether to render brand typography alongside emblem
+ * @property {string} [className=''] - Additional CSS classes
+ */
+
+/**
+ * Common Nexis Tech Brand Vector Logo Primitive
+ * Features mathematical hexagonal tech emblem and brand typography with design token integration.
+ *
+ * @param {LogoProps} props
+ * @returns {JSX.Element}
+ */
 export default function Logo({
-  variant = 'dark', // 'dark' (for light bg) | 'light' (for dark bg) | 'auto' (responsive)
-  size = 'md', // 'sm' | 'md' | 'lg'
+  variant = 'dark',
+  size = 'md',
   showText = true,
   className = '',
 }) {
@@ -21,26 +41,26 @@ export default function Logo({
       ? '#FFFFFF'
       : 'var(--color-primary-dark)'
 
-  const svgClass = isAuto ? 'text-[var(--color-primary-dark)] dark:text-white' : ''
+  const svgClass = isAuto ? 'text-primary-dark dark:text-white' : ''
 
   // Typography color classes from theme CSS variables
   const nexisColor = isAuto
-    ? 'text-[var(--color-text-primary)] dark:text-white'
+    ? 'text-text-primary dark:text-white'
     : isLight
       ? 'text-white'
-      : 'text-[var(--color-text-primary)]'
+      : 'text-text-primary'
 
   const techColor = isAuto
-    ? 'text-[var(--color-primary-medium)] dark:text-[var(--color-text-gold)]'
+    ? 'text-primary-medium dark:text-text-gold'
     : isLight
-      ? 'text-[var(--color-text-gold)]'
-      : 'text-[var(--color-primary-medium)]'
+      ? 'text-text-gold'
+      : 'text-primary-medium'
 
   const tagColor = isAuto
-    ? 'text-[var(--color-text-secondary)] dark:text-[var(--color-border-light)]'
+    ? 'text-text-secondary dark:text-border-light'
     : isLight
-      ? 'text-[var(--color-border-light)]'
-      : 'text-[var(--color-text-secondary)]'
+      ? 'text-border-light'
+      : 'text-text-secondary'
 
   const iconSizes = {
     sm: 'w-6 h-6',
@@ -73,9 +93,10 @@ export default function Logo({
       {/* Hexagonal Tech Emblem */}
       <svg
         viewBox="0 0 48 48"
-        className={`${iconSizes[size]} ${svgClass} flex-shrink-0`}
+        className={`${iconSizes[size]} ${svgClass} shrink-0`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
       >
         {/* Outer Hexagon */}
         <polygon
@@ -118,4 +139,3 @@ export default function Logo({
     </div>
   )
 }
-
