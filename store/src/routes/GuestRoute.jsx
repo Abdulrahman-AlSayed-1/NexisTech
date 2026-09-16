@@ -1,5 +1,5 @@
-import { Navigate, Outlet } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 /**
  * GuestRoute Guard
@@ -9,11 +9,11 @@ import { useSelector } from 'react-redux'
  * @returns {JSX.Element}
  */
 export default function GuestRoute() {
-  const { isAuthenticated } = useSelector((state) => state.auth)
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/" replace />;
   }
 
-  return <Outlet />
+  return <Outlet />;
 }
