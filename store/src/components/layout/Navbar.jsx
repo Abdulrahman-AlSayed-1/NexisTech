@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { Search, Moon, Sun, Heart, ShoppingCart, User, X, Bell, Menu } from 'lucide-react'
 import { toggleTheme, toggleSearch, closeSearch, toggleMobileMenu, closeMobileMenu, selectTheme, selectIsSearchOpen, selectIsMobileMenuOpen} from '@/store/slices/uiSlice'
-import { selectAuth } from '@/store/slices/authSlice'
+import { selectIsAuthenticated , selectCurrentUser  } from '@/store/slices/authSlice'
 import { selectCartTotals } from '@/store/slices/cartSlice'
 import { selectWishlistCount  } from '@/store/slices/wishlistSlice'
 import { searchProductsThunk } from '@/store/slices/productsSlice'
@@ -12,7 +12,8 @@ import Logo from '@/components/common/Logo'
 export default function Navbar() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { isAuthenticated, user } = useSelector(selectAuth)
+  const isAuthenticated = useSelector(selectIsAuthenticated) 
+  const user = useSelector(selectCurrentUser)
   const { itemCount: cartCount } = useSelector(selectCartTotals)
   const favCount = useSelector(selectWishlistCount)
   const theme = useSelector(selectTheme)
