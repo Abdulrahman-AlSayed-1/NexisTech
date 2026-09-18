@@ -1,32 +1,32 @@
 import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
+import { logout } from '@/store/slices/authSlice'
+
+import { isNexisStaffUser } from '@/utils/storeCatalog'
 
 export default function ProtectedRoute() {
+  const dispatch = useDispatch()
   const { isAuthenticated, user } = useSelector((state) => state.auth)
   const location = useLocation()
 
+  const isAdmin = isNexisStaffUser(user)
+  const isNonAdmin = Boolean(isAuthenticated && !isAdmin)
+
   useEffect(() => {
-    if (!isAuthenticated) {
-      toast.warn('Please sign in to access the admin dashboard.', {
-        toastId: 'auth-required-toast',
-      })
-    } else if (user?.role && user.role !== 'admin') {
-      toast.error('Access denied. Administrator privileges are required.', {
+    if (isNonAdmin) {
+      toast.error('Access denied. Only authorized @nexis.com administrators can access this portal.', {
         toastId: 'admin-required-toast',
       })
+      // Clear non-admin auth so user isn't stuck in an infinite redirect ping-pong loop with /login
+      dispatch(logout())
     }
-  }, [isAuthenticated, user])
+  }, [isNonAdmin, dispatch])
 
   // Verify token exists and role is admin
-  if (!isAuthenticated) {
+  if (!isAuthenticated || isNonAdmin) {
     return <Navigate to="/login" state={{ from: location }} replace />
-  }
-
-  // If user role is present and not admin, redirect
-  if (user?.role && user.role !== 'admin') {
-    return <Navigate to="/login" replace />
   }
 
   return <Outlet />

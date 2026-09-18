@@ -1,29 +1,30 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { Search, Sparkles, CreditCard, Banknote, Wallet, FileText, MessageSquare } from 'lucide-react'
 import OrderDetailPanel from '@/components/orders/OrderDetailPanel'
-import { getAdminOrders } from '@/api/orders'
+import { fetchAdminOrders } from '@/store/slices/ordersSlice'
+import { selectStoreCatalogLookup } from '@/store/slices/productsSlice'
 import {
-  setOrdersLoading,
-  setOrders,
-  setOrdersError,
-} from '@/store/slices/ordersSlice'
+  isStoreOrder,
+  filterStoreOrder,
+} from '@/utils/storeCatalog'
 import Dropdown from '@/components/common/Dropdown'
+import Badge from '@/components/common/Badge'
+import Pagination from '@/components/common/Pagination'
+import { formatDate, formatCurrency } from '@/utils/formatters'
+import { getAdminNote } from '@/utils/orderNotes'
 
-const statusStyles = {
-  Pending: 'bg-amber-50 text-amber-700',
-  Confirmed: 'bg-sky-50 text-sky-600',
-  Processing: 'bg-violet-50 text-violet-600',
-  Shipped: 'bg-cyan-50 text-cyan-600',
-  Delivered: 'bg-emerald-50 text-emerald-600',
-  Cancelled: 'bg-rose-50 text-rose-600',
-  Returned: 'bg-slate-100 text-slate-600',
-}
-
-const paymentStyles = {
-  Pending: 'bg-[var(--color-text-gold)]/20 text-[var(--color-text-gold)]',
-  Paid: 'bg-emerald-50 text-emerald-600',
-  Failed: 'bg-rose-50 text-rose-600',
+const renderPaymentMethodIcon = (method) => {
+  const m = String(method || '').toLowerCase()
+  if (m.includes('stripe') || m.includes('card')) {
+    return <CreditCard className="w-3.5 h-3.5 shrink-0 text-sky-500" />
+  }
+  if (m.includes('paypal') || m.includes('paymob') || m.includes('wallet')) {
+    return <Wallet className="w-3.5 h-3.5 shrink-0 text-violet-500" />
+  }
+  return <Banknote className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
 }
 
 const PAYMENT_OPTIONS = [
@@ -49,19 +50,6 @@ const STATUS_OPTIONS = [
 ]
 const PAGE_SIZE = 15
 
-const formatDate = (value) => {
-  if (!value) return '—'
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return String(value)
-
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
 const formatOrder = (order) => {
   const customer = order.customer || order.user || order.createdBy || {}
   const customerName =
@@ -72,10 +60,38 @@ const formatOrder = (order) => {
     '—'
 
   const rawStatus = order.status || 'Pending'
-  const rawPayment = order.paymentStatus || order.payment || 'Pending'
-  const rawMethod = order.paymentMethod || order.method || '—'
+  const normalizedStatus = String(rawStatus).toLowerCase()
+  const isDeliveredOrShipped = normalizedStatus === 'delivered' || normalizedStatus === 'shipped'
+  const isCancelledOrReturned = normalizedStatus === 'cancelled' || normalizedStatus === 'returned'
 
   const orderId = order._id || order.id || ''
+  const localNote =
+    getAdminNote(orderId) ||
+    getAdminNote(order.id) ||
+    getAdminNote(order._id) ||
+    getAdminNote(order.originalId)
+  const adminNote = (
+    order.adminNote !== undefined && order.adminNote !== null
+      ? order.adminNote
+      : localNote
+  ).trim()
+  const customerNote = (order.customerNote || order.note || order.customer?.note || '').trim()
+
+  const isStripe =
+    String(order.paymentMethod || order.method || order.paymentType || '').toLowerCase().includes('stripe') ||
+    String(order.paymentMethod || order.method || order.paymentType || '').toLowerCase().includes('card') ||
+    adminNote.toLowerCase().includes('stripe') ||
+    adminNote.toLowerCase().includes('card') ||
+    customerNote.toLowerCase().includes('stripe') ||
+    customerNote.toLowerCase().includes('card')
+
+  const rawPayment = isCancelledOrReturned
+    ? 'Failed'
+    : (isDeliveredOrShipped || isStripe)
+      ? 'Paid'
+      : (order.paymentStatus || order.payment || 'Pending')
+
+  const rawMethod = isStripe ? 'Stripe' : (order.paymentMethod || order.method || 'Cash')
 
   return {
     ...order,
@@ -88,51 +104,56 @@ const formatOrder = (order) => {
     status: String(rawStatus).charAt(0).toUpperCase() + String(rawStatus).slice(1).toLowerCase(),
     payment: String(rawPayment).charAt(0).toUpperCase() + String(rawPayment).slice(1).toLowerCase(),
     method: rawMethod === '—'? '—': String(rawMethod).charAt(0).toUpperCase() + String(rawMethod).slice(1).toLowerCase(),
-    total: order.total ?? order.totalAmount ?? order.totalPrice ?? order.amount ?? '0.00',
+    total: Number(Number(order.total ?? order.totalAmount ?? order.totalPrice ?? order.amount ?? 0).toFixed(2)),
     originalId: orderId,
+    adminNote,
+    customerNote,
   }
 }
 
 function OrdersPage() {
   const dispatch = useDispatch()
-  const { items, total, isLoading, error } = useSelector(
+  const { items, isLoading, error } = useSelector(
     (state) => state.orders,
   )
+  const storeCatalogLookup = useSelector(selectStoreCatalogLookup)
   const preferences = useSelector((state) => state.ui?.preferences)
   const pageSize = Number(preferences?.defaultPageSize || preferences?.itemsPerPage) || PAGE_SIZE
   const currency = preferences?.currency || 'EGP'
 
-  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const orderIdParam = searchParams.get('orderId')
+
+  const [selectedOrderId, setSelectedOrderId] = useState(null)
+  const [hoveredNote, setHoveredNote] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All statuses')
   const [paymentFilter, setPaymentFilter] = useState('All payments')
   const [methodFilter, setMethodFilter] = useState('All methods')
 
+  // Dismiss floating note tooltip on any scroll
   useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        dispatch(setOrdersLoading(true))
-        const data = await getAdminOrders()
-        dispatch(setOrders(data))
-      } catch (err) {
-        dispatch(
-          setOrdersError(
-            err.response?.data?.message || 'Failed to load orders',
-          ),
-        )
-      }
-    }
+    const handleScroll = () => setHoveredNote(null)
+    window.addEventListener('scroll', handleScroll, true)
+    return () => window.removeEventListener('scroll', handleScroll, true)
+  }, [])
 
-    loadOrders()
+  useEffect(() => {
+    dispatch(fetchAdminOrders())
   }, [dispatch])
 
-  const orders = useMemo(
-    () => items.map(formatOrder),
-    [items],
-  )
+  // Scope orders strictly to Nexis Tech Electronics merchandise
+  const storeScopedOrders = useMemo(() => {
+    return items
+      .filter((order) => isStoreOrder(order, storeCatalogLookup))
+      .map((order) => filterStoreOrder(order, storeCatalogLookup))
+  }, [items, storeCatalogLookup])
 
-  
+  const orders = useMemo(
+    () => storeScopedOrders.map(formatOrder),
+    [storeScopedOrders],
+  )
 
   const filteredOrders = useMemo(() => {
     const term = searchTerm.trim().toLowerCase()
@@ -157,14 +178,49 @@ function OrdersPage() {
     })
   }, [orders, searchTerm, statusFilter, paymentFilter, methodFilter])
 
+  // Synchronously derive selectedOrder from URL param or active click selection
+  const activeOrderId = selectedOrderId || orderIdParam
+  const selectedOrder = useMemo(() => {
+    if (!activeOrderId) return null
+    return (
+      orders.find(
+        (o) =>
+          o.originalId === activeOrderId ||
+          o._id === activeOrderId ||
+          o.id === activeOrderId ||
+          o.id === `#${String(activeOrderId).slice(-8).toUpperCase()}`
+      ) || null
+    )
+  }, [activeOrderId, orders])
+
+  const handleOpenOrder = (order) => {
+    const targetId = order.originalId || order._id || order.id
+    setSelectedOrderId(targetId)
+    if (targetId) {
+      const newParams = new URLSearchParams(searchParams)
+      newParams.set('orderId', targetId)
+      setSearchParams(newParams, { replace: true })
+    }
+  }
+
+  const handleCloseOrder = () => {
+    setSelectedOrderId(null)
+    if (searchParams.has('orderId')) {
+      const newParams = new URLSearchParams(searchParams)
+      newParams.delete('orderId')
+      setSearchParams(newParams, { replace: true })
+    }
+  }
+
   const totalPages = Math.max(
     1,
     Math.ceil(filteredOrders.length / pageSize),
   )
+  const safePage = Math.min(currentPage, totalPages)
 
   const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
+    (safePage - 1) * pageSize,
+    safePage * pageSize,
   )
 
   const goToPage = (page) => {
@@ -196,72 +252,78 @@ function OrdersPage() {
     <div className="relative space-y-6 pb-12">
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-[var(--color-text-gold)]">
-            Admin · Management
-          </p>
-          <h1 className="mt-1 text-4xl font-black text-[var(--color-text-primary)] dark:text-[var(--color-text-light)]">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-[var(--color-text-gold)]">
+              Admin · Management
+            </p>
+            <Badge variant="success" size="sm">
+              <Sparkles className="w-3 h-3" />
+              Nexis Store Orders
+            </Badge>
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-4xl font-black text-text-primary dark:text-text-light font-heading">
             Orders
           </h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-text-secondary font-body">
             Manage customer orders, payment status, and delivery progress.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] px-6 py-3 shadow-sm dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/30">
-          <span className="text-2xl font-black text-[var(--color-text-primary)] dark:text-white">
-            {total || orders.length}
+        <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start rounded-2xl border border-border-light bg-bg-card px-4 sm:px-6 py-2.5 sm:py-3 shadow-xs dark:bg-dark-bg-main dark:border-primary-medium/30">
+          <span className="text-xl sm:text-2xl font-black text-text-primary dark:text-white font-heading">
+            {orders.length}
           </span>
-          <span className="ml-2 text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-gold)]">
-            total orders
+          <span className="ml-2 text-xs sm:text-sm text-text-secondary dark:text-text-gold font-body">
+            store orders
           </span>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 md:flex-row">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-secondary)] dark:text-slate-400" />
+      <div className="flex flex-col gap-3 lg:flex-row flex-wrap">
+        <div className="relative flex-1 w-full min-w-0 max-w-md">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary dark:text-slate-400" />
           <input
             type="text"
             value={searchTerm}
             onChange={(event) => handleSearchChange(event.target.value)}
             placeholder="Search ID, customer..."
-            className="w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] py-3 pl-11 pr-4 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-gold)] dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/30 dark:placeholder:text-slate-400 dark:text-white"
+            className="w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] py-3 pl-11 pr-4 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-gold)] dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/30 dark:placeholder:text-slate-300 dark:text-white"
           />
         </div>
 
-           <Dropdown
-            value={statusFilter}
-            onChange={handleStatusChange}
-            options={STATUS_OPTIONS.map((option) => ({
-                value: option,
-                label: option,
-            }))}
-            placeholder="All statuses"
-            ariaLabel="Filter by order status"
-            />
+        <Dropdown
+          value={statusFilter}
+          onChange={handleStatusChange}
+          options={STATUS_OPTIONS.map((option) => ({
+            value: option,
+            label: option,
+          }))}
+          placeholder="All statuses"
+          ariaLabel="Filter by order status"
+        />
 
-           <Dropdown
-            value={paymentFilter}
-            onChange={handlePaymentChange}
-            options={PAYMENT_OPTIONS.map((option) => ({
-                value: option,
-                label: option,
-            }))}
-            placeholder="All payments"
-            ariaLabel="Filter by order payments"
-            />
+        <Dropdown
+          value={paymentFilter}
+          onChange={handlePaymentChange}
+          options={PAYMENT_OPTIONS.map((option) => ({
+            value: option,
+            label: option,
+          }))}
+          placeholder="All payments"
+          ariaLabel="Filter by order payments"
+        />
 
-            <Dropdown
-            value={methodFilter}
-            onChange={handleMethodChange}
-            options={METHODS_OPTIONS.map((option) => ({
-                value: option,
-                label: option,
-            }))}
-            placeholder="All methods"
-            ariaLabel="Filter by order methods"
-            />
-        </div>
+        <Dropdown
+          value={methodFilter}
+          onChange={handleMethodChange}
+          options={METHODS_OPTIONS.map((option) => ({
+            value: option,
+            label: option,
+          }))}
+          placeholder="All methods"
+          ariaLabel="Filter by order methods"
+        />
+      </div>
 
       {isLoading && (
         <div className="rounded-2xl bg-[var(--color-bg-card)] dark:bg-[var(--color-dark-bg-card)] px-6 py-12 text-center text-sm text-[var(--color-text-secondary)] dark:text-slate-400 shadow-sm border border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30">
@@ -279,7 +341,7 @@ function OrdersPage() {
       {!isLoading && !error && (
         <div className="overflow-x-auto rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] shadow-sm dark:border-[var(--color-primary-medium)]/30 dark:bg-[var(--color-dark-bg-card)]">
           <div className="min-w-[720px]">
-            <div className="grid grid-cols-6 gap-4 bg-[var(--color-bg-main)] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)] dark:bg-[var(--color-dark-bg-main)] dark:text-[var(--color-text-gold)]">
+            <div className="grid grid-cols-6 gap-4 bg-[var(--color-bg-main)] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)] dark:bg-[var(--color-dark-bg-main)] dark:text-[var(--color-text-gold)] text-center">
               <span>Order</span>
               <span>Customer</span>
               <span>Date</span>
@@ -298,46 +360,71 @@ function OrdersPage() {
               <button
                 key={order.originalId || order.id}
                 type="button"
-                onClick={() => setSelectedOrder(order)}
-                className="grid w-full grid-cols-6 items-center gap-4 whitespace-nowrap border-t border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/20 px-6 py-4 text-left transition-colors hover:bg-[var(--color-bg-main)] dark:bg-[var(--color-dark-bg-card)] dark:hover:bg-[var(--color-primary-medium)]/25 group cursor-pointer"
+                onClick={() => handleOpenOrder(order)}
+                className="grid w-full grid-cols-6 items-center gap-4 whitespace-nowrap border-t border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/20 px-6 py-4 text-center transition-colors hover:bg-[var(--color-bg-main)] dark:bg-[var(--color-dark-bg-card)] dark:hover:bg-[var(--color-primary-medium)]/25 group cursor-pointer"
               >
-                <span className="font-mono text-sm font-semibold text-[var(--color-text-gold)]">
-                  {order.id}
-                </span>
+                {/* 1. Order ID & Note Indicator */}
+                <div className="flex items-center justify-center gap-1.5 min-w-0">
+                  <span className="font-mono text-sm font-semibold text-[var(--color-text-gold)]">
+                    {order.id}
+                  </span>
 
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-bg-input)] text-sm font-bold text-[var(--color-primary-dark)] dark:bg-[var(--color-primary-medium)]/50 dark:text-white">
-                  {order.customer}
-                </span>
+                  {(order.adminNote || order.customerNote) && (
+                    <div className="inline-flex items-center justify-center">
+                      <span
+                        onMouseEnter={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect()
+                          setHoveredNote({
+                            order,
+                            rect: {
+                              top: rect.top,
+                              bottom: rect.bottom,
+                              left: rect.left,
+                              right: rect.right,
+                              width: rect.width,
+                              height: rect.height,
+                            },
+                          })
+                        }}
+                        onMouseLeave={() => setHoveredNote(null)}
+                        className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--color-accent-gold)]/15 text-[var(--color-accent-gold)] border border-[var(--color-accent-gold)]/30 hover:bg-[var(--color-accent-gold)]/25 transition-colors cursor-help"
+                      >
+                        <FileText className="w-3 h-3" />
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                <span className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-slate-200">
+                {/* 2. Customer Avatar */}
+                <div className="flex items-center justify-center">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-bg-input)] text-sm font-bold text-[var(--color-primary-dark)] dark:bg-[var(--color-primary-medium)]/50 dark:text-white">
+                    {order.customer}
+                  </span>
+                </div>
+
+                {/* 3. Date */}
+                <span className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-slate-200 text-center">
                   {order.date}
                 </span>
 
-                <span
-                  className={`w-fit rounded-full px-3 py-1 text-xs font-bold ${
-                    statusStyles[order.status] ||
-                    'bg-[var(--color-bg-input)] text-[var(--color-text-secondary)] dark:bg-[var(--color-primary-medium)]/40 dark:text-slate-300'
-                  }`}
-                >
-                  ● {order.status}
-                </span>
-
-                <div>
-                  <span
-                    className={`inline-block rounded-lg px-3 py-1 text-xs font-bold uppercase ${
-                      paymentStyles[order.payment] ||
-                      'bg-[var(--color-bg-input)] text-[var(--color-text-secondary)] dark:bg-[var(--color-primary-medium)]/40 dark:text-slate-300'
-                    }`}
-                  >
-                    {order.payment}
-                  </span>
-                  <p className="mt-1 text-xs text-[var(--color-text-secondary)] dark:text-slate-400">
-                    {order.method}
-                  </p>
+                {/* 4. Order Status */}
+                <div className="flex items-center justify-center">
+                  <Badge status={order.status} dot />
                 </div>
 
-                <span className="text-sm font-bold text-[var(--color-text-primary)] dark:text-white">
-                  {order.total} {currency}
+                {/* 5. Payment */}
+                <div className="flex flex-col items-center justify-center gap-1 text-center">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)] dark:text-white">
+                    {renderPaymentMethodIcon(order.method)}
+                    <span>{order.method || 'Cash'}</span>
+                  </div>
+
+                  <Badge status={order.payment || 'pending'} rounded="md" size="sm" />
+                </div>
+
+                {/* 6. Total */}
+                <span className="text-sm font-bold text-[var(--color-text-primary)] dark:text-white text-center">
+                  {formatCurrency(order.total, currency)}
                 </span>
               </button>
             ))}
@@ -346,66 +433,20 @@ function OrdersPage() {
       )}
 
       {filteredOrders.length > 0 && (
-        <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
-          <p className="text-sm text-[var(--color-text-secondary)] dark:text-slate-400">
-            Showing{' '}
-            <span className="font-semibold text-[var(--color-text-primary)] dark:text-white">
-              {(currentPage - 1) * pageSize + 1}
-            </span>{' '}
-            -{' '}
-            <span className="font-semibold text-[var(--color-text-primary)] dark:text-white">
-              {Math.min(currentPage * pageSize, filteredOrders.length)}
-            </span>{' '}
-            of{' '}
-            <span className="font-semibold text-[var(--color-text-primary)] dark:text-white">
-              {filteredOrders.length}
-            </span>{' '}
-            orders
-          </p>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-main)] dark:bg-[var(--color-dark-bg-card)] dark:border-[var(--color-primary-medium)]/40 dark:text-slate-300 dark:hover:bg-[var(--color-primary-medium)]/30 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-              (page) => (
-                <button
-                  key={page}
-                  type="button"
-                  onClick={() => goToPage(page)}
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold cursor-pointer transition-colors ${
-                    page === currentPage
-                      ? 'bg-[var(--color-primary-dark)] text-white dark:bg-[var(--color-text-gold)] dark:text-[var(--color-primary-dark)] shadow-sm'
-                      : 'border border-[var(--color-border-light)] bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-main)] dark:bg-[var(--color-dark-bg-card)] dark:border-[var(--color-primary-medium)]/40 dark:text-slate-300 dark:hover:bg-[var(--color-primary-medium)]/30'
-                  }`}
-                >
-                  {page}
-                </button>
-              ),
-            )}
-
-            <button
-              type="button"
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-main)] dark:bg-[var(--color-dark-bg-card)] dark:border-[var(--color-primary-medium)]/40 dark:text-slate-300 dark:hover:bg-[var(--color-primary-medium)]/30 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={safePage}
+          totalPages={totalPages}
+          totalItems={filteredOrders.length}
+          pageSize={pageSize}
+          itemLabel="orders"
+          onPageChange={goToPage}
+        />
       )}
 
       {selectedOrder && (
         <div
           className="fixed inset-0 z-40 bg-black/30"
-          onClick={() => setSelectedOrder(null)}
+          onClick={handleCloseOrder}
         />
       )}
 
@@ -417,21 +458,88 @@ function OrdersPage() {
         <OrderDetailPanel
           order={selectedOrder}
           currency={currency}
-          onClose={() => setSelectedOrder(null)}
-          onUpdated={(updated) => {
-            const newStatus = updated?.status || updated?.order?.status
-            if (newStatus && selectedOrder) {
-              setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
-              const updatedItems = items.map((item) => {
-                const id = item._id || item.id
-                const targetId = selectedOrder.originalId || selectedOrder._id || selectedOrder.id
-                return id === targetId ? { ...item, status: newStatus } : item
-              })
-              dispatch(setOrders({ orders: updatedItems, total }))
-            }
-          }}
+          onClose={handleCloseOrder}
         />
       </div>
+
+      {/* Floating Note Tooltip rendered into document.body to avoid table overflow clipping */}
+      {hoveredNote &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          (() => {
+            const showBelow = hoveredNote.rect.top < 220
+            const top = showBelow
+              ? hoveredNote.rect.bottom + 10
+              : hoveredNote.rect.top - 10
+            const centerX = hoveredNote.rect.left + hoveredNote.rect.width / 2
+            const clampedX = Math.max(140, Math.min(window.innerWidth - 140, centerX))
+
+            return (
+              <div
+                className="pointer-events-none fixed z-50 flex flex-col items-start w-64 p-3 rounded-2xl bg-white/95 dark:bg-[var(--color-dark-bg-card)]/95 backdrop-blur-md text-[var(--color-text-primary)] dark:text-white text-xs shadow-[0_18px_38px_-6px_rgba(47,72,66,0.22)] dark:shadow-[0_20px_45px_rgba(0,0,0,0.65)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40 ring-1 ring-black/5 dark:ring-white/10 transition-all text-left"
+                style={{
+                  top: `${top}px`,
+                  left: `${clampedX}px`,
+                  transform: showBelow
+                    ? 'translate(-50%, 0)'
+                    : 'translate(-50%, -100%)',
+                }}
+              >
+                {/* Header bar */}
+                <div className="flex items-center justify-between w-full pb-2 mb-2 border-b border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] dark:text-slate-400 font-heading">
+                  <span>Order Notes</span>
+                  <span className="text-[var(--color-text-gold)] font-mono font-semibold">
+                    {hoveredNote.order.id}
+                  </span>
+                </div>
+
+                {/* Admin Note Card */}
+                {hoveredNote.order.adminNote && (
+                  <div className="w-full rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 p-2.5 shadow-2xs">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-md bg-amber-500/20 text-amber-700 dark:text-[var(--color-text-gold)]">
+                        <FileText className="w-2.5 h-2.5" />
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-[var(--color-text-gold)] font-heading">
+                        Internal Admin Note
+                      </span>
+                    </div>
+                    <p className="line-clamp-3 text-slate-800 dark:text-slate-200 mt-0.5 whitespace-normal font-normal text-xs leading-relaxed">
+                      {hoveredNote.order.adminNote}
+                    </p>
+                  </div>
+                )}
+
+                {/* Customer Note Card */}
+                {hoveredNote.order.customerNote && (
+                  <div
+                    className={`w-full rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 p-2.5 shadow-2xs ${hoveredNote.order.adminNote ? 'mt-2' : ''}`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-md bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">
+                        <MessageSquare className="w-2.5 h-2.5" />
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 font-heading">
+                        Customer Note
+                      </span>
+                    </div>
+                    <p className="line-clamp-3 text-slate-800 dark:text-slate-200 mt-0.5 whitespace-normal italic font-normal text-xs leading-relaxed">
+                      “{hoveredNote.order.customerNote}”
+                    </p>
+                  </div>
+                )}
+
+                {/* Tooltip arrow matching light and dark surface + border */}
+                {showBelow ? (
+                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-white dark:bg-[var(--color-dark-bg-card)] border-l border-t border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40" />
+                ) : (
+                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-white dark:bg-[var(--color-dark-bg-card)] border-r border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40" />
+                )}
+              </div>
+            )
+          })(),
+          document.body,
+        )}
     </div>
   )
 }

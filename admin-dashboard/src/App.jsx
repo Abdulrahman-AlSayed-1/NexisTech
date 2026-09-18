@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AppRoutes from "./routes/AppRoutes";
+// import Products from "./pages/products/Products";
 
 export default function App() {
   const theme = useSelector((state) => state.ui?.theme || "light");
@@ -18,6 +19,7 @@ export default function App() {
       <ToastContainer
         position={preferences?.toastPosition || "top-right"}
         autoClose={preferences?.toastDuration || 3000}
+        limit={2}
         theme={theme === "dark" ? "dark" : "colored"}
         hideProgressBar={false}
         newestOnTop
@@ -27,6 +29,9 @@ export default function App() {
         draggable
         pauseOnHover
       />
+    {/* <Products/> */}
+
+      
     </>
   );
 }

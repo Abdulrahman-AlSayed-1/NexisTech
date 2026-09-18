@@ -1,17 +1,20 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { toggleTheme, toggleMobileSidebar } from '../../store/slices/uiSlice'
-import { logout } from '../../store/slices/authSlice'
+import { logoutUser } from '../../store/slices/authSlice'
+import { LogOut, X, Menu } from 'lucide-react'
 import Logo from '../common/Logo'
+import Button from '../common/Button'
 
 function NavBar() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const theme = useSelector((state) => state.ui?.theme || 'light')
+  const isMobileSidebarOpen = useSelector((state) => state.ui?.isMobileSidebarOpen)
   const { user } = useSelector((state) => state.auth)
 
-  const handleLogout = () => {
-    dispatch(logout())
+  const handleLogout = async () => {
+    await dispatch(logoutUser())
     navigate('/login')
   }
 
@@ -20,31 +23,21 @@ function NavBar() {
   const initialLetter = (displayName[0] || 'A').toUpperCase()
 
   return (
-    <header className="sticky top-0 z-40 bg-[var(--color-bg-card)]/95 border-b border-[var(--color-border-light)] backdrop-blur-xl transition-colors duration-200 dark:bg-[var(--color-primary-dark)] dark:border-[var(--color-primary-medium)]/30">
+    <header className="sticky top-0 z-40 bg-bg-card/95 border-b border-border-light backdrop-blur-xl transition-colors duration-200 dark:bg-primary-dark dark:border-primary-medium/30">
       <div className="flex h-20 items-center justify-between px-4 lg:px-8">
         <div className="flex items-center gap-3">
           {/* Mobile hamburger menu button */}
           <button
             type="button"
-            aria-label="Toggle navigation menu"
+            aria-label={isMobileSidebarOpen ? "Close navigation menu" : "Open navigation menu"}
             onClick={() => dispatch(toggleMobileSidebar())}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-primary)] border border-[var(--color-border-light)] shadow-xs transition hover:border-[var(--color-accent-gold-hover)] hover:text-[var(--color-accent-gold-hover)] md:hidden dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/40 dark:text-[var(--color-text-gold)] dark:hover:bg-[var(--color-primary-medium)]/30"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-bg-main text-text-primary border border-border-light shadow-xs transition hover:border-accent-gold-hover hover:text-accent-gold-hover md:hidden dark:bg-dark-bg-main dark:border-primary-medium/40 dark:text-text-gold dark:hover:bg-primary-medium/30 cursor-pointer"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            {isMobileSidebarOpen ? (
+              <X className="h-5 w-5 text-accent-gold-hover" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
 
           <Logo variant="auto" size="md" />
@@ -140,53 +133,27 @@ function NavBar() {
           </div>
 
           {/* Desktop Logout Button */}
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="hidden md:flex items-center gap-2 rounded-xl bg-[var(--color-accent-gold-hover)] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[var(--color-text-gold)] active:scale-[0.98]"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-log-out"
+          <div className="hidden md:block">
+            <Button
+              type="button"
+              variant="gold"
+              size="md"
+              onClick={handleLogout}
+              className="items-center gap-2"
             >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" x2="9" y1="12" y2="12" />
-            </svg>
-            Logout
-          </button>
+              <LogOut className="w-4 h-4" />
+              Logout
+            </Button>
+          </div>
 
           {/* Mobile Logout Button */}
           <button
             type="button"
             onClick={handleLogout}
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-accent-gold-hover)] text-white shadow-xs transition hover:bg-[var(--color-text-gold)] active:scale-[0.98] md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-gold-hover text-white shadow-xs transition hover:bg-text-gold active:scale-[0.98] md:hidden cursor-pointer"
             aria-label="Logout"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-log-out"
-            >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" x2="9" y1="12" y2="12" />
-            </svg>
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>

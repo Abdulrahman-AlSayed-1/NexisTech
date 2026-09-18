@@ -68,4 +68,5 @@ export const {
   updateUser,
 } = authSlice.actions
 
+export const selectAuth = (state) => state.auth
 export default authSlice.reducer

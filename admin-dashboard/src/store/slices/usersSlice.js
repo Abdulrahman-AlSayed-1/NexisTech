@@ -1,5 +1,15 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import { getAllUsers, addUser, deleteUser } from '@/api/users'
+import { changeUserRole } from '@/api/auth'
+import {
+  buildStoreCatalogLookup,
+  isStoreOrder,
+  filterStoreOrder,
+  isStoreCart,
+  filterStoreCart,
+  buildNexisCustomerLookup,
+  filterNexisUsers,
+} from '@/utils/storeCatalog'
 
 // Async Thunks
 export const fetchUsers = createAsyncThunk(
@@ -46,6 +56,20 @@ export const removeUser = createAsyncThunk(
   }
 )
 
+export const updateUserRole = createAsyncThunk(
+  'users/updateUserRole',
+  async ({ userId, role }, { rejectWithValue }) => {
+    try {
+      const data = await changeUserRole(userId, role)
+      return { userId, role, data }
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Failed to update user role'
+      )
+    }
+  }
+)
+
 const initialState = {
   items: [],
   total: 0,
@@ -73,7 +97,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.isLoading = false
-        const payload = action.payload
+        const payload = action.payload || {}
         state.items = payload.users || (Array.isArray(payload) ? payload : [])
         state.total = payload.total ?? state.items.length
         state.page = payload.page ?? 1
@@ -117,8 +141,85 @@ const usersSlice = createSlice({
         state.isActionLoading = false
         state.error = action.payload
       })
+
+      // updateUserRole
+      .addCase(updateUserRole.pending, (state) => {
+        state.isActionLoading = true
+      })
+      .addCase(updateUserRole.fulfilled, (state, action) => {
+        state.isActionLoading = false
+        const { userId, role, data } = action.payload
+        const updatedUser = data?.user || data
+        const idx = state.items.findIndex(
+          (u) => (u._id || u.id) === userId
+        )
+        if (idx !== -1) {
+          state.items[idx] = {
+            ...state.items[idx],
+            ...(typeof updatedUser === 'object' ? updatedUser : {}),
+            role: role || state.items[idx].role,
+          }
+        }
+      })
+      .addCase(updateUserRole.rejected, (state, action) => {
+        state.isActionLoading = false
+        state.error = action.payload
+      })
   },
 })
 
 export const { clearUserError } = usersSlice.actions
+
+// ==========================================
+// User Domain Selectors
+// ==========================================
+
+/**
+ * Selector that returns only authorized Nexis Tech personnel (@nexis.com) and customers
+ * who have placed an order or currently hold a cart containing Nexis Tech merchandise.
+ */
+export const selectNexisUsers = createSelector(
+  [
+    (state) => state.users?.items || [],
+    (state) => state.orders?.items || [],
+    (state) => state.carts?.items || [],
+    (state) => state.products?.items || [],
+  ],
+  (rawUsers, rawOrders, rawCarts, products) => {
+    const catalogLookup = buildStoreCatalogLookup(products)
+    const storeOrders = rawOrders
+      .filter((o) => isStoreOrder(o, catalogLookup))
+      .map((o) => filterStoreOrder(o, catalogLookup))
+    const storeCarts = rawCarts
+      .filter((c) => isStoreCart(c, catalogLookup))
+      .map((c) => filterStoreCart(c, catalogLookup))
+
+    const customerLookup = buildNexisCustomerLookup(storeOrders, storeCarts)
+    return filterNexisUsers(rawUsers, customerLookup)
+  }
+)
+
+/**
+ * User Directory & Customer Demographics Selector
+ * Computes total users, customer count, and admin count strictly for Nexis Tech.
+ */
+export const selectUserStats = createSelector(
+  [
+    selectNexisUsers,
+    (state) => Boolean(state.users?.isLoading),
+  ],
+  (nexisUsers, isLoading) => {
+    const totalUsers = nexisUsers.length
+    const totalCustomers = nexisUsers.filter((u) => u.role !== 'ADMIN').length
+    const totalAdmins = nexisUsers.filter((u) => u.role === 'ADMIN').length
+
+    return {
+      totalUsers,
+      totalCustomers,
+      totalAdmins,
+      isUsersLoading: isLoading,
+    }
+  }
+)
+
 export default usersSlice.reducer

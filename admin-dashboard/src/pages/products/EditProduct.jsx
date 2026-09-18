@@ -5,6 +5,7 @@ import { ArrowLeft, Edit3, Loader2, AlertCircle } from 'lucide-react'
 import { toast } from 'react-toastify'
 import ProductForm from '@/components/products/ProductForm'
 import Button from '@/components/common/Button'
+import Badge from '@/components/common/Badge'
 import {
   fetchProductById,
   updateExistingProduct,
@@ -75,7 +76,7 @@ export default function EditProduct() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12">
+    <div className="max-w-7xl mx-auto space-y-6 pb-12">
       {/* Back button pill */}
       <div>
         <Link
@@ -88,30 +89,32 @@ export default function EditProduct() {
       </div>
 
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-white via-[var(--color-bg-main)]/30 to-white dark:from-[var(--color-dark-bg-card)] dark:via-[var(--color-dark-bg-main)]/40 dark:to-[var(--color-dark-bg-card)] p-6 sm:p-8 rounded-3xl border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary-dark)] text-white dark:bg-[var(--color-primary-medium)] flex items-center justify-center shrink-0 shadow-sm border border-[var(--color-primary-medium)]/30">
-            <Edit3 className="w-6 h-6 text-[var(--color-text-gold)]" />
+      <div className="bg-gradient-to-r from-white via-bg-main/30 to-white dark:from-dark-bg-card dark:via-dark-bg-main/40 dark:to-dark-bg-card p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-border-medium dark:border-primary-medium/30 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 transition-colors">
+        <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-primary-dark text-white dark:bg-primary-medium flex items-center justify-center shrink-0 shadow-sm border border-primary-medium/30">
+            <Edit3 className="w-5 h-5 sm:w-6 sm:h-6 text-text-gold" />
           </div>
-          <div className="space-y-1.5">
-            <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase font-heading bg-[var(--color-primary-medium)]/15 text-[var(--color-primary-dark)] border border-[var(--color-primary-medium)]/25 dark:bg-[var(--color-primary-medium)]/30 dark:text-[var(--color-text-gold)]">
-              EDIT PRODUCT
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)] tracking-tight">
+          <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <Badge variant="primary" size="sm">
+                EDIT PRODUCT
+              </Badge>
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-heading text-primary-dark dark:text-text-light tracking-tight truncate">
               {selectedProduct?.name ? `Edit: ${selectedProduct.name}` : 'Update Product'}
             </h1>
-            <p className="text-xs text-[var(--color-text-secondary)] font-body">
+            <p className="text-xs text-text-secondary font-body line-clamp-2 sm:line-clamp-none">
               Modify hardware specifications, pricing, inventory stock, and image gallery.
             </p>
           </div>
         </div>
 
         {/* Right Status Card */}
-        <div className="p-4 rounded-2xl bg-[var(--color-bg-main)]/80 dark:bg-[var(--color-dark-bg-main)]/60 border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 min-w-[200px] space-y-1">
-          <span className="text-[10px] font-bold text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)] tracking-widest uppercase font-heading">
+        <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-bg-main/80 dark:bg-dark-bg-main/60 border border-border-medium dark:border-primary-medium/30 min-w-0 md:min-w-[200px] shrink-0 space-y-1">
+          <span className="text-[10px] font-bold text-primary-dark dark:text-text-gold tracking-widest uppercase font-heading">
             EDITING LIVE ENTRY
           </span>
-          <p className="text-xs text-[var(--color-text-secondary)] font-body">
+          <p className="text-xs text-text-secondary font-body">
             Saving changes will synchronize immediately with the storefront.
           </p>
         </div>

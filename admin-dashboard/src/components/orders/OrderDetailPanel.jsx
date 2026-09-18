@@ -1,33 +1,52 @@
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { Link } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { toast } from 'react-toastify'
-import { updateOrderStatus } from '@/api/orders'
+import { changeOrderStatus } from '@/store/slices/ordersSlice'
 import Dropdown from '@/components/common/Dropdown'
 import Button from '@/components/common/Button'
+import Badge from '@/components/common/Badge'
+import { getAdminNote, saveAdminNote } from '@/utils/orderNotes'
+import { formatCurrency } from '@/utils/formatters'
 
 const STATUS_OPTIONS = [
   'Pending',
   'Confirmed',
+  'Processing',
   'Shipped',
   'Delivered',
   'Cancelled',
+  'Returned',
 ]
 
+const normalizeStatus = (s) => {
+  if (!s) return 'Pending'
+  const str = String(s).trim()
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
+
+const resolveNote = (o) => {
+  if (!o) return ''
+  return o.adminNote || getAdminNote(o._id || o.originalId || o.id) || ''
+}
+
 function OrderDetailPanel({ order, currency = 'EGP', onClose, onUpdated }) {
+  const dispatch = useDispatch()
   const [prevOrder, setPrevOrder] = useState(order)
-  const [status, setStatus] = useState(order?.status || 'Pending')
-  const [note, setNote] = useState('')
+  const [status, setStatus] = useState(normalizeStatus(order?.status))
+  const [note, setNote] = useState(resolveNote(order))
   const [isSaving, setIsSaving] = useState(false)
 
   if (order !== prevOrder) {
     setPrevOrder(order)
-    setStatus(order?.status || 'Pending')
-    setNote('')
+    setStatus(normalizeStatus(order?.status))
+    setNote(resolveNote(order))
   }
 
   if (!order) return null
 
-  const orderId = order.originalId || order._id || order.id
+  const orderId = order._id || order.originalId || (order.id?.startsWith?.('#') ? '' : order.id)
   const customerNote =
     order.customerNote || order.note || order.customer?.note || ''
 
@@ -39,33 +58,65 @@ function OrderDetailPanel({ order, currency = 'EGP', onClose, onUpdated }) {
           .join(', ')
     : '—'
 
+  const adminNoteText = String(note || order.adminNote || '').toLowerCase()
+  const customerNoteText = String(customerNote).toLowerCase()
+  const rawMethodText = String(order.method || order.paymentMethod || order.paymentType || '').toLowerCase()
+
+  const isStripe =
+    rawMethodText.includes('stripe') ||
+    rawMethodText.includes('card') ||
+    adminNoteText.includes('stripe') ||
+    adminNoteText.includes('card') ||
+    customerNoteText.includes('stripe') ||
+    customerNoteText.includes('card')
+
+  const currentStatus = String(status || order.status || '').toLowerCase()
+  const derivedPayment = ['cancelled', 'returned'].includes(currentStatus)
+    ? 'Failed'
+    : (['delivered', 'shipped'].includes(currentStatus) || isStripe)
+      ? 'Paid'
+      : (order.payment || order.paymentStatus || 'Pending')
+
   const handleSave = async () => {
     if (!orderId) {
-      toast.error('Order ID is missing')
+      toast.error('Valid Order ID is missing')
       return
     }
 
     try {
       setIsSaving(true)
 
-      const updatedOrder = await updateOrderStatus(orderId, {
-        status,
-        note,
-      })
+      const trimmedNote = (note || '').trim()
+      const statusData = {
+        status: status.toLowerCase().trim(),
+        adminNote: trimmedNote,
+      }
 
-      toast.success('Order status updated successfully')
-      onUpdated?.(updatedOrder)
+      const result = await dispatch(
+        changeOrderStatus({ id: orderId, statusData })
+      ).unwrap()
+
+      // Save to localStorage helper so it persists across sessions
+      saveAdminNote([orderId, order._id, order.id, order.originalId], trimmedNote)
+
+      toast.success('Order updated successfully')
+      const returnedOrder = result?.data?.order || result?.data || {}
+      onUpdated?.({
+        ...returnedOrder,
+        status,
+        adminNote: trimmedNote,
+      })
       onClose?.()
     } catch (error) {
       toast.error(
-        error.response?.data?.message || 'Failed to update order status',
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Failed to update order status'
       )
     } finally {
       setIsSaving(false)
     }
   }
-
-  const isDelivered = order.status?.toLowerCase() === 'delivered'
 
   return (
     <aside className="flex h-full w-full max-w-md flex-col bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-2xl dark:bg-[var(--color-dark-bg-card)] dark:text-white border-l border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30">
@@ -93,17 +144,12 @@ function OrderDetailPanel({ order, currency = 'EGP', onClose, onUpdated }) {
       {/* Status and payment */}
       <div className="flex items-center justify-between border-b border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30 px-6 py-4">
         <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1 rounded-full bg-[var(--color-primary-medium)]/15 px-3 py-1 text-xs font-bold text-[var(--color-primary-dark)] dark:bg-[var(--color-primary-medium)]/40 dark:text-emerald-300">
-            ● {order.status || 'Pending'}
-          </span>
-
-          <span className="rounded-full bg-[var(--color-accent-gold)]/20 px-3 py-1 text-xs font-bold uppercase text-[var(--color-text-gold)]">
-            {order.payment || 'Pending'}
-          </span>
+          <Badge status={status} dot />
+          <Badge status={derivedPayment} rounded="md" size="sm" />
         </div>
 
         <span className="text-sm text-[var(--color-text-secondary)] dark:text-slate-300">
-          {order.method || '—'}
+          {isStripe ? 'Stripe' : (order.method || order.paymentMethod || 'Cash')}
         </span>
       </div>
 
@@ -179,17 +225,27 @@ function OrderDetailPanel({ order, currency = 'EGP', onClose, onUpdated }) {
               )}
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-[var(--color-text-primary)] dark:text-white">
-                  {item.name || item.productName || 'Product'}
-                </p>
+                {item.product?._id || item.product ? (
+                  <Link
+                    to={`/dashboard/products/${item.product?._id || item.product}/edit`}
+                    className="truncate text-sm font-semibold text-[var(--color-text-primary)] dark:text-white hover:text-[var(--color-accent-gold)] transition-colors block"
+                    title="Edit product"
+                  >
+                    {item.name || item.productName || 'Product'}
+                  </Link>
+                ) : (
+                  <p className="truncate text-sm font-semibold text-[var(--color-text-primary)] dark:text-white">
+                    {item.name || item.productName || 'Product'}
+                  </p>
+                )}
                 <p className="text-xs text-[var(--color-text-secondary)] dark:text-slate-400">
                   x {item.qty || item.quantity || 1} ·{' '}
-                  {item.unitPrice || item.price || '0.00'} {currency}
+                  {formatCurrency(item.unitPrice || item.price, currency)}
                 </p>
               </div>
 
               <span className="text-sm font-bold text-[var(--color-text-primary)] dark:text-[var(--color-text-gold)]">
-                {item.total || item.totalPrice || '0.00'} {currency}
+                {formatCurrency(item.total || item.totalPrice || (Number(item.price || item.unitPrice || 0) * Number(item.qty || item.quantity || 1)), currency)}
               </span>
             </div>
           ))}
@@ -200,21 +256,21 @@ function OrderDetailPanel({ order, currency = 'EGP', onClose, onUpdated }) {
           <div className="flex items-center justify-between text-sm">
             <span className="text-[var(--color-text-secondary)] dark:text-slate-400">Subtotal</span>
             <span className="font-semibold text-[var(--color-text-primary)] dark:text-white">
-              {order.subtotal || '0.00'} {currency}
+              {formatCurrency(order.subtotal, currency)}
             </span>
           </div>
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-[var(--color-text-secondary)] dark:text-slate-400">Shipping</span>
             <span className="font-semibold text-[var(--color-text-primary)] dark:text-white">
-              {order.shipping || order.shippingFee || '0.00'} {currency}
+              {formatCurrency(order.shipping || order.shippingFee, currency)}
             </span>
           </div>
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-[var(--color-text-secondary)] dark:text-slate-400">Tax</span>
             <span className="font-semibold text-[var(--color-text-primary)] dark:text-white">
-              {order.tax || '0.00'} {currency}
+              {formatCurrency(order.tax, currency)}
             </span>
           </div>
 
@@ -223,20 +279,20 @@ function OrderDetailPanel({ order, currency = 'EGP', onClose, onUpdated }) {
           <div className="flex items-center justify-between text-base font-bold">
             <span className="text-[var(--color-text-primary)] dark:text-white">Total</span>
             <span className="text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]">
-              {order.total || order.totalPrice || '0.00'} {currency}
+              {formatCurrency(order.total || order.totalPrice, currency)}
             </span>
           </div>
         </div>
 
         {/* Customer Note */}
-        {isDelivered && (
+        {customerNote && (
           <>
             <p className="mb-3 mt-6 text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-text-secondary)] dark:text-[var(--color-text-gold)]">
               Customer Note
             </p>
 
             <div className="rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-main)] p-4 text-sm italic text-[var(--color-text-secondary)] dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/30 dark:text-slate-300">
-              {customerNote ? `“${customerNote}”` : 'No customer note available.'}
+              “{customerNote}”
             </div>
           </>
         )}
