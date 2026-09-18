@@ -1,15 +1,32 @@
+import { Link } from 'react-router-dom'
+import AuthCard from '@/components/auth/AuthCard'
+import RegisterForm from '@/components/auth/RegisterForm'
+
 /**
- * Register Page Placeholder
- * Route: /register
- * To be implemented by feature team.
+ * RegisterPage Component
+ * Route: /register (Guest only via GuestRoute & AuthLayout)
  */
 export default function RegisterPage() {
   return (
-    <div className="py-16 text-center text-text-secondary dark:text-slate-400">
-      <h1 className="text-xl font-heading font-bold text-primary-dark dark:text-text-light mb-2">
-        Register Page
-      </h1>
-      <p className="text-xs">Route: /register — To be implemented by team</p>
-    </div>
+    <AuthCard
+      title="Create Your Account"
+      subtitle="Join Nexis Tech for genuine electronics and flagship hardware gear."
+      badgeText="Account Registration"
+      showcaseTitle="Egypt's Flagship Hardware Destination."
+      showcaseSubtitle="Create your account to unlock member discounts, save domestic delivery addresses, and track shipments in real-time."
+      footer={
+        <p>
+          Already have an account?{' '}
+          <Link
+            to="/login"
+            className="font-semibold text-accent-gold hover:underline"
+          >
+            Sign in
+          </Link>
+        </p>
+      }
+    >
+      <RegisterForm />
+    </AuthCard>
   )
 }

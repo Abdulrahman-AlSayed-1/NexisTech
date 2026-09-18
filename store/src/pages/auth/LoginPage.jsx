@@ -1,15 +1,32 @@
+import { Link } from 'react-router-dom'
+import AuthCard from '@/components/auth/AuthCard'
+import LoginForm from '@/components/auth/LoginForm'
+
 /**
- * Login Page Placeholder
- * Route: /login
- * To be implemented by feature team.
+ * LoginPage Component
+ * Route: /login (Guest only via GuestRoute & AuthLayout)
  */
 export default function LoginPage() {
   return (
-    <div className="py-16 text-center text-text-secondary dark:text-slate-400">
-      <h1 className="text-xl font-heading font-bold text-primary-dark dark:text-text-light mb-2">
-        Sign In Page
-      </h1>
-      <p className="text-xs">Route: /login — To be implemented by team</p>
-    </div>
+    <AuthCard
+      title="Welcome Back"
+      subtitle="Sign in to manage your orders, wishlist, and hardware warranty."
+      badgeText="Customer Portal"
+      showcaseTitle="Power Your Setup with Authentic Gear."
+      showcaseSubtitle="Access your account to track live Egyptian deliveries, review past hardware purchases, and unlock member discounts."
+      footer={
+        <p>
+          Don't have an account?{' '}
+          <Link
+            to="/register"
+            className="font-semibold text-accent-gold hover:underline"
+          >
+            Create one
+          </Link>
+        </p>
+      }
+    >
+      <LoginForm />
+    </AuthCard>
   )
 }

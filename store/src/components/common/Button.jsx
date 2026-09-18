@@ -42,7 +42,7 @@ export default function Button({
     outline:
       'border border-border-medium dark:border-primary-medium/50 hover:bg-bg-main dark:hover:bg-dark-bg-main text-text-primary dark:text-text-light focus:ring-primary-medium',
     gold:
-      'bg-accent-gold hover:bg-accent-gold-hover text-primary-dark font-bold focus:ring-accent-gold shadow-sm active:scale-[0.99]',
+      'bg-accent-gold hover:bg-accent-gold-hover text-white font-bold focus:ring-accent-gold shadow-sm active:scale-[0.99]',
     danger:
       'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500 shadow-sm',
     ghost:
