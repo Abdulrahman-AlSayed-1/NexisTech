@@ -1,5 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import { getAllUsers, addUser, deleteUser } from '@/api/users'
+import { changeUserRole } from '@/api/auth'
+import { filterNexisUsers } from '@/utils/storeCatalog'
 
 // Async Thunks
 export const fetchUsers = createAsyncThunk(
@@ -20,7 +22,24 @@ export const createNewUser = createAsyncThunk(
   'users/createNewUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const data = await addUser(userData)
+      const { role, ...apiPayload } = userData
+      const data = await addUser(apiPayload)
+      const newUser = data?.user || data
+      const userId = newUser?._id || newUser?.id
+
+      if (role === 'admin' && userId) {
+        try {
+          await changeUserRole(userId, 'admin')
+          if (data?.user) {
+            data.user.role = 'admin'
+          } else if (typeof data === 'object') {
+            data.role = 'admin'
+          }
+        } catch (roleErr) {
+          console.warn('User created but role escalation failed:', roleErr)
+        }
+      }
+
       return data
     } catch (err) {
       const errorMsg =
@@ -41,6 +60,20 @@ export const removeUser = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || 'Failed to delete user'
+      )
+    }
+  }
+)
+
+export const updateUserRole = createAsyncThunk(
+  'users/updateUserRole',
+  async ({ userId, role }, { rejectWithValue }) => {
+    try {
+      const data = await changeUserRole(userId, role)
+      return { userId, role, data }
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Failed to update user role'
       )
     }
   }
@@ -73,7 +106,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.isLoading = false
-        const payload = action.payload
+        const payload = action.payload || {}
         state.items = payload.users || (Array.isArray(payload) ? payload : [])
         state.total = payload.total ?? state.items.length
         state.page = payload.page ?? 1
@@ -117,8 +150,70 @@ const usersSlice = createSlice({
         state.isActionLoading = false
         state.error = action.payload
       })
+
+      // updateUserRole
+      .addCase(updateUserRole.pending, (state) => {
+        state.isActionLoading = true
+      })
+      .addCase(updateUserRole.fulfilled, (state, action) => {
+        state.isActionLoading = false
+        const { userId, role, data } = action.payload
+        const updatedUser = data?.user || data
+        const idx = state.items.findIndex(
+          (u) => (u._id || u.id) === userId
+        )
+        if (idx !== -1) {
+          state.items[idx] = {
+            ...state.items[idx],
+            ...(typeof updatedUser === 'object' ? updatedUser : {}),
+            role: role || state.items[idx].role,
+          }
+        }
+      })
+      .addCase(updateUserRole.rejected, (state, action) => {
+        state.isActionLoading = false
+        state.error = action.payload
+      })
   },
 })
 
 export const { clearUserError } = usersSlice.actions
+
+// ==========================================
+// User Domain Selectors
+// ==========================================
+
+/**
+ * Selector that returns only authorized Nexis Tech personnel (@nexis.com admins)
+ * and all registered customers.
+ * Foreign admins from other stores are filtered out.
+ */
+export const selectNexisUsers = createSelector(
+  [(state) => state.users?.items || []],
+  (rawUsers) => filterNexisUsers(rawUsers)
+)
+
+/**
+ * User Directory & Customer Demographics Selector
+ * Computes total users, customer count, and admin count strictly for Nexis Tech.
+ */
+export const selectUserStats = createSelector(
+  [
+    selectNexisUsers,
+    (state) => Boolean(state.users?.isLoading),
+  ],
+  (nexisUsers, isLoading) => {
+    const totalUsers = nexisUsers.length
+    const totalCustomers = nexisUsers.filter((u) => u.role !== 'ADMIN').length
+    const totalAdmins = nexisUsers.filter((u) => u.role === 'ADMIN').length
+
+    return {
+      totalUsers,
+      totalCustomers,
+      totalAdmins,
+      isUsersLoading: isLoading,
+    }
+  }
+)
+
 export default usersSlice.reducer

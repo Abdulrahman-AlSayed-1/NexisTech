@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   Users,
@@ -10,22 +10,70 @@ import {
   AlertCircle,
   Mail,
   CheckCircle2,
+  Search,
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import Modal from '@/components/common/Modal'
 import Input from '@/components/common/Input'
 import Button from '@/components/common/Button'
+import Dropdown from '@/components/common/Dropdown'
+import Badge from '@/components/common/Badge'
+import Pagination from '@/components/common/Pagination'
 import {
   fetchUsers,
   createNewUser,
   removeUser,
+  selectNexisUsers,
 } from '@/store/slices/usersSlice'
 
 export default function UserList() {
   const dispatch = useDispatch()
-  const { items, total, isLoading, isActionLoading, error } = useSelector(
+  const { isLoading, isActionLoading, error } = useSelector(
     (state) => state.users
   )
+  const nexisUsers = useSelector(selectNexisUsers)
+
+  const preferences = useSelector((state) => state.ui?.preferences)
+  const pageSize = Number(preferences?.defaultPageSize) || 25
+  const [currentPage, setCurrentPage] = useState(1)
+  const [roleFilter, setRoleFilter] = useState('ALL')
+  const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    dispatch(fetchUsers())
+  }, [dispatch])
+
+  // Filter users naturally by role and search query
+  const filteredUsers = useMemo(() => {
+    let result = nexisUsers
+    if (roleFilter !== 'ALL') {
+      result = result.filter(
+        (u) => (u.role || 'CUSTOMER').toUpperCase() === roleFilter
+      )
+    }
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase().trim()
+      result = result.filter((u) => {
+        const name = `${u.firstName || ''} ${u.lastName || ''} ${u.name || ''} ${u.username || ''}`.toLowerCase()
+        const email = (u.email || '').toLowerCase()
+        return name.includes(q) || email.includes(q)
+      })
+    }
+    return result
+  }, [nexisUsers, roleFilter, searchTerm])
+
+  const totalUsers = filteredUsers.length
+  const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize))
+  const safePage = Math.min(currentPage, totalPages)
+
+  const startIndex = (safePage - 1) * pageSize
+  const endIndex = Math.min(startIndex + pageSize, totalUsers)
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return
+    setCurrentPage(page)
+  }
 
   const [userToDelete, setUserToDelete] = useState(null)
   const [formData, setFormData] = useState({
@@ -33,13 +81,9 @@ export default function UserList() {
     lastName: '',
     email: '',
     password: '',
-    role: 'USER',
+    role: 'CUSTOMER',
   })
   const [formErrors, setFormErrors] = useState({})
-
-  useEffect(() => {
-    dispatch(fetchUsers())
-  }, [dispatch])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -60,7 +104,13 @@ export default function UserList() {
       errs.email = 'Email is required'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       errs.email = 'Please enter a valid email address'
+    } else if (
+      formData.role === 'ADMIN' &&
+      !formData.email.trim().toLowerCase().endsWith('@nexis.com')
+    ) {
+      errs.email = 'Administrator accounts must use an official @nexis.com email address.'
     }
+
     if (!formData.password) {
       errs.password = 'Password is required'
     } else if (formData.password.length < 6) {
@@ -76,21 +126,24 @@ export default function UserList() {
 
     const payload = {
       username: `${formData.firstName} ${formData.lastName}`.trim() || formData.email.split('@')[0],
-      email: formData.email,
+      email: formData.email.trim(),
       password: formData.password,
+      role: formData.role === 'ADMIN' ? 'admin' : 'user',
     }
 
     const resultAction = await dispatch(createNewUser(payload))
     if (createNewUser.fulfilled.match(resultAction)) {
       toast.success(
-        resultAction.payload?.message || 'User registered successfully!'
+        formData.role === 'ADMIN'
+          ? 'Administrator account created successfully!'
+          : resultAction.payload?.message || 'Customer account registered successfully!'
       )
       setFormData({
         firstName: '',
         lastName: '',
         email: '',
         password: '',
-        role: 'USER',
+        role: 'CUSTOMER',
       })
       dispatch(fetchUsers())
     } else {
@@ -120,33 +173,35 @@ export default function UserList() {
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-12">
       {/* Header Banner */}
-      <div className="bg-white dark:bg-[var(--color-dark-bg-card)] p-6 sm:p-8 rounded-3xl border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary-dark)] text-white dark:bg-[var(--color-primary-medium)] flex items-center justify-center shrink-0 shadow-sm border border-[var(--color-primary-medium)]/30">
-            <Users className="w-6 h-6 text-[var(--color-text-gold)]" />
+      <div className="bg-white dark:bg-dark-bg-card p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-border-medium dark:border-primary-medium/30 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 transition-colors">
+        <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-primary-dark text-white dark:bg-primary-medium flex items-center justify-center shrink-0 shadow-sm border border-primary-medium/30">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-text-gold" />
           </div>
-          <div className="space-y-1">
-            <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase font-heading bg-[var(--color-primary-medium)]/15 text-[var(--color-primary-dark)] border border-[var(--color-primary-medium)]/25 dark:bg-[var(--color-primary-medium)]/30 dark:text-[var(--color-text-gold)]">
-              USER MANAGEMENT
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)] tracking-tight">
+          <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <Badge variant="primary" size="sm">
+                USER MANAGEMENT
+              </Badge>
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-heading text-primary-dark dark:text-text-light tracking-tight">
               Users & Administrators
             </h1>
-            <p className="text-xs text-[var(--color-text-secondary)] font-body">
+            <p className="text-xs text-text-secondary font-body line-clamp-2 sm:line-clamp-none">
               Manage accounts, control access privileges, and provision new team administrators.
             </p>
           </div>
         </div>
 
         {/* Metric Pill */}
-        <div className="p-4 rounded-2xl bg-[var(--color-bg-main)]/70 dark:bg-[var(--color-dark-bg-main)]/60 border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 min-w-[200px] space-y-1">
-          <span className="text-[10px] font-bold text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)] tracking-widest uppercase font-heading">
-            REGISTERED ACCOUNTS
+        <div className="flex items-center justify-between md:flex-col md:items-start p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-bg-main/70 dark:bg-dark-bg-main/60 border border-border-medium dark:border-primary-medium/30 md:min-w-[200px] shrink-0">
+          <span className="text-[10px] font-bold text-primary-dark dark:text-text-gold tracking-widest uppercase font-heading">
+            NEXIS ACCOUNTS
           </span>
-          <p className="text-2xl font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
-            {total || items.length}{' '}
-            <span className="text-xs font-normal font-body text-[var(--color-text-secondary)]">
-              users
+          <p className="text-lg sm:text-2xl font-bold font-heading text-primary-dark dark:text-text-light leading-none">
+            {nexisUsers.length}{' '}
+            <span className="text-xs font-normal font-body text-text-secondary">
+              accounts
             </span>
           </p>
         </div>
@@ -156,13 +211,18 @@ export default function UserList() {
       <div className="bg-white dark:bg-[var(--color-dark-bg-card)] rounded-2xl p-6 sm:p-8 shadow-xs border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30">
         <div className="flex items-center gap-2 mb-5 pb-3 border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30">
           <UserPlus className="w-5 h-5 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]" />
-          <h2 className="text-base font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
-            Create Account
-          </h2>
+          <div>
+            <h2 className="text-base font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+              Create Account
+            </h2>
+            <p className="text-xs text-[var(--color-text-secondary)]">
+              Register store customers or administrators. Use an <span className="font-semibold text-primary-dark dark:text-text-gold">@nexis.com</span> email for admin privileges.
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleAddUser} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
             <Input
               label="First Name"
               name="firstName"
@@ -185,10 +245,11 @@ export default function UserList() {
               label="Email Address"
               type="email"
               name="email"
-              placeholder="john.doe@example.com"
+              placeholder={formData.role === 'ADMIN' ? 'name@nexis.com' : 'customer@email.com'}
               value={formData.email}
               onChange={handleChange}
               error={formErrors.email}
+              helperText={formData.role === 'ADMIN' ? 'Must end with @nexis.com' : undefined}
               required
             />
             <Input
@@ -201,17 +262,45 @@ export default function UserList() {
               error={formErrors.password}
               required
             />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] font-heading">
+                Account Role <span className="text-rose-500">*</span>
+              </label>
+              <Dropdown
+                value={formData.role}
+                onChange={(val) => {
+                  setFormData((prev) => ({ ...prev, role: val }))
+                  if (formErrors.email) {
+                    setFormErrors((prev) => ({ ...prev, email: '' }))
+                  }
+                }}
+                options={[
+                  { value: 'CUSTOMER', label: 'Customer' },
+                  { value: 'ADMIN', label: 'Administrator (@nexis.com)' },
+                ]}
+                ariaLabel="Account Role"
+              />
+            </div>
           </div>
 
           <div className="flex items-center justify-end pt-2">
             <Button
               type="submit"
-              isLoading={isActionLoading}
               variant="primary"
+              disabled={isActionLoading}
               className="w-full sm:w-auto"
             >
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              Add User
+              {isActionLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                  Create Account
+                </>
+              )}
             </Button>
           </div>
         </form>
@@ -219,19 +308,53 @@ export default function UserList() {
 
       {/* Users Table Card */}
       <div className="bg-white dark:bg-[var(--color-dark-bg-card)] rounded-2xl border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 shadow-xs overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 flex items-center justify-between">
-          <h3 className="text-sm font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
-            Registered Users Directory
-          </h3>
-          <span className="text-xs text-[var(--color-text-secondary)] font-body">
-            Showing {items.length} accounts
-          </span>
+        <div className="p-4 sm:p-5 border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+              Nexis Personnel & Customers Directory
+            </h3>
+            <span className="text-xs text-[var(--color-text-secondary)] font-body">
+              Showing {filteredUsers.length} of {nexisUsers.length} accounts
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary dark:text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setCurrentPage(1)
+                }}
+                placeholder="Search name or email..."
+                className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-border-light dark:border-white/10 bg-bg-main/30 dark:bg-white/5 text-primary-dark dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-medium shadow-2xs"
+              />
+            </div>
+
+            <div className="w-full sm:w-48">
+              <Dropdown
+                value={roleFilter}
+                onChange={(val) => {
+                  setRoleFilter(val)
+                  setCurrentPage(1)
+                }}
+                options={[
+                  { value: 'ALL', label: 'All Accounts' },
+                  { value: 'ADMIN', label: 'Admins (@nexis.com)' },
+                  { value: 'CUSTOMER', label: 'Customers' },
+                ]}
+                ariaLabel="Filter by Role"
+              />
+            </div>
+          </div>
         </div>
 
         {isLoading ? (
           <div className="py-16 flex flex-col items-center justify-center space-y-3">
-            <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]" />
-            <p className="text-sm text-[var(--color-text-secondary)] font-body">
+            <Loader2 className="w-8 h-8 animate-spin text-primary-dark dark:text-text-gold" />
+            <p className="text-sm text-text-secondary font-body">
               Loading user accounts...
             </p>
           </div>
@@ -248,21 +371,21 @@ export default function UserList() {
               Try Again
             </Button>
           </div>
-        ) : items.length === 0 ? (
+        ) : nexisUsers.length === 0 ? (
           <div className="p-12 text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-[var(--color-bg-input)]/50 dark:bg-[var(--color-dark-bg-main)] text-[var(--color-text-secondary)] flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-bg-input/50 dark:bg-dark-bg-main text-text-secondary flex items-center justify-center mx-auto mb-3">
               <Users className="w-6 h-6" />
             </div>
-            <p className="text-sm font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+            <p className="text-sm font-bold font-heading text-primary-dark dark:text-text-light">
               No users found
             </p>
-            <p className="text-xs text-[var(--color-text-secondary)] font-body">
+            <p className="text-xs text-text-secondary font-body">
               Register your first user above to populate this catalog.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="bg-[var(--color-bg-main)]/60 dark:bg-[var(--color-dark-bg-main)] text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)] border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30">
                 <tr>
                   <th className="px-6 py-3.5 font-bold font-heading text-xs tracking-wider uppercase">
@@ -279,8 +402,18 @@ export default function UserList() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-border-medium)]/50 dark:divide-[var(--color-primary-medium)]/30">
-                {items.map((user) => {
+              <tbody className="divide-y divide-[var(--color-border-medium)]/30 font-body">
+                {paginatedUsers.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-6 py-12 text-center text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-slate-400 font-body"
+                    >
+                      No users match your search or filter criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedUsers.map((user) => {
                   const userId = user._id || user.id
                   const displayName =
                     `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
@@ -320,20 +453,14 @@ export default function UserList() {
                       </td>
 
                       <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold font-heading ${
-                            isAdmin
-                              ? 'bg-[var(--color-primary-dark)] text-white dark:bg-[var(--color-primary-medium)]'
-                              : 'bg-[var(--color-bg-input)]/70 text-[var(--color-primary-dark)] dark:bg-[var(--color-dark-bg-main)] dark:text-[var(--color-text-gold)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40'
-                          }`}
-                        >
+                        <Badge variant={isAdmin ? 'primary' : 'neutral'} size="sm">
                           {isAdmin ? (
                             <Shield className="w-3 h-3 text-[var(--color-text-gold)]" />
                           ) : (
                             <UserIcon className="w-3 h-3 text-[var(--color-text-secondary)]" />
                           )}
                           <span>{role}</span>
-                        </span>
+                        </Badge>
                       </td>
 
                       <td className="px-6 py-4 text-right">
@@ -352,10 +479,24 @@ export default function UserList() {
                       </td>
                     </tr>
                   )
-                })}
-              </tbody>
+                })
+              )}
+            </tbody>
             </table>
           </div>
+        )}
+
+        {/* Pagination Footer */}
+        {!isLoading && !error && totalUsers > 0 && (
+          <Pagination
+            currentPage={safePage}
+            totalPages={totalPages}
+            totalItems={totalUsers}
+            pageSize={pageSize}
+            itemLabel="users"
+            onPageChange={goToPage}
+            className="border-t border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30 px-6 py-4 bg-[var(--color-bg-card)] dark:bg-[var(--color-dark-bg-card)]"
+          />
         )}
       </div>
 
