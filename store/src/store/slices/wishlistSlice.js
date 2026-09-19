@@ -128,9 +128,12 @@ const wishlistSlice = createSlice({
       .addCase(fetchWishlistThunk.fulfilled, (state, action) => {
         state.isLoading = false
         const payload = action.payload || {}
-        const items = payload.products || payload.data || (Array.isArray(payload) ? payload : [])
-        state.items = items
-        state.totalProducts = items.length
+        const serverItems =
+          payload.products ||
+          payload.data ||
+          (Array.isArray(payload) ? payload : [])
+        state.items = serverItems
+        state.totalProducts = serverItems.length
         saveWishlist(state.items)
       })
       .addCase(fetchWishlistThunk.rejected, (state, action) => {
@@ -149,8 +152,10 @@ export const {
 
 export const selectWishlistItems = (state) => state.wishlist.items
 export const selectWishlistCount = (state) => state.wishlist.totalProducts
+export const selectWishlistLoading = (state) => state.wishlist.isLoading
+export const selectWishlistError = (state) => state.wishlist.error
 
-// Memoized IDs set for fast O(1) membership checks
+// Memoized IDs set for fast membership checks
 export const selectWishlistIds = createSelector(
   [selectWishlistItems],
   (items) => new Set(items.map((i) => i._id || i.productId || i.id))
