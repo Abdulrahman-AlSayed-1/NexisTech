@@ -19,7 +19,15 @@ const getStoredUser = () => {
     if (!user || user === 'undefined' || user === 'null') {
       return null
     }
-    return JSON.parse(user)
+    const parsed = JSON.parse(user)
+    const email = (parsed.email || '').trim().toLowerCase()
+    const role = (parsed.role || '').toLowerCase()
+    if (!email.endsWith('@nexis.com') || (role !== 'admin' && email !== 'admin@nexis.com')) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      return null
+    }
+    return parsed
   } catch {
     return null
   }
@@ -30,8 +38,8 @@ const initialUser = getStoredUser()
 
 const initialState = {
   user: initialUser,
-  token: initialToken,
-  isAuthenticated: Boolean(initialToken),
+  token: initialUser ? initialToken : null,
+  isAuthenticated: Boolean(initialUser && initialToken),
   isLoading: false,
   error: null,
 }
@@ -42,6 +50,17 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const data = await loginAdmin(credentials)
+      const user = data?.user || {}
+      const email = (user.email || '').trim().toLowerCase()
+      const role = (user.role || '').toLowerCase()
+
+      // Enforce Nexis Tech Admin boundary: Only @nexis.com admin accounts are permitted
+      if (!email.endsWith('@nexis.com') || (role !== 'admin' && email !== 'admin@nexis.com')) {
+        return rejectWithValue(
+          'Access denied: Only authorized @nexis.com administrator accounts can access this portal.'
+        )
+      }
+
       return data
     } catch (err) {
       const errorMessage =
@@ -76,6 +95,17 @@ const authSlice = createSlice({
       state.error = null
     },
     loginSuccess: (state, action) => {
+      const user = action.payload?.user || {}
+      const email = (user.email || '').trim().toLowerCase()
+      const role = (user.role || '').toLowerCase()
+
+      if (!email.endsWith('@nexis.com') || (role !== 'admin' && email !== 'admin@nexis.com')) {
+        state.isLoading = false
+        state.error =
+          'Access denied: Only authorized @nexis.com administrator accounts can access this portal.'
+        return
+      }
+
       state.isLoading = false
       state.isAuthenticated = true
       state.user = action.payload.user

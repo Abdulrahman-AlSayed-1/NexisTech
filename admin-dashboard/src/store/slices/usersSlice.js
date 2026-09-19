@@ -1,15 +1,7 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import { getAllUsers, addUser, deleteUser } from '@/api/users'
 import { changeUserRole } from '@/api/auth'
-import {
-  buildStoreCatalogLookup,
-  isStoreOrder,
-  filterStoreOrder,
-  isStoreCart,
-  filterStoreCart,
-  buildNexisCustomerLookup,
-  filterNexisUsers,
-} from '@/utils/storeCatalog'
+import { filterNexisUsers } from '@/utils/storeCatalog'
 
 // Async Thunks
 export const fetchUsers = createAsyncThunk(
@@ -175,28 +167,13 @@ export const { clearUserError } = usersSlice.actions
 // ==========================================
 
 /**
- * Selector that returns only authorized Nexis Tech personnel (@nexis.com) and customers
- * who have placed an order or currently hold a cart containing Nexis Tech merchandise.
+ * Selector that returns only authorized Nexis Tech personnel (@nexis.com admins)
+ * and all registered customers.
+ * Foreign admins from other stores are filtered out.
  */
 export const selectNexisUsers = createSelector(
-  [
-    (state) => state.users?.items || [],
-    (state) => state.orders?.items || [],
-    (state) => state.carts?.items || [],
-    (state) => state.products?.items || [],
-  ],
-  (rawUsers, rawOrders, rawCarts, products) => {
-    const catalogLookup = buildStoreCatalogLookup(products)
-    const storeOrders = rawOrders
-      .filter((o) => isStoreOrder(o, catalogLookup))
-      .map((o) => filterStoreOrder(o, catalogLookup))
-    const storeCarts = rawCarts
-      .filter((c) => isStoreCart(c, catalogLookup))
-      .map((c) => filterStoreCart(c, catalogLookup))
-
-    const customerLookup = buildNexisCustomerLookup(storeOrders, storeCarts)
-    return filterNexisUsers(rawUsers, customerLookup)
-  }
+  [(state) => state.users?.items || []],
+  (rawUsers) => filterNexisUsers(rawUsers)
 )
 
 /**

@@ -225,22 +225,29 @@ export function isNexisCustomer(user, customerLookup) {
 
 /**
  * Filters and maps a list of users to strictly Nexis Tech personnel and store customers.
- * - Only @nexis.com accounts are displayed as ADMIN.
- * - Only customers who have placed a Nexis order or hold a Nexis cart are displayed as CUSTOMER.
- * - Strangers/admins from other stores who never interacted with Nexis are excluded.
+ * - Only @nexis.com accounts with admin privileges are recognized as ADMIN.
+ * - Any user with admin role who is NOT from @nexis.com belongs to another store -> EXCLUDED.
+ * - ALL regular customers (non-admin accounts, e.g. @gmail.com) are recognized as CUSTOMER.
  *
  * @param {Array} rawUsers
- * @param {{ ids: Set<string>, emails: Set<string> }} customerLookup
  * @returns {Array}
  */
-export function filterNexisUsers(rawUsers = [], customerLookup) {
+export function filterNexisUsers(rawUsers = []) {
   if (!Array.isArray(rawUsers)) return []
 
   return rawUsers
     .filter((u) => {
-      if (isNexisStaffUser(u)) return true
-      if (isNexisCustomer(u, customerLookup)) return true
-      return false
+      if (!u || typeof u !== 'object') return false
+      const email = (u.email || '').trim().toLowerCase()
+      const role = (u.role || '').toLowerCase()
+
+      // If user has an admin role but is NOT @nexis.com, they belong to another store -> exclude
+      if (role === 'admin' && !email.endsWith('@nexis.com')) {
+        return false
+      }
+
+      // Keep our @nexis.com admins and all customers
+      return true
     })
     .map((u) => {
       const isStaff = isNexisStaffUser(u)

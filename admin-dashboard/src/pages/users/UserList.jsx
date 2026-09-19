@@ -25,9 +25,6 @@ import {
   removeUser,
   selectNexisUsers,
 } from '@/store/slices/usersSlice'
-import { fetchAdminOrders } from '@/store/slices/ordersSlice'
-import { fetchAdminCarts } from '@/store/slices/cartsSlice'
-import { fetchProducts } from '@/store/slices/productsSlice'
 
 export default function UserList() {
   const dispatch = useDispatch()
@@ -35,9 +32,6 @@ export default function UserList() {
     (state) => state.users
   )
   const nexisUsers = useSelector(selectNexisUsers)
-  const ordersLoaded = useSelector((state) => (state.orders?.items || []).length > 0)
-  const cartsLoaded = useSelector((state) => (state.carts?.items || []).length > 0)
-  const productsLoaded = useSelector((state) => (state.products?.items || []).length > 0)
 
   const preferences = useSelector((state) => state.ui?.preferences)
   const pageSize = Number(preferences?.defaultPageSize) || 25
@@ -47,10 +41,7 @@ export default function UserList() {
 
   useEffect(() => {
     dispatch(fetchUsers())
-    if (!ordersLoaded) dispatch(fetchAdminOrders({ limit: 100 }))
-    if (!cartsLoaded) dispatch(fetchAdminCarts({ limit: 100 }))
-    if (!productsLoaded) dispatch(fetchProducts({ limit: 100 }))
-  }, [dispatch, ordersLoaded, cartsLoaded, productsLoaded])
+  }, [dispatch])
 
   // Filter users naturally by role and search query
   const filteredUsers = useMemo(() => {
@@ -323,7 +314,7 @@ export default function UserList() {
                 options={[
                   { value: 'ALL', label: 'All Accounts' },
                   { value: 'ADMIN', label: 'Admins (@nexis.com)' },
-                  { value: 'CUSTOMER', label: 'Nexis Customers' },
+                  { value: 'CUSTOMER', label: 'Customers' },
                 ]}
                 ariaLabel="Filter by Role"
               />
