@@ -25,9 +25,6 @@ import {
   removeUser,
   selectNexisUsers,
 } from '@/store/slices/usersSlice'
-import { fetchAdminOrders } from '@/store/slices/ordersSlice'
-import { fetchAdminCarts } from '@/store/slices/cartsSlice'
-import { fetchProducts } from '@/store/slices/productsSlice'
 
 export default function UserList() {
   const dispatch = useDispatch()
@@ -35,9 +32,6 @@ export default function UserList() {
     (state) => state.users
   )
   const nexisUsers = useSelector(selectNexisUsers)
-  const ordersLoaded = useSelector((state) => (state.orders?.items || []).length > 0)
-  const cartsLoaded = useSelector((state) => (state.carts?.items || []).length > 0)
-  const productsLoaded = useSelector((state) => (state.products?.items || []).length > 0)
 
   const preferences = useSelector((state) => state.ui?.preferences)
   const pageSize = Number(preferences?.defaultPageSize) || 25
@@ -47,10 +41,7 @@ export default function UserList() {
 
   useEffect(() => {
     dispatch(fetchUsers())
-    if (!ordersLoaded) dispatch(fetchAdminOrders({ limit: 100 }))
-    if (!cartsLoaded) dispatch(fetchAdminCarts({ limit: 100 }))
-    if (!productsLoaded) dispatch(fetchProducts({ limit: 100 }))
-  }, [dispatch, ordersLoaded, cartsLoaded, productsLoaded])
+  }, [dispatch])
 
   // Filter users naturally by role and search query
   const filteredUsers = useMemo(() => {
@@ -90,7 +81,7 @@ export default function UserList() {
     lastName: '',
     email: '',
     password: '',
-    role: 'USER',
+    role: 'CUSTOMER',
   })
   const [formErrors, setFormErrors] = useState({})
 
@@ -113,7 +104,13 @@ export default function UserList() {
       errs.email = 'Email is required'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       errs.email = 'Please enter a valid email address'
+    } else if (
+      formData.role === 'ADMIN' &&
+      !formData.email.trim().toLowerCase().endsWith('@nexis.com')
+    ) {
+      errs.email = 'Administrator accounts must use an official @nexis.com email address.'
     }
+
     if (!formData.password) {
       errs.password = 'Password is required'
     } else if (formData.password.length < 6) {
@@ -129,21 +126,24 @@ export default function UserList() {
 
     const payload = {
       username: `${formData.firstName} ${formData.lastName}`.trim() || formData.email.split('@')[0],
-      email: formData.email,
+      email: formData.email.trim(),
       password: formData.password,
+      role: formData.role === 'ADMIN' ? 'admin' : 'user',
     }
 
     const resultAction = await dispatch(createNewUser(payload))
     if (createNewUser.fulfilled.match(resultAction)) {
       toast.success(
-        resultAction.payload?.message || 'User registered successfully!'
+        formData.role === 'ADMIN'
+          ? 'Administrator account created successfully!'
+          : resultAction.payload?.message || 'Customer account registered successfully!'
       )
       setFormData({
         firstName: '',
         lastName: '',
         email: '',
         password: '',
-        role: 'USER',
+        role: 'CUSTOMER',
       })
       dispatch(fetchUsers())
     } else {
@@ -222,7 +222,7 @@ export default function UserList() {
         </div>
 
         <form onSubmit={handleAddUser} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
             <Input
               label="First Name"
               name="firstName"
@@ -245,10 +245,11 @@ export default function UserList() {
               label="Email Address"
               type="email"
               name="email"
-              placeholder="name@nexis.com or customer@email.com"
+              placeholder={formData.role === 'ADMIN' ? 'name@nexis.com' : 'customer@email.com'}
               value={formData.email}
               onChange={handleChange}
               error={formErrors.email}
+              helperText={formData.role === 'ADMIN' ? 'Must end with @nexis.com' : undefined}
               required
             />
             <Input
@@ -261,6 +262,25 @@ export default function UserList() {
               error={formErrors.password}
               required
             />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] font-heading">
+                Account Role <span className="text-rose-500">*</span>
+              </label>
+              <Dropdown
+                value={formData.role}
+                onChange={(val) => {
+                  setFormData((prev) => ({ ...prev, role: val }))
+                  if (formErrors.email) {
+                    setFormErrors((prev) => ({ ...prev, email: '' }))
+                  }
+                }}
+                options={[
+                  { value: 'CUSTOMER', label: 'Customer' },
+                  { value: 'ADMIN', label: 'Administrator (@nexis.com)' },
+                ]}
+                ariaLabel="Account Role"
+              />
+            </div>
           </div>
 
           <div className="flex items-center justify-end pt-2">
@@ -323,7 +343,7 @@ export default function UserList() {
                 options={[
                   { value: 'ALL', label: 'All Accounts' },
                   { value: 'ADMIN', label: 'Admins (@nexis.com)' },
-                  { value: 'CUSTOMER', label: 'Nexis Customers' },
+                  { value: 'CUSTOMER', label: 'Customers' },
                 ]}
                 ariaLabel="Filter by Role"
               />
