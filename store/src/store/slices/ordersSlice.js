@@ -113,9 +113,9 @@ const ordersSlice = createSlice({
         state.isLoading = false
         const payload = action.payload || {}
         state.orders = payload.orders || payload.data || (Array.isArray(payload) ? payload : [])
-        state.totalOrders = payload.total || state.orders.length
-        state.totalPages = payload.pages || 1
-        state.currentPage = payload.page || 1
+        state.totalOrders = payload.total ?? state.orders.length
+        state.totalPages = payload.totalPages ?? payload.pages ?? 1
+        state.currentPage = payload.currentPage ?? payload.page ?? 1
       })
       .addCase(fetchMyOrdersThunk.rejected, (state, action) => {
         state.isLoading = false
@@ -156,6 +156,9 @@ export const selectOrders = (state) => state.orders.orders
 export const selectCurrentOrder = (state) => state.orders.currentOrder
 export const selectOrdersLoading = (state) => state.orders.isLoading
 export const selectIsPlacingOrder = (state) => state.orders.isPlacingOrder
+export const selectOrdersCurrentPage = (state) => state.orders.currentPage
+export const selectOrdersTotalPages = (state) => state.orders.totalPages
+export const selectOrdersTotalCount = (state) => state.orders.totalOrders
 
 // Memoized order statistics selector
 export const selectOrderStats = createSelector(
@@ -179,6 +182,36 @@ export const selectOrderStats = createSelector(
     }
 
     return stats
+  }
+)
+
+// Memoized current order payment & cost summary selector
+export const selectCurrentOrderSummary = createSelector(
+  [selectCurrentOrder],
+  (order) => {
+    if (!order) {
+      return {
+        subtotal: 0,
+        shippingFee: 0,
+        tax: 0,
+        discount: 0,
+        total: 0,
+      }
+    }
+
+    const subtotal = Number(order.subtotal) || 0
+    const shippingFee = Number(order.shippingFee) || 0
+    const tax = Number(order.tax) || 0
+    const discount = Number(order.discount) || 0
+    const total = Number(order.totalPrice) || (subtotal + shippingFee + tax - discount)
+
+    return {
+      subtotal,
+      shippingFee,
+      tax,
+      discount,
+      total,
+    }
   }
 )
 
