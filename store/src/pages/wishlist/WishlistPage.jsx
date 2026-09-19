@@ -46,6 +46,7 @@ export default function WishlistPage() {
     dispatch(removeFromWishlistThunk(getId(product)))
   }
 
+
   const handleClear = () => {
     dispatch(clearWishlistThunk())
   }
@@ -53,6 +54,7 @@ export default function WishlistPage() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
+  
 
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -121,14 +123,14 @@ export default function WishlistPage() {
                       {product.name || product.title || 'Product'}
                     </h2>
 
-                    <p className="mt-2 text-lg font-bold text-blue-600">
+                    <p className="mt-2 text-lg font-bold text-[#C28723]">
                       ${Number(product.price || 0).toFixed(2)}
                     </p>
 
                     <div className="mt-5 flex gap-2">
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                        className="flex-1 rounded-lg bg-[#1D3532] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#7A928D]"
                       >
                         Add to Cart
                       </button>

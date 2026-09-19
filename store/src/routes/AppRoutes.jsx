@@ -44,9 +44,10 @@ export default function AppRoutes() {
         <Route path="products/:id" element={<ProductDetailPage />} />
 
         {/* User (Protected) Routes */}
+        
         <Route element={<ProtectedRoute />}>
-          <Route path="cart" element={<CartPage />} />
           <Route path="wishlist" element={<WishlistPage />} />
+          <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="checkout/payment" element={<PaymentPage />} />
           <Route path="order-success" element={<OrderSuccessPage />} />
