@@ -22,7 +22,24 @@ export const createNewUser = createAsyncThunk(
   'users/createNewUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const data = await addUser(userData)
+      const { role, ...apiPayload } = userData
+      const data = await addUser(apiPayload)
+      const newUser = data?.user || data
+      const userId = newUser?._id || newUser?.id
+
+      if (role === 'admin' && userId) {
+        try {
+          await changeUserRole(userId, 'admin')
+          if (data?.user) {
+            data.user.role = 'admin'
+          } else if (typeof data === 'object') {
+            data.role = 'admin'
+          }
+        } catch (roleErr) {
+          console.warn('User created but role escalation failed:', roleErr)
+        }
+      }
+
       return data
     } catch (err) {
       const errorMsg =

@@ -66,6 +66,12 @@ export default function RegisterForm() {
       setLocalError('Please enter a valid Egyptian mobile number (e.g. 01012345678 or +2010...).')
       return
     }
+    if (form.email.trim().toLowerCase().endsWith('@nexis.com')) {
+      setLocalError(
+        '@nexis.com email addresses are reserved for internal staff. Please use a personal email address.'
+      )
+      return
+    }
 
     const resultAction = await dispatch(
       registerThunk({

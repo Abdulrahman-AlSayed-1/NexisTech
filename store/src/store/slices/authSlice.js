@@ -22,6 +22,12 @@ export const registerThunk = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
+      const email = (userData?.email || '').trim().toLowerCase()
+      if (email.endsWith('@nexis.com')) {
+        return rejectWithValue(
+          '@nexis.com email addresses are reserved for internal staff. Please use a personal email address.'
+        )
+      }
       const data = await sendRegisterOtp(userData)
       return { data, email: userData.email }
     } catch (err) {
