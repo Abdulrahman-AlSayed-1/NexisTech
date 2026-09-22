@@ -1,6 +1,6 @@
 import { ShieldCheck, Truck, RotateCcw, ArrowRight } from 'lucide-react'
 import Button from '@/components/common/Button'
-import { formatCurrency } from '@/utils/formatters'
+import { formatCurrency, formatPrice } from '@/utils/formatters'
 
 /**
  * CartOrderSummary Component
@@ -10,6 +10,7 @@ export default function CartOrderSummary({
   subtotal = 0,
   discount = 0,
   couponCode = null,
+  appliedCoupon = null,
   shipping = 0,
   total = 0,
   itemCount = 0,
@@ -17,12 +18,13 @@ export default function CartOrderSummary({
   isLoading = false,
 }) {
   const isFreeShipping = shipping === 0
+  const activeCoupon = couponCode || appliedCoupon
   const finalAmount = total > 0 ? total : Math.max(0, subtotal - discount + (isFreeShipping ? 0 : shipping))
 
   return (
-    <div className="rounded-2xl border border-border-light dark:border-primary-medium/30 bg-bg-card dark:bg-dark-bg-card p-6 shadow-2xs space-y-6">
-      <div className="border-b border-border-light dark:border-primary-medium/20 pb-4">
-        <h2 className="font-heading text-lg font-bold text-primary-dark dark:text-text-light">
+    <div className="bg-bg-card dark:bg-dark-bg-card rounded-2xl border border-border-light dark:border-primary-medium/30 p-5 sm:p-6 space-y-5 shadow-xs sticky top-28">
+      <div>
+        <h2 className="text-lg font-bold font-heading text-primary-dark dark:text-text-light">
           Order Summary
         </h2>
         <p className="text-xs text-text-secondary dark:text-slate-400 mt-0.5">
@@ -30,26 +32,25 @@ export default function CartOrderSummary({
         </p>
       </div>
 
-      {/* Pricing Breakdown */}
-      <div className="space-y-3 text-sm font-body">
+      <div className="space-y-3 text-sm border-t border-border-light dark:border-primary-medium/30 pt-4">
         <div className="flex justify-between text-text-secondary dark:text-slate-300">
           <span>Subtotal</span>
-          <span className="font-semibold text-primary-dark dark:text-text-light font-heading">
+          <span className="font-semibold text-text-primary dark:text-text-light font-heading whitespace-nowrap">
             {formatCurrency(subtotal)}
           </span>
         </div>
 
         {discount > 0 && (
-          <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-semibold">
-            <span className="flex items-center gap-1.5">
-              <span>Coupon Discount</span>
-              {couponCode && (
-                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
-                  {couponCode}
+          <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
+            <span className="flex items-center gap-1">
+              Coupon Discount
+              {activeCoupon && (
+                <span className="text-[11px] font-bold font-heading bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                  {activeCoupon}
                 </span>
               )}
             </span>
-            <span className="font-heading">-{formatCurrency(discount)}</span>
+            <span className="font-heading whitespace-nowrap">-{formatCurrency(discount)}</span>
           </div>
         )}
 
@@ -60,26 +61,31 @@ export default function CartOrderSummary({
               Standard
             </span>
           </span>
-          <span className="font-semibold font-heading text-emerald-600 dark:text-emerald-400">
+          <span className="font-semibold font-heading text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
             {isFreeShipping ? 'Free Delivery' : formatCurrency(shipping)}
           </span>
         </div>
       </div>
 
       <div className="border-t border-border-light dark:border-primary-medium/30 pt-4">
-        <div className="flex items-baseline justify-between">
-          <div>
-            <span className="block font-heading text-base font-bold text-primary-dark dark:text-text-light">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 pr-1">
+            <span className="block font-heading text-sm sm:text-base font-bold text-primary-dark dark:text-text-light">
               Total Amount
             </span>
-            <span className="text-[11px] text-text-secondary dark:text-slate-400">
+            <span className="block text-[11px] text-text-secondary dark:text-slate-400">
               Including VAT & official warranty
             </span>
           </div>
 
-          <span className="font-heading text-xl sm:text-2xl font-black text-accent-gold">
-            {formatCurrency(finalAmount)}
-          </span>
+          <div className="text-right shrink-0 whitespace-nowrap">
+            <span className="font-heading text-lg sm:text-xl font-black text-accent-gold tracking-tight">
+              {formatPrice(finalAmount)}
+            </span>
+            <span className="ml-1 text-xs sm:text-sm font-bold font-heading text-accent-gold">
+              EGP
+            </span>
+          </div>
         </div>
       </div>
 

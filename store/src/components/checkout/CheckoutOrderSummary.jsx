@@ -1,7 +1,7 @@
 import { ShieldCheck, Truck, ArrowRight, RotateCcw, Tag } from 'lucide-react'
 import Button from '@/components/common/Button'
 import Badge from '@/components/common/Badge'
-import { formatCurrency } from '@/utils/formatters'
+import { formatCurrency, formatPrice } from '@/utils/formatters'
 import { getCartItemId } from '@/utils/productUtils'
 
 /**
@@ -152,16 +152,21 @@ export default function CheckoutOrderSummary({
         )}
 
         {/* Final Total */}
-        <div className="pt-3 border-t border-border-light dark:border-primary-medium/40 flex items-center justify-between">
-          <div>
+        <div className="pt-3 border-t border-border-light dark:border-primary-medium/40 flex items-center justify-between gap-3">
+          <div className="min-w-0 pr-1">
             <span className="text-sm font-heading font-bold text-primary-dark dark:text-text-light">
               Total Amount
             </span>
             <p className="text-[10px] text-text-secondary dark:text-slate-500">Includes VAT & Delivery</p>
           </div>
-          <span className="text-lg sm:text-xl font-heading font-extrabold text-accent-gold">
-            {formatCurrency(finalTotal)}
-          </span>
+          <div className="text-right shrink-0 whitespace-nowrap">
+            <span className="text-lg sm:text-xl font-heading font-extrabold text-accent-gold tracking-tight">
+              {formatPrice(finalTotal)}
+            </span>
+            <span className="ml-1 text-xs sm:text-sm font-bold font-heading text-accent-gold">
+              EGP
+            </span>
+          </div>
         </div>
       </div>
 

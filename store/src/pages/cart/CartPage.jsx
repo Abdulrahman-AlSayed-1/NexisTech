@@ -139,11 +139,17 @@ export default function CartPage() {
                     Cart Items ({itemCount})
                   </h2>
                   <span className="text-xs text-text-secondary dark:text-slate-400">
-                    Prices include standard taxes
+                    {items.length > 3 ? 'Scroll to view all items • Prices include tax' : 'Prices include standard taxes'}
                   </span>
                 </div>
 
-                <div>
+                <div
+                  className={
+                    items.length > 3
+                      ? 'max-h-[360px] sm:max-h-[410px] overflow-y-auto overscroll-contain pr-0.5'
+                      : ''
+                  }
+                >
                   {items.map((item, index) => {
                     const key = getCartItemId(item) || `cart-item-${index}`
                     return (
