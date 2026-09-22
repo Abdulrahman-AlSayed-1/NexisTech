@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 import { Lock, Eye, EyeOff, ShieldCheck, Mail, ArrowLeft, KeyRound, RefreshCw } from 'lucide-react'
 
 import Button from '@/components/common/Button'
+import OtpInput from '@/components/common/OtpInput'
 import {
   selectCurrentUser,
   requestPasswordChangeOtpThunk,
@@ -293,24 +294,18 @@ export default function SecurityTab() {
               </div>
             </div>
 
-            <div>
+            <div className="space-y-2 py-1">
               <label
-                htmlFor="sec-otp-code"
-                className="block text-xs font-bold uppercase tracking-wider text-text-secondary dark:text-slate-400 mb-2 font-heading"
+                className="block text-center text-xs font-bold uppercase tracking-wider text-text-secondary dark:text-slate-400 font-heading"
               >
                 6-Digit Security Code
               </label>
-              <input
-                id="sec-otp-code"
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
+              <OtpInput
+                length={6}
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                required
+                onChange={setOtp}
+                disabled={isLoading}
                 autoFocus
-                placeholder="123456"
-                className="w-full text-center tracking-[0.4em] font-mono text-xl py-3 rounded-xl border border-border-medium dark:border-primary-medium/40 bg-bg-main dark:bg-dark-bg-main text-text-primary dark:text-text-light focus:outline-none focus:ring-2 focus:ring-accent-gold focus:border-accent-gold"
               />
             </div>
 

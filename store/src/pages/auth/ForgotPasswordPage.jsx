@@ -1,15 +1,33 @@
+import { Link } from 'react-router-dom'
+import AuthCard from '@/components/auth/AuthCard'
+import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm'
+
 /**
- * Forgot Password Page Placeholder
- * Route: /forgot-password
- * To be implemented by feature team.
+ * ForgotPasswordPage Component
+ * Route: /forgot-password (Guest only via GuestRoute & AuthLayout)
+ * Secure credential recovery surface for customers.
  */
 export default function ForgotPasswordPage() {
   return (
-    <div className="py-16 text-center text-text-secondary dark:text-slate-400">
-      <h1 className="text-xl font-heading font-bold text-primary-dark dark:text-text-light mb-2">
-        Forgot Password Page
-      </h1>
-      <p className="text-xs">Route: /forgot-password — To be implemented by team</p>
-    </div>
+    <AuthCard
+      title="Reset Password"
+      subtitle="Enter your email to receive a 6-digit verification code and restore account access."
+      badgeText="Account Recovery"
+      showcaseTitle="Fast & Protected Account Recovery."
+      showcaseSubtitle="We generate a single-use verification code sent directly to your registered inbox to safeguard your account."
+      footer={
+        <p>
+          Remember your password?{' '}
+          <Link
+            to="/login"
+            className="font-semibold text-accent-gold hover:underline"
+          >
+            Back to Sign In
+          </Link>
+        </p>
+      }
+    >
+      <ForgotPasswordForm />
+    </AuthCard>
   )
 }

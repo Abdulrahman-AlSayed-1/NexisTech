@@ -43,6 +43,7 @@ import {
   removeFromWishlistThunk,
   selectWishlistIds,
 } from '@/store/slices/wishlistSlice'
+import { selectIsAuthenticated, selectCurrentUser } from '@/store/slices/authSlice'
 
 import { formatCurrency, calculateDiscountPercentage, formatDate } from '@/utils/formatters'
 import { getProductId, extractProductImages } from '@/utils/productUtils'
@@ -64,7 +65,8 @@ export default function ProductDetailPage() {
   const error = useSelector(selectProductsError)
   const catalogProducts = useSelector(selectProducts)
   const wishlistIds = useSelector(selectWishlistIds)
-  const currentUser = useSelector((state) => state.auth?.user)
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  const currentUser = useSelector(selectCurrentUser)
 
   // Local UI states
   const [activeImageIdx, setActiveImageIdx] = useState(0)
@@ -107,7 +109,7 @@ export default function ProductDetailPage() {
 
   // Normalized product fields
   const productId = getProductId(product)
-  const isFavorite = wishlistIds.has(productId)
+  const isFavorite = isAuthenticated && wishlistIds.has(productId)
   const name = product?.name || product?.title || 'Nexis Tech Device'
   const brand = product?.brand || 'Nexis Tech'
   const category = product?.category || 'Electronics'
@@ -156,6 +158,11 @@ export default function ProductDetailPage() {
 
   // Handlers
   const handleToggleWishlist = async () => {
+    if (!isAuthenticated) {
+      toast.info('Please sign in to save items to your wishlist.')
+      return
+    }
+
     if (isTogglingWishlist || !product) return
     try {
       setIsTogglingWishlist(true)
@@ -174,6 +181,11 @@ export default function ProductDetailPage() {
   }
 
   const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      toast.info('Please sign in to add items to your shopping cart.')
+      return
+    }
+
     if (isOutOfStock || isAddingToCart || !product) return
     try {
       setIsAddingToCart(true)
@@ -193,6 +205,12 @@ export default function ProductDetailPage() {
   }
 
   const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      toast.info('Please sign in to proceed with purchasing items.')
+      navigate('/login', { state: { from: { pathname: `/products/${productId}` } } })
+      return
+    }
+
     if (isOutOfStock || isBuyingNow || !product) return
     try {
       setIsBuyingNow(true)

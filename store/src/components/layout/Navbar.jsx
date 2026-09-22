@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { Search, Moon, Sun, Heart, ShoppingCart, User, X, Menu } from 'lucide-react'
+import { toast } from 'react-toastify'
 import {
   toggleTheme,
   toggleSearch,
@@ -89,6 +90,22 @@ export default function Navbar() {
     dispatch(closeMobileMenu())
   }
 
+  const handleWishlistClick = (e) => {
+    if (!isAuthenticated) {
+      e.preventDefault()
+      toast.info('Please sign in to view your wishlist.')
+      navigate('/login', { state: { from: { pathname: '/wishlist' } } })
+    }
+  }
+
+  const handleCartClick = (e) => {
+    if (!isAuthenticated) {
+      e.preventDefault()
+      toast.info('Please sign in to access your shopping cart.')
+      navigate('/login', { state: { from: { pathname: '/cart' } } })
+    }
+  }
+
   const searchSubmit = (e) => {
     if (e) e.preventDefault()
     const trimmed = searchValue.trim()
@@ -138,34 +155,41 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Center: Main Navigation Menu (Desktop) */}
-          <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 bg-bg-main dark:bg-primary-medium/10 p-1.5 rounded-full border border-border-medium/30 dark:border-primary-medium/10 transition-colors">
-            <NavLink to="/" end className={navLinkStyle}>Home</NavLink>
-            <NavLink to="/products" className={navLinkStyle}>Shop</NavLink>
-            <NavLink to="/profile/orders" className={navLinkStyle}>My Orders</NavLink>
-            <NavLink to="/wishlist" className={navLinkStyle}>Wishlist</NavLink>
+          {/* Center: Desktop Navigation Bar */}
+          <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-full bg-bg-main/60 dark:bg-dark-bg-card/60 border border-border-light dark:border-primary-medium/30 shadow-2xs backdrop-blur-xs">
+            <NavLink to="/" end className={navLinkStyle}>
+              Home
+            </NavLink>
+            <NavLink to="/products" className={navLinkStyle}>
+              Shop
+            </NavLink>
+            {isAuthenticated && (
+              <>
+                <NavLink to="/profile/orders" className={navLinkStyle}>
+                  My Orders
+                </NavLink>
+                <NavLink to="/wishlist" className={navLinkStyle}>
+                  Wishlist
+                </NavLink>
+              </>
+            )}
           </nav>
 
-          {/* Right: Actions, Search, Theme, Cart, User */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Expandable Desktop Search Bar (Unified single container with zero bouncing) */}
+          {/* Right: Actions (Search, Theme, Wishlist, Cart, Profile) */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Interactive Search Bar Toggle */}
             <form
               onSubmit={searchSubmit}
-              className={`hidden md:flex items-center relative rounded-full border transition-all duration-300 ease-out overflow-hidden ${
+              onClick={() => {
+                if (!searchActive) handleToggleSearch()
+              }}
+              className={`flex items-center rounded-full bg-bg-card/70 dark:bg-dark-bg-card border border-border-medium/50 dark:border-primary-medium/30 shadow-2xs transition-all duration-300 cursor-pointer ${
                 searchActive
-                  ? 'w-48 lg:w-56 h-8 px-2.5 bg-bg-card dark:bg-dark-bg-card border-border-medium/60 dark:border-primary-medium/40 shadow-xs'
-                  : 'w-8 h-8 px-0 justify-center bg-bg-card/70 dark:bg-dark-bg-card border-border-medium/50 dark:border-primary-medium/30 shadow-2xs hover:text-accent-gold dark:hover:text-accent-gold hover:bg-bg-card cursor-pointer'
+                  ? 'w-48 sm:w-64 px-3 py-1.5 border-accent-gold dark:border-accent-gold shadow-xs'
+                  : 'w-8 h-8 justify-center hover:text-accent-gold dark:hover:text-accent-gold hover:border-accent-gold/40'
               }`}
             >
-              <button
-                type={searchActive ? 'submit' : 'button'}
-                onClick={!searchActive ? handleToggleSearch : undefined}
-                className="flex items-center justify-center text-text-secondary hover:text-accent-gold dark:text-text-light/70 dark:hover:text-accent-gold shrink-0 cursor-pointer"
-                aria-label="Search"
-                title="Search"
-              >
-                <Search className="w-3.5 h-3.5" />
-              </button>
+              <Search className="w-3.5 h-3.5 text-text-secondary dark:text-text-light/70 shrink-0" />
 
               <input
                 ref={searchInputRef}
@@ -173,7 +197,7 @@ export default function Navbar() {
                 placeholder="Search products..."
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className={`bg-transparent text-xs font-body outline-none text-text-primary dark:text-text-light placeholder-text-secondary/50 transition-opacity duration-200 ${
+                className={`bg-transparent text-xs font-body outline-none text-text-primary dark:text-text-light placeholder-text-secondary/50 transition-all duration-300 ${
                   searchActive ? 'w-full ml-2 opacity-100' : 'w-0 opacity-0 pointer-events-none'
                 }`}
                 disabled={!searchActive}
@@ -181,12 +205,12 @@ export default function Navbar() {
 
               {searchActive && (
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation()
                     searchClose()
                   }}
-                  type="button"
-                  className="text-text-secondary hover:text-accent-gold dark:text-text-light/60 dark:hover:text-accent-gold cursor-pointer shrink-0 ml-1"
+                  className="text-text-secondary hover:text-accent-gold dark:text-text-light/70 shrink-0 ml-1"
                   aria-label="Close search"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -204,35 +228,41 @@ export default function Navbar() {
               {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
 
-            {/* Wishlist Link */}
-            <Link
-              to="/wishlist"
-              className={`${iconBtnClass} relative`}
-              aria-label="Wishlist"
-              title="Wishlist"
-            >
-              <Heart className="w-3.5 h-3.5" />
-              {favCount > 0 && (
-                <span className={badgeCountClass}>
-                  {favCount}
-                </span>
-              )}
-            </Link>
+            {/* Wishlist Link - Only visible when logged in */}
+            {isAuthenticated && (
+              <Link
+                to="/wishlist"
+                onClick={handleWishlistClick}
+                className={`${iconBtnClass} relative`}
+                aria-label="Wishlist"
+                title="Wishlist"
+              >
+                <Heart className="w-3.5 h-3.5" />
+                {favCount > 0 && (
+                  <span className={badgeCountClass}>
+                    {favCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
-            {/* Cart Link */}
-            <Link
-              to="/cart"
-              className={`${iconBtnClass} relative`}
-              aria-label="Cart"
-              title="Shopping Cart"
-            >
-              <ShoppingCart className="w-3.5 h-3.5" />
-              {cartCount > 0 && (
-                <span className={badgeCountClass}>
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+            {/* Cart Link - Only visible when logged in */}
+            {isAuthenticated && (
+              <Link
+                to="/cart"
+                onClick={handleCartClick}
+                className={`${iconBtnClass} relative`}
+                aria-label="Cart"
+                title="Shopping Cart"
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+                {cartCount > 0 && (
+                  <span className={badgeCountClass}>
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* User Button (Navigates to Profile or Login) */}
             <button
@@ -280,12 +310,24 @@ export default function Navbar() {
           <NavLink to="/products" className={navLinkStyle} onClick={() => dispatch(closeMobileMenu())}>
             Shop
           </NavLink>
-          <NavLink to="/profile/orders" className={navLinkStyle} onClick={() => dispatch(closeMobileMenu())}>
-            My Orders
-          </NavLink>
-          <NavLink to="/wishlist" className={navLinkStyle} onClick={() => dispatch(closeMobileMenu())}>
-            Wishlist
-          </NavLink>
+          {isAuthenticated && (
+            <>
+              <NavLink
+                to="/profile/orders"
+                className={navLinkStyle}
+                onClick={() => dispatch(closeMobileMenu())}
+              >
+                My Orders
+              </NavLink>
+              <NavLink
+                to="/wishlist"
+                className={navLinkStyle}
+                onClick={() => dispatch(closeMobileMenu())}
+              >
+                Wishlist
+              </NavLink>
+            </>
+          )}
         </nav>
 
         {/* Mobile Search Form with High Contrast */}

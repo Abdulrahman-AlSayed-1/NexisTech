@@ -8,7 +8,8 @@ import { formatCurrency, formatDate } from '@/utils/formatters'
  * @param {{ address: object, order: object, summary?: { subtotal: number, shippingFee: number, tax: number, discount: number, total: number } }} props
  */
 export default function OrderSummaryCard({ address = {}, order = {}, summary }) {
-  const placedDate = formatDate(order?.createdAt, true)
+  const rawDate = order?.orderDate || order?.date || order?.createdAt || order?.created_at
+  const placedDate = formatDate(rawDate, true)
   const paymentMethod = order?.paymentMethod ? order.paymentMethod.toUpperCase() : 'CASH ON DELIVERY'
 
   const subtotal = summary?.subtotal ?? (Number(order?.subtotal) || 0)

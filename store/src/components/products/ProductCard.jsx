@@ -14,6 +14,7 @@ import {
   removeFromWishlistThunk,
   selectWishlistIds,
 } from '@/store/slices/wishlistSlice'
+import { selectIsAuthenticated } from '@/store/slices/authSlice'
 import {
   getProductId,
   extractProductImages,
@@ -32,6 +33,7 @@ import {
  */
 export default function ProductCard({ product, className = '' }) {
   const dispatch = useDispatch()
+  const isAuthenticated = useSelector(selectIsAuthenticated)
   const wishlistIds = useSelector(selectWishlistIds)
 
   const [activeImageIdx, setActiveImageIdx] = useState(0)
@@ -42,7 +44,7 @@ export default function ProductCard({ product, className = '' }) {
   if (!product) return null
 
   const id = getProductId(product)
-  const isFavorite = wishlistIds.has(id)
+  const isFavorite = isAuthenticated && wishlistIds.has(id)
 
   const name = product.name || product.title || 'Electronics Product'
   const brand = product.brand || 'Nexis Tech'
@@ -78,6 +80,12 @@ export default function ProductCard({ product, className = '' }) {
   const handleToggleWishlist = async (e) => {
     e.preventDefault()
     e.stopPropagation()
+
+    if (!isAuthenticated) {
+      toast.info('Please sign in to save items to your wishlist.')
+      return
+    }
+
     if (isTogglingWishlist) return
 
     try {
@@ -99,6 +107,12 @@ export default function ProductCard({ product, className = '' }) {
   const handleAddToCart = async (e) => {
     e.preventDefault()
     e.stopPropagation()
+
+    if (!isAuthenticated) {
+      toast.info('Please sign in to add items to your shopping cart.')
+      return
+    }
+
     if (isOutOfStock || isAddingToCart) return
 
     try {

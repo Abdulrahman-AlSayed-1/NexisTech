@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight, CheckCircle2, UserCheck } from 'lucide-react'
 import Input from '@/components/common/Input'
 import Button from '@/components/common/Button'
 import {
@@ -24,7 +24,15 @@ export default function LoginForm() {
   const isLoading = useSelector(selectAuthLoading)
   const serverError = useSelector(selectAuthError)
 
-  const [form, setForm] = useState({ email: '', password: '' })
+  const prefilledEmail =
+    location.state?.prefilledEmail || location.state?.verifiedEmail || ''
+  const statusBanner = location.state?.passwordResetSuccess
+    ? 'Password reset successfully! Please sign in with your new password.'
+    : location.state?.justVerified
+    ? 'Account verified! Please sign in to access your account.'
+    : null
+
+  const [form, setForm] = useState({ email: prefilledEmail, password: '' })
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [localError, setLocalError] = useState('')
@@ -67,10 +75,28 @@ export default function LoginForm() {
     }
   }
 
+  const handleGuestAccess = () => {
+    const fromPath = location.state?.from?.pathname || '/'
+    const isProtected =
+      fromPath.startsWith('/profile') ||
+      fromPath.startsWith('/checkout') ||
+      fromPath.startsWith('/wishlist') ||
+      fromPath.startsWith('/cart') ||
+      fromPath.startsWith('/orders')
+    navigate(isProtected ? '/' : fromPath)
+  }
+
   const activeError = localError || serverError
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
+      {statusBanner && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 flex items-start gap-2.5 text-xs text-emerald-700 dark:text-emerald-300 animate-in fade-in duration-300">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-500" />
+          <span className="font-medium">{statusBanner}</span>
+        </div>
+      )}
+
       <Input
         label="Email Address"
         name="email"
@@ -140,6 +166,25 @@ export default function LoginForm() {
       >
         <span>Sign In to Account</span>
         {!isLoading && <ArrowRight className="w-4 h-4" />}
+      </Button>
+
+      <div className="relative flex items-center justify-center pt-1">
+        <div className="border-t border-border-light dark:border-primary-medium/30 w-full" />
+        <span className="bg-bg-card dark:bg-dark-bg-card px-3 text-[11px] text-text-secondary dark:text-slate-400 uppercase tracking-wider font-semibold">
+          or
+        </span>
+        <div className="border-t border-border-light dark:border-primary-medium/30 w-full" />
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="lg"
+        onClick={handleGuestAccess}
+        className="w-full flex items-center justify-center gap-2 hover:border-accent-gold/60 hover:text-accent-gold transition-all"
+      >
+        <UserCheck className="w-4 h-4 text-accent-gold" />
+        <span>Access as Guest</span>
       </Button>
     </form>
   )

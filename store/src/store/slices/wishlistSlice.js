@@ -43,10 +43,15 @@ export const fetchWishlistThunk = createAsyncThunk(
 
 export const addToWishlistThunk = createAsyncThunk(
   'wishlist/addToWishlist',
-  async (product, { rejectWithValue, dispatch }) => {
+  async (product, { rejectWithValue, dispatch, getState }) => {
     try {
-      dispatch(wishlistSlice.actions.addToWishlist(product))
+      const { auth } = getState()
       const token = localStorage.getItem('token')
+      if (!auth?.isAuthenticated && !token) {
+        return rejectWithValue('Please sign in to save items to your wishlist.')
+      }
+
+      dispatch(wishlistSlice.actions.addToWishlist(product))
       if (token) {
         const prodId = getProductId(product)
         const data = await addToWishlistApi(prodId)

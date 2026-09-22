@@ -6,7 +6,7 @@ export const sendRegisterOtp = async (userData) => {
 }
 
 export const verifyOtp = async (otpData) => {
-  const response = await api.post('/auth/verify-otp', otpData)
+  const response = await api.post('/auth/register/verify-otp', otpData)
   return response.data
 }
 

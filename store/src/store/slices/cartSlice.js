@@ -73,11 +73,16 @@ export const fetchCartThunk = createAsyncThunk(
 
 export const addToCartThunk = createAsyncThunk(
   'cart/addToCart',
-  async (itemData, { rejectWithValue, dispatch }) => {
+  async (itemData, { rejectWithValue, dispatch, getState }) => {
     try {
+      const { auth } = getState()
+      const token = localStorage.getItem('token')
+      if (!auth?.isAuthenticated && !token) {
+        return rejectWithValue('Please sign in to add items to your cart.')
+      }
+
       // Optimistically update local state with rich product metadata
       dispatch(cartSlice.actions.addToCart(itemData))
-      const token = localStorage.getItem('token')
       if (token) {
         const prodId = getCartItemId(itemData)
         const data = await addToCartApi({

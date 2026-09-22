@@ -45,14 +45,20 @@ export default function OrdersPage() {
   const dateGroups = useMemo(() => {
     if (!Array.isArray(orders) || orders.length === 0) return []
 
+    const getOrderTimestamp = (order) => {
+      const val = order?.orderDate || order?.date || order?.createdAt || order?.created_at
+      return val ? new Date(val).getTime() : 0
+    }
+
     const sorted = [...orders].sort(
-      (a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0)
+      (a, b) => getOrderTimestamp(b) - getOrderTimestamp(a)
     )
 
     const groupsMap = new Map()
 
     sorted.forEach((order) => {
-      const dateLabel = formatDate(order?.createdAt) || 'Recent Orders'
+      const orderDateVal = order?.orderDate || order?.date || order?.createdAt || order?.created_at
+      const dateLabel = formatDate(orderDateVal) || 'Recent Orders'
       if (!groupsMap.has(dateLabel)) {
         groupsMap.set(dateLabel, [])
       }

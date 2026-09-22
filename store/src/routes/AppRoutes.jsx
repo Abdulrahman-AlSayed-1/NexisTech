@@ -54,6 +54,8 @@ export default function AppRoutes() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/orders" element={<OrdersPage />} />
           <Route path="profile/orders/:id" element={<OrderDetailPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="orders/:id" element={<OrderDetailPage />} />
         </Route>
 
         {/* 404 Fallback */}

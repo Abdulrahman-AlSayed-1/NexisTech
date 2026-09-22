@@ -43,9 +43,9 @@ export default function OrderCard({ order }) {
   const status = normalizeStatus(order.status)
   const items = getItems(order)
   const itemCount = getOrderItemsCount(order)
+  const rawDate = order?.orderDate || order?.date || order?.createdAt || order?.created_at
+  const placedDate = formatDate(rawDate, true)
   const total = getOrderTotal(order)
-
-  const placedDate = formatDate(order?.createdAt, true)
 
   return (
     <article className="rounded-2xl border border-border-light dark:border-primary-medium/25 bg-bg-card dark:bg-dark-bg-card p-4 sm:p-5 shadow-xs transition-all duration-200 hover:border-accent-gold/60 dark:hover:border-accent-gold/60 hover:shadow-md">
