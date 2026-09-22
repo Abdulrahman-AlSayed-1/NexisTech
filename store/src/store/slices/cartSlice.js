@@ -100,15 +100,25 @@ export const addToCartThunk = createAsyncThunk(
 
 export const updateCartItemThunk = createAsyncThunk(
   'cart/updateCartItem',
-  async (itemData, { rejectWithValue, dispatch }) => {
+  async (itemData, { rejectWithValue, dispatch, getState }) => {
     try {
+      const currentCartItems = getState().cart.items || []
+      const existing = currentCartItems.find((i) => isMatchingItem(i, itemData))
+      const rawStock = itemData.stock ?? existing?.stock ?? existing?.product?.stock
+      const knownStock = Number(rawStock)
+      const requestedQty = Number(itemData.quantity) || 1
+
+      if (!isNaN(knownStock) && knownStock > 0 && requestedQty > knownStock) {
+        return rejectWithValue(`Only ${knownStock} units available in stock`)
+      }
+
       dispatch(cartSlice.actions.updateQuantity(itemData))
       const token = localStorage.getItem('token')
       if (token) {
         const prodId = getCartItemId(itemData)
         const data = await updateCartItemApi({
           productId: prodId,
-          quantity: Math.max(1, Number(itemData.quantity) || 1),
+          quantity: Math.max(1, requestedQty),
         })
         return data
       }
@@ -235,13 +245,19 @@ const cartSlice = createSlice({
       const item = action.payload
       const prodId = getCartItemId(item)
       const existing = state.items.find((i) => isMatchingItem(i, prodId))
+      const rawStock = item.stock ?? item.product?.stock
+      const itemStock = rawStock !== undefined ? Number(rawStock) : 99
+      const maxStock = !isNaN(itemStock) && itemStock > 0 ? itemStock : 99
+
       if (existing) {
-        existing.quantity += Number(item.quantity) || 1
+        const newQty = (Number(existing.quantity) || 1) + (Number(item.quantity) || 1)
+        existing.quantity = Math.min(maxStock, newQty)
       } else {
         state.items.push({
           ...item,
           productId: prodId,
-          quantity: Number(item.quantity) || 1,
+          quantity: Math.min(maxStock, Number(item.quantity) || 1),
+          stock: maxStock < 99 ? maxStock : undefined,
         })
       }
       const { subtotal, itemCount, total } = calculateTotals(state.items, state.discount)
@@ -261,10 +277,13 @@ const cartSlice = createSlice({
     },
     updateQuantity: (state, action) => {
       const target = action.payload
-      const quantity = Number(target.quantity) || 1
       const item = state.items.find((i) => isMatchingItem(i, target))
       if (item) {
-        item.quantity = Math.max(1, quantity)
+        const rawStock = target.stock ?? item.stock ?? item.product?.stock
+        const itemStock = rawStock !== undefined ? Number(rawStock) : 99
+        const maxQuantity = !isNaN(itemStock) && itemStock > 0 ? itemStock : 99
+        const requestedQuantity = Number(target.quantity) || 1
+        item.quantity = Math.max(1, Math.min(maxQuantity, requestedQuantity))
       }
       const { subtotal, itemCount, total } = calculateTotals(state.items, state.discount)
       state.subtotal = subtotal
@@ -303,7 +322,23 @@ const cartSlice = createSlice({
         state.isLoading = false
         const payload = action.payload?.cart || action.payload?.data || action.payload || {}
         if (payload.items) {
-          state.items = payload.items
+          state.items = payload.items.map((newItem) => {
+            const prodId = getCartItemId(newItem)
+            const prev = state.items.find((i) => isMatchingItem(i, prodId))
+            const prevStock = prev?.stock ?? prev?.product?.stock
+            const newStock = newItem?.stock ?? newItem?.product?.stock ?? prevStock
+            return {
+              ...newItem,
+              stock: newStock !== undefined ? Number(newStock) : undefined,
+              product:
+                typeof newItem.product === 'object' && newItem.product !== null
+                  ? {
+                      ...newItem.product,
+                      stock: newStock !== undefined ? Number(newStock) : undefined,
+                    }
+                  : newItem.product,
+            }
+          })
           if (payload.coupon) {
             state.couponCode = typeof payload.coupon === 'object' ? payload.coupon.code : payload.coupon
           }

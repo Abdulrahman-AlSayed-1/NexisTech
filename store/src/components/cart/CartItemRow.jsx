@@ -1,8 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { Trash2, Minus, Plus } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatters'
-import { extractProductImages, getCartItemId } from '@/utils/productUtils'
+import { extractProductImages, getCartItemId, getProductId } from '@/utils/productUtils'
+import { selectProducts } from '@/store/slices/productsSlice'
 
 /**
  * CartItemRow Component
@@ -16,15 +18,28 @@ export default function CartItemRow({
 }) {
   if (!item) return null
 
+  const catalogProducts = useSelector(selectProducts) || []
   const product = item.product || item
   const productId = getCartItemId(item)
+  const catalogProduct = catalogProducts.find((p) => getProductId(p) === productId)
+
   const itemId = item._id || item.id || ''
   const name = item.name || product.name || product.title || 'Product'
   const brand = product.brand || ''
   const category = product.category || product.categoryName || ''
   const price = Number(item.price ?? product.price ?? 0)
   const quantity = Number(item.quantity) || 1
-  const stock = typeof product.stock === 'number' ? product.stock : 99
+
+  const rawStock =
+    product.stock !== undefined && product.stock !== null
+      ? product.stock
+      : item.stock !== undefined && item.stock !== null
+      ? item.stock
+      : catalogProduct?.stock
+
+  const parsedStock = Number(rawStock)
+  const stock = !isNaN(parsedStock) && parsedStock > 0 ? parsedStock : 99
+  const isMaxReached = quantity >= stock
   const itemTotal = price * quantity
 
   const images = extractProductImages(product)
@@ -71,43 +86,55 @@ export default function CartItemRow({
 
       {/* Stepper, Subtotal, & Delete */}
       <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-light dark:border-primary-medium/20">
-        {/* Quantity Stepper */}
-        <div className="inline-flex items-center rounded-xl bg-bg-main dark:bg-dark-bg-main border border-border-medium dark:border-primary-medium/50 p-0.5">
-          <button
-            type="button"
-            onClick={() =>
-              onUpdateQuantity({
-                productId,
-                itemId,
-                quantity: Math.max(1, quantity - 1),
-              })
-            }
-            disabled={quantity <= 1 || isUpdating}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-primary-dark dark:hover:text-white hover:bg-bg-card dark:hover:bg-primary-medium/30 disabled:opacity-30 cursor-pointer transition-colors"
-            aria-label="Decrease quantity"
-          >
-            <Minus className="w-3.5 h-3.5" />
-          </button>
+        {/* Quantity Stepper & Stock Limit Warning */}
+        <div className="flex flex-col items-end sm:items-center">
+          <div className="inline-flex items-center rounded-xl bg-bg-main dark:bg-dark-bg-main border border-border-medium dark:border-primary-medium/50 p-0.5">
+            <button
+              type="button"
+              onClick={() =>
+                onUpdateQuantity({
+                  productId,
+                  itemId,
+                  quantity: Math.max(1, quantity - 1),
+                  stock,
+                })
+              }
+              disabled={quantity <= 1 || isUpdating}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-primary-dark dark:hover:text-white hover:bg-bg-card dark:hover:bg-primary-medium/30 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              aria-label="Decrease quantity"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
 
-          <span className="w-9 text-center text-xs sm:text-sm font-bold font-heading text-primary-dark dark:text-text-light">
-            {quantity}
-          </span>
+            <span className="w-9 text-center text-xs sm:text-sm font-bold font-heading text-primary-dark dark:text-text-light">
+              {quantity}
+            </span>
 
-          <button
-            type="button"
-            onClick={() =>
-              onUpdateQuantity({
-                productId,
-                itemId,
-                quantity: Math.min(stock, quantity + 1),
-              })
-            }
-            disabled={quantity >= stock || isUpdating}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-primary-dark dark:hover:text-white hover:bg-bg-card dark:hover:bg-primary-medium/30 disabled:opacity-30 cursor-pointer transition-colors"
-            aria-label="Increase quantity"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (isMaxReached || isUpdating) return
+                onUpdateQuantity({
+                  productId,
+                  itemId,
+                  quantity: quantity + 1,
+                  stock,
+                })
+              }}
+              disabled={isMaxReached || isUpdating}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-primary-dark dark:hover:text-white hover:bg-bg-card dark:hover:bg-primary-medium/30 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              title={isMaxReached ? `Only ${stock} units available in stock` : 'Increase quantity'}
+              aria-label="Increase quantity"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {isMaxReached && stock < 99 && (
+            <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 mt-1 font-heading">
+              Max available ({stock})
+            </span>
+          )}
         </div>
 
         {/* Item Total Price */}

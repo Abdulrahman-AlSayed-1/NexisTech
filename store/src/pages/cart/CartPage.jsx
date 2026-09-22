@@ -24,6 +24,7 @@ import {
   selectCartCoupon,
   selectCartLoading,
 } from '@/store/slices/cartSlice'
+import { fetchStoreProducts } from '@/store/slices/productsSlice'
 
 /**
  * CartPage Component
@@ -43,6 +44,7 @@ export default function CartPage() {
 
   useEffect(() => {
     dispatch(fetchCartThunk())
+    dispatch(fetchStoreProducts())
   }, [dispatch])
 
   const handleUpdateQuantity = (payload) => {
