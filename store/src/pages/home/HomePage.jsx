@@ -1,12 +1,22 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
-import  CategorySection   from '@/pages/home/CategorySection'
+import { useDispatch } from 'react-redux'
+import Button from '@/components/common/Button'
+import CategorySection from '@/pages/home/CategorySection'
 import FeaturedProductsSection from '@/pages/home/FeaturedProductsSection'
 import OrderStepsSection from '@/pages/home/OrderStepsSection'
 import SubscribeSection from '@/pages/home/SubscribeSection'
+import { fetchStoreProducts } from '@/store/slices/productsSlice'
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  // Load products so CategorySection can compute category counts
+  useEffect(() => {
+    dispatch(fetchStoreProducts())
+  }, [dispatch])
 
   return (
    <div className="w-full">
@@ -30,22 +40,25 @@ export default function HomePage() {
             Discover next-gen smartphones, high-tier laptops, and premium digital devices. Power your daily workflow and entertainment with authentic gear tailored for tech enthusiasts and professionals.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-4"> 
-            <button
+          <div className="flex flex-wrap items-center gap-4 pt-4">
+            <Button
+              variant="gold"
+              size="md"
               onClick={() => navigate('/products')}
-              className="px-7 py-4 bg-accent-gold text-primary-dark font-heading font-bold text-xs uppercase tracking-wider rounded-xl shadow-md border border-accent-gold hover:bg-accent-gold-hover hover:border-accent-gold-hover hover:shadow-lg active:scale-97 transition-all cursor-pointer"
             >
               Explore Devices
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
               onClick={() => {
-                const catSection = document.getElementById('catSection');
-                if (catSection) catSection.scrollIntoView({ behavior: 'smooth' });
+                const catSection = document.getElementById('catSection')
+                if (catSection) catSection.scrollIntoView({ behavior: 'smooth' })
               }}
-              className="px-7 py-4 bg-transparent text-text-light border border-white/20 hover:bg-white/5 font-heading font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs hover:border-white/50 active:scale-97 transition-all cursor-pointer"
+              className="border-white/20 text-text-light hover:bg-white/5 hover:border-white/50"
             >
               Browse Categories
-            </button>
+            </Button>
           </div>
         </div>
       </section>

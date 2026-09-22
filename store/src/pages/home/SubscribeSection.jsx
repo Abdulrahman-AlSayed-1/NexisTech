@@ -8,7 +8,7 @@ export default function SubscribeSection() {
   const handleSubscribe = (e) => {
     e.preventDefault()
     if (email.trim() !== '') {
-      toast((t) => (
+      toast(() => (
       <div className="flex items-center justify-between w-full h-4 gap-3 font-heading">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />

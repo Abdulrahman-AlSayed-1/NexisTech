@@ -73,6 +73,7 @@ const initialState = {
   totalPages: 1,
   currentPage: 1,
   isLoading: false,
+  isFeaturedLoading: false,
   isDetailLoading: false,
   isSearchLoading: false,
   error: null,
@@ -114,12 +115,18 @@ const productsSlice = createSlice({
 
       // fetchFeaturedProducts
       .addCase(fetchFeaturedProducts.pending, (state) => {
+        state.isFeaturedLoading = true
         state.error = null
       })
       .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
+        state.isFeaturedLoading = false
         const payload = action.payload || {}
         const raw = payload.products || payload.data || (Array.isArray(payload) ? payload : [])
         state.featuredItems = raw.filter(isElectronicsOrHardwareProduct)
+      })
+      .addCase(fetchFeaturedProducts.rejected, (state, action) => {
+        state.isFeaturedLoading = false
+        state.error = action.payload
       })
 
       // fetchProductById
@@ -160,6 +167,7 @@ export const selectProducts = (state) => state.products.items
 export const selectFeaturedProducts = (state) => state.products.featuredItems
 export const selectSelectedProduct = (state) => state.products.selectedProduct
 export const selectProductsLoading = (state) => state.products.isLoading
+export const selectFeaturedLoading = (state) => state.products.isFeaturedLoading
 export const selectProductDetailLoading = (state) => state.products.isDetailLoading
 export const selectProductsError = (state) => state.products.error
 export const selectSearchResults = (state) => state.products.searchResults
