@@ -40,16 +40,18 @@ export default function OrdersPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Group orders chronologically by date
+  // Group orders chronologically by date (newest first)
   const dateGroups = useMemo(() => {
     if (!Array.isArray(orders) || orders.length === 0) return []
 
+    const sorted = [...orders].sort(
+      (a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0)
+    )
+
     const groupsMap = new Map()
 
-    orders.forEach((order) => {
-      const rawDate = order?.createdAt || order?.orderDate || order?.date
-      const dateLabel = formatDate(rawDate) || 'Recent Orders'
-
+    sorted.forEach((order) => {
+      const dateLabel = formatDate(order?.createdAt) || 'Recent Orders'
       if (!groupsMap.has(dateLabel)) {
         groupsMap.set(dateLabel, [])
       }
