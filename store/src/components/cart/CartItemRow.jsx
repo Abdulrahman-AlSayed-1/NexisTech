@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Trash2, Minus, Plus } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatters'
-import { extractProductImages, getProductId } from '@/utils/productUtils'
+import { extractProductImages, getCartItemId } from '@/utils/productUtils'
 
 /**
  * CartItemRow Component
@@ -17,7 +17,7 @@ export default function CartItemRow({
   if (!item) return null
 
   const product = item.product || item
-  const productId = getProductId(product) || item.productId || item._id || item.id
+  const productId = getCartItemId(item)
   const itemId = item._id || item.id || ''
   const name = item.name || product.name || product.title || 'Product'
   const brand = product.brand || ''

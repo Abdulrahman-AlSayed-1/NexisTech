@@ -8,7 +8,7 @@ import {
   removeCouponApi,
   clearCartApi,
 } from '@/api/cart'
-import { getProductId } from '@/utils/productUtils'
+import { getProductId, getCartItemId } from '@/utils/productUtils'
 
 const getStoredCart = () => {
   try {
@@ -50,7 +50,6 @@ const calculateTotals = (items = [], discount = 0) => {
   return { subtotal, itemCount: count, discount: discountVal, total }
 }
 
-const getCartItemId = (item) => getProductId(item?.product) || getProductId(item)
 
 export const isMatchingItem = (item, target) => {
   if (!item || !target) return false
@@ -80,7 +79,7 @@ export const addToCartThunk = createAsyncThunk(
       dispatch(cartSlice.actions.addToCart(itemData))
       const token = localStorage.getItem('token')
       if (token) {
-        const prodId = itemData.productId || itemData._id || itemData.id
+        const prodId = getCartItemId(itemData)
         const data = await addToCartApi({
           productId: prodId,
           quantity: Math.max(1, Number(itemData.quantity) || 1),
@@ -106,12 +105,7 @@ export const updateCartItemThunk = createAsyncThunk(
       dispatch(cartSlice.actions.updateQuantity(itemData))
       const token = localStorage.getItem('token')
       if (token) {
-        const prodId =
-          itemData.productId ||
-          itemData.product?._id ||
-          itemData.product?.id ||
-          itemData._id ||
-          itemData.id
+        const prodId = getCartItemId(itemData)
         const data = await updateCartItemApi({
           productId: prodId,
           quantity: Math.max(1, Number(itemData.quantity) || 1),
@@ -135,10 +129,7 @@ export const removeCartItemThunk = createAsyncThunk(
   'cart/removeCartItem',
   async (target, { rejectWithValue, dispatch }) => {
     try {
-      const prodId =
-        typeof target === 'object' && target !== null
-          ? target.productId || target.product?._id || target.product?.id || target._id || target.id
-          : target
+      const prodId = getCartItemId(target)
 
       // Optimistically remove from state immediately
       dispatch(cartSlice.actions.removeFromCart(target))
@@ -241,8 +232,7 @@ const cartSlice = createSlice({
       saveCart(state)
     },
     addToCart: (state, action) => {
-      const item = action.payload
-      const prodId = item.productId || item.product?._id || item._id || item.id
+      const prodId = getCartItemId(item)
       const existing = state.items.find((i) => isMatchingItem(i, prodId))
       if (existing) {
         existing.quantity += Number(item.quantity) || 1

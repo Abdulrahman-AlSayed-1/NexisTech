@@ -1,6 +1,7 @@
 import React from 'react'
 import { Box, Package } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatters'
+import { getCartItemId } from '@/utils/productUtils'
 
 const getItemName = (item) =>
   item?.name || item?.product?.name || 'Item'
@@ -41,7 +42,7 @@ export default function OrderItemsList({ items = [] }) {
 
             return (
               <div
-                key={item?._id || item?.id || `${itemName}-${index}`}
+                key={getCartItemId(item) || `${itemName}-${index}`}
                 className="flex items-center justify-between gap-4 rounded-xl bg-bg-input/30 dark:bg-dark-bg-main/60 border border-border-light/60 dark:border-primary-medium/20 p-3 sm:px-4"
               >
                 <div className="flex min-w-0 items-center gap-3.5">

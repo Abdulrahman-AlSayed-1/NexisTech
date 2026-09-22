@@ -2,6 +2,7 @@ import { ShieldCheck, Truck, ArrowRight, RotateCcw, Tag } from 'lucide-react'
 import Button from '@/components/common/Button'
 import Badge from '@/components/common/Badge'
 import { formatCurrency } from '@/utils/formatters'
+import { getCartItemId } from '@/utils/productUtils'
 
 /**
  * CheckoutOrderSummary Component
@@ -61,7 +62,7 @@ export default function CheckoutOrderSummary({
           const image = item.image || item.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'
 
           return (
-            <div key={item.productId || item._id || idx} className="flex items-center gap-3 pt-3 first:pt-0">
+            <div key={getCartItemId(item) || idx} className="flex items-center gap-3 pt-3 first:pt-0">
               <img
                 src={image}
                 alt={title}

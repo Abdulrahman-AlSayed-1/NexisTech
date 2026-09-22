@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ChevronDown, ArrowUpRight, Package } from 'lucide-react'
 import Badge from '@/components/common/Badge'
 import { formatCurrency, formatDate } from '@/utils/formatters'
+import { getCartItemId } from '@/utils/productUtils'
 
 const normalizeStatus = (status = 'Pending') => {
   const value = String(status).toLowerCase()
@@ -140,7 +141,7 @@ export default function OrderCard({ order }) {
 
               return (
                 <div
-                  key={item?._id || `${name}-${idx}`}
+                  key={getCartItemId(item) || `${name}-${idx}`}
                   className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-bg-input/30 dark:bg-dark-bg-main/60 border border-border-light/60 dark:border-primary-medium/20 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">

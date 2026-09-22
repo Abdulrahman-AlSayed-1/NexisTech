@@ -5,6 +5,7 @@ import {
   removeFromWishlistApi,
   clearWishlistApi,
 } from '@/api/wishlist'
+import { getProductId } from '@/utils/productUtils'
 
 const getStoredWishlist = () => {
   try {
@@ -24,11 +25,6 @@ const saveWishlist = (items) => {
   }
 }
 
-export const getEntityId = (item) => {
-  if (!item) return ''
-  if (typeof item === 'string') return item
-  return item._id || item.productId || item.id || ''
-}
 
 export const fetchWishlistThunk = createAsyncThunk(
   'wishlist/fetchWishlist',
@@ -52,10 +48,7 @@ export const addToWishlistThunk = createAsyncThunk(
       dispatch(wishlistSlice.actions.addToWishlist(product))
       const token = localStorage.getItem('token')
       if (token) {
-        const prodId =
-          typeof product === 'string'
-            ? product
-            : product._id || product.productId || product.id
+        const prodId = getProductId(product)
         const data = await addToWishlistApi(prodId)
         return data
       }
@@ -70,14 +63,10 @@ export const removeFromWishlistThunk = createAsyncThunk(
   'wishlist/removeFromWishlist',
   async (productId, { rejectWithValue, dispatch }) => {
     try {
-      const prodId =
-        typeof productId === 'object' && productId !== null
-          ? productId._id || productId.productId || productId.id
-          : productId
-
+      const prodId = getProductId(productId)
       dispatch(wishlistSlice.actions.removeFromWishlist(prodId))
       const token = localStorage.getItem('token')
-      if (token) {
+      if (token && prodId) {
         const data = await removeFromWishlistApi(prodId)
         return data
       }
@@ -126,8 +115,8 @@ const wishlistSlice = createSlice({
     },
     addToWishlist: (state, action) => {
       const product = action.payload
-      const targetId = getEntityId(product)
-      const exists = state.items.some((i) => getEntityId(i) === targetId)
+      const targetId = getProductId(product)
+      const exists = state.items.some((i) => getProductId(i) === targetId)
       if (!exists) {
         state.items.push(product)
         state.totalProducts = state.items.length
@@ -135,8 +124,8 @@ const wishlistSlice = createSlice({
       }
     },
     removeFromWishlist: (state, action) => {
-      const targetId = getEntityId(action.payload)
-      state.items = state.items.filter((i) => getEntityId(i) !== targetId)
+      const targetId = getProductId(action.payload)
+      state.items = state.items.filter((i) => getProductId(i) !== targetId)
       state.totalProducts = state.items.length
       saveWishlist(state.items)
     },
@@ -185,7 +174,7 @@ export const selectWishlistError = (state) => state.wishlist.error
 // Memoized IDs set for fast membership checks
 export const selectWishlistIds = createSelector(
   [selectWishlistItems],
-  (items) => new Set(items.map(getEntityId).filter(Boolean))
+  (items) => new Set(items.map(getProductId).filter(Boolean))
 )
 
 export const selectIsInWishlist = (productId) => (state) =>

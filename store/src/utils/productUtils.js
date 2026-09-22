@@ -18,6 +18,17 @@ export const getProductId = (product) => {
 }
 
 /**
+ * Resolves the product ID from either a direct product object/ID or a cart item wrapper
+ * @param {object|string} item
+ * @returns {string}
+ */
+export const getCartItemId = (item) => {
+  if (!item) return ''
+  if (typeof item === 'string') return item
+  return getProductId(item.product) || getProductId(item)
+}
+
+/**
  * Extracts and sanitizes product image URLs into an array
  * Handles arrays of URLs, Cloudinary image objects ({ url, secure_url }), and single image strings.
  * @param {object} product

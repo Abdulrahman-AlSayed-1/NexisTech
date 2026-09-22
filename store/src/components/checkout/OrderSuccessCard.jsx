@@ -15,6 +15,7 @@ import {
 import Button from '@/components/common/Button'
 import Badge from '@/components/common/Badge'
 import { formatCurrency, formatDate } from '@/utils/formatters'
+import { getCartItemId } from '@/utils/productUtils'
 
 /**
  * OrderSuccessCard Component
@@ -223,7 +224,7 @@ export default function OrderSuccessCard({ order }) {
                   'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80'
 
                 return (
-                  <div key={item._id || item.productId || idx} className="py-3 flex items-center justify-between gap-4 text-xs">
+                  <div key={getCartItemId(item) || idx} className="py-3 flex items-center justify-between gap-4 text-xs">
                     <div className="flex items-center gap-3 min-w-0">
                       <img
                         src={image}

@@ -8,6 +8,7 @@ import CartItemRow from '@/components/cart/CartItemRow'
 import CartOrderSummary from '@/components/cart/CartOrderSummary'
 import CartCouponBox from '@/components/cart/CartCouponBox'
 import CartEmptyState from '@/components/cart/CartEmptyState'
+import { getCartItemId } from '@/utils/productUtils'
 
 import {
   fetchCartThunk,
@@ -142,7 +143,7 @@ export default function CartPage() {
 
                 <div>
                   {items.map((item, index) => {
-                    const key = item.productId || item.product?._id || item._id || item.id || `cart-item-${index}`
+                    const key = getCartItemId(item) || `cart-item-${index}`
                     return (
                       <CartItemRow
                         key={key}
