@@ -20,6 +20,11 @@ export const sendForgotPasswordOtp = async (emailData) => {
   return response.data
 }
 
+export const verifyForgotPasswordOtp = async (payload) => {
+  const response = await api.post('/auth/forgot-password/verify-otp', payload)
+  return response.data
+}
+
 export const getMe = async () => {
   const response = await api.get('/auth/me')
   return response.data

@@ -21,6 +21,7 @@ import {
 } from '@/store/slices/checkoutSlice'
 import {
   placeOrderThunk,
+  fetchMyOrdersThunk,
   selectIsPlacingOrder,
 } from '@/store/slices/ordersSlice'
 
@@ -104,6 +105,9 @@ export default function PaymentPage() {
         const orderId = orderData?._id || orderData?.id
 
         toast.success('Order placed successfully!')
+
+        // Refresh customer orders in Redux so profile & checkout delivery history update immediately
+        dispatch(fetchMyOrdersThunk({ limit: 20 }))
 
         // Clean up client active cart & draft state
         dispatch(clearCart())

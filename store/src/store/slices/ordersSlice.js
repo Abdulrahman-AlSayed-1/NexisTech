@@ -5,6 +5,7 @@ import {
   getMyOrderById,
   cancelOrder,
 } from '@/api/orders'
+import { extractAddressesFromOrders } from '@/utils/addressManager'
 
 export const placeOrderThunk = createAsyncThunk(
   'orders/placeOrder',
@@ -213,6 +214,14 @@ export const selectCurrentOrderSummary = createSelector(
       total,
     }
   }
+)
+
+/**
+ * Memoized selector that extracts unique customer addresses from order history
+ */
+export const selectCustomerAddresses = createSelector(
+  [selectOrders],
+  (orders) => extractAddressesFromOrders(orders)
 )
 
 export default ordersSlice.reducer

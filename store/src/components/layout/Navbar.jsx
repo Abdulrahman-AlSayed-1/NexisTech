@@ -58,6 +58,12 @@ export default function Navbar() {
   }, [searchActive])
 
   const displayName = user?.username || (user?.role ? user.role.toUpperCase() : 'USER')
+  const userAvatar =
+    user?.avatar && user.avatar !== 'default' && user.avatar !== 'none'
+      ? user.avatar
+      : user?.profileImage && user.profileImage !== 'default' && user.profileImage !== 'none'
+      ? user.profileImage
+      : null
 
   const toggleThemeMode = () => dispatch(toggleTheme())
   const handleToggleSearch = () => dispatch(toggleSearch())
@@ -227,8 +233,16 @@ export default function Navbar() {
               className="flex items-center gap-1.5 h-8 px-3.5 border border-accent-gold/40 rounded-full bg-accent-gold hover:bg-accent-gold-hover text-primary-dark font-heading font-semibold text-xs shadow-2xs transition-all cursor-pointer select-none"
               aria-label={isAuthenticated ? 'My Profile' : 'Sign In'}
             >
-              <User className="w-3.5 h-3.5" />
-              <span>{isAuthenticated ? displayName : 'Login'}</span>
+              {isAuthenticated && userAvatar ? (
+                <img
+                  src={userAvatar}
+                  alt={displayName}
+                  className="w-4 h-4 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <User className="w-3.5 h-3.5 shrink-0" />
+              )}
+              <span className="truncate max-w-[100px]">{isAuthenticated ? displayName : 'Login'}</span>
             </button>
           </div>
         </div>

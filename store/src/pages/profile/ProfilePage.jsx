@@ -1,405 +1,187 @@
 import React, { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Lock, 
-  Camera, 
-  CheckCircle, 
-  Plus, 
-  Trash2, 
-  Edit2, 
-  Save 
-} from 'lucide-react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { User, MapPin, Lock, Package, ArrowUpRight, LogOut, Camera } from 'lucide-react'
 
+import { selectCurrentUser, logoutThunk } from '@/store/slices/authSlice'
+import PersonalInfoTab from '@/components/profile/PersonalInfoTab'
+import AddressesTab from '@/components/profile/AddressesTab'
+import SecurityTab from '@/components/profile/SecurityTab'
+import AvatarModal from '@/components/profile/AvatarModal'
+
+/**
+ * ProfilePage Component
+ * Account management dashboard with personal info, addresses, security tabs, and logout.
+ */
 export default function ProfilePage() {
   const dispatch = useDispatch()
-  
-  const user = useSelector((state) => state.auth?.user) || {
-    firstName: 'Ahmed',
-    lastName: 'Hassan',
-    email: 'customer@koda.com',
-    phone: '01234567891',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200'
-  }
-
+  const navigate = useNavigate()
+  const currentUser = useSelector(selectCurrentUser)
   const [activeTab, setActiveTab] = useState('info')
-  const [isSaved, setIsSaved] = useState(false)
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
 
-  const [formData, setFormData] = useState({
-    firstName: user.firstName || '',
-    lastName: user.lastName || '',
-    email: user.email || '',
-    phone: user.phone || '',
-  })
-
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  })
-
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      type: 'Home',
-      street: '15 El-Tahrir Street, Building 4B',
-      city: 'Cairo',
-      country: 'Egypt',
-      isDefault: true,
-    },
-    {
-      id: 2,
-      type: 'Work',
-      street: 'Smart Village, Building B12',
-      city: 'Giza',
-      country: 'Egypt',
-      isDefault: false,
-    },
-  ])
-
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-  
-  const handleProfileSubmit = (e) => {
-    e.preventDefault()
-    setIsSaved(true)
-    setTimeout(() => setIsSaved(false), 3000)
+  const handleLogout = async () => {
+    await dispatch(logoutThunk())
+    toast.info('You have been signed out.')
+    navigate('/login')
   }
 
-  const handlePasswordSubmit = (e) => {
-    e.preventDefault()
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match!')
-      return
-    }
-    alert('Password changed successfully!')
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-  }
+  const displayName =
+    currentUser?.name ||
+    (currentUser?.firstName
+      ? `${currentUser.firstName} ${currentUser?.lastName || ''}`.trim()
+      : currentUser?.username) ||
+    'Valued Customer'
 
-  const setDefaultAddress = (id) => {
-    setAddresses(
-      addresses.map((addr) => ({
-        ...addr,
-        isDefault: addr.id === id,
-      }))
-    )
-  }
+  const displayEmail = currentUser?.email || 'customer@nexis.com'
+  const userRole = (currentUser?.role || 'Customer').toUpperCase()
+  const defaultInitialsUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+    displayName
+  )}&backgroundColor=dda136&textColor=1d2826`
+  const avatarUrl = currentUser?.avatar || defaultInitialsUrl
 
-  const deleteAddress = (id) => {
-    setAddresses(addresses.filter((addr) => addr.id !== id))
-  }
+  const tabs = [
+    { id: 'info', label: 'Personal Info', icon: User },
+    { id: 'addresses', label: 'Addresses', icon: MapPin },
+    { id: 'security', label: 'Security', icon: Lock },
+  ]
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-      {/* Header Banner */}
-      <div className="mb-8">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#DDA136] block mb-1">
-          ACCOUNT MANAGEMENT
-        </span>
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
-          My Profile
-        </h1>
-        <p className="text-sm mt-1 text-slate-500 dark:text-slate-400">
-          Manage your account information, address book, and security settings.
-        </p>
-      </div>
+    <main className="min-h-screen bg-bg-main px-4 py-6 text-text-primary sm:px-6 sm:py-8 lg:px-10 lg:py-10 dark:bg-dark-bg-main">
+      <div className="mx-auto w-full max-w-6xl">
+        {/* Header Banner */}
+        <header className="mb-6 sm:mb-8">
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.2em] text-accent-gold font-heading">
+            Account Management
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-primary-dark dark:text-text-light">
+            My Profile
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-text-secondary">
+            Manage your personal profile, delivery address book, and security settings.
+          </p>
+        </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Navigation Sidebar */}
-        <div className="lg:col-span-1">
-          {/* User Profile Card */}
-          <div className="p-5 rounded-2xl mb-6 flex flex-col items-center text-center shadow-sm bg-white dark:bg-[#253531] border border-slate-200/50 dark:border-[#2F4842]">
-            <div className="relative group mb-3">
-              <img
-                src={user.avatar}
-                alt={`${formData.firstName} ${formData.lastName}`}
-                className="w-20 h-20 rounded-full object-cover border-2 border-[#DDA136] shadow-sm"
-              />
-              <button 
-                type="button"
-                className="absolute bottom-0 right-0 p-1.5 bg-[#DDA136] hover:bg-[#C58C2B] text-white rounded-full transition-colors shadow"
-                title="Change Avatar"
-              >
-                <Camera className="w-3.5 h-3.5" />
-              </button>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* Navigation Sidebar */}
+          <aside className="lg:col-span-1 space-y-5">
+            {/* User Profile Summary Card */}
+            <div className="p-5 rounded-2xl flex flex-col items-center text-center shadow-xs bg-bg-card dark:bg-dark-bg-card border border-border-light dark:border-primary-medium/25">
+              <div className="relative mb-3.5 group">
+                <img
+                  src={avatarUrl}
+                  alt={displayName}
+                  className="w-20 h-20 rounded-full object-cover border-2 border-accent-gold/80 shadow-xs"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsAvatarModalOpen(true)}
+                  aria-label="Edit avatar"
+                  title="Change avatar"
+                  className="absolute bottom-0 right-0 p-1.5 rounded-full bg-accent-gold hover:bg-accent-gold-hover text-primary-dark shadow-xs hover:scale-110 transition-all cursor-pointer border-2 border-bg-card dark:border-dark-bg-card"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <h2 className="font-bold text-base font-heading text-primary-dark dark:text-text-light line-clamp-1">
+                {displayName}
+              </h2>
+              <p className="text-xs text-text-secondary line-clamp-1 mt-0.5">
+                {displayEmail}
+              </p>
+
+              <span className="mt-2.5 inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-accent-gold/15 text-accent-gold dark:text-text-gold rounded-full font-heading border border-accent-gold/30">
+                {userRole}
+              </span>
             </div>
-            <h2 className="font-bold text-base text-slate-800 dark:text-slate-100">
-              {formData.firstName} {formData.lastName}
-            </h2>
-            <p className="text-xs mt-0.5 text-slate-500 dark:text-slate-400">{formData.email}</p>
-          </div>
 
-          {/* Navigation Tabs */}
-          <nav className="flex lg:flex-col gap-2 p-2 rounded-2xl shadow-sm bg-white dark:bg-[#253531] border border-slate-200/50 dark:border-[#2F4842]">
-            <button
-              onClick={() => setActiveTab('info')}
-              className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold rounded-xl transition-all ${
-                activeTab === 'info'
-                  ? 'bg-[#DDA136] text-white shadow'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#2F4842]/50'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span>Personal Info</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('addresses')}
-              className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold rounded-xl transition-all ${
-                activeTab === 'addresses'
-                  ? 'bg-[#DDA136] text-white shadow'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#2F4842]/50'
-              }`}
-            >
-              <MapPin className="w-4 h-4" />
-              <span>Addresses</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('security')}
-              className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold rounded-xl transition-all ${
-                activeTab === 'security'
-                  ? 'bg-[#DDA136] text-white shadow'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#2F4842]/50'
-              }`}
-            >
-              <Lock className="w-4 h-4" />
-              <span>Security</span>
-            </button>
-          </nav>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="lg:col-span-3">
-          <div className="rounded-2xl p-6 md:p-8 shadow-sm bg-white dark:bg-[#253531] border border-slate-200/50 dark:border-[#2F4842]">
-            {isSaved && (
-              <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-3 text-emerald-600 dark:text-emerald-400 text-sm">
-                <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                <span>Profile updated successfully!</span>
-              </div>
-            )}
-
-            {/* Tab 1: Personal Info */}
-            {activeTab === 'info' && (
-              <div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6">
-                  Personal Information
-                </h2>
-                <form onSubmit={handleProfileSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2F4842] bg-slate-50 dark:bg-[#1D2826] text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#DDA136]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2F4842] bg-slate-50 dark:bg-[#1D2826] text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#DDA136]"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2F4842] bg-slate-50 dark:bg-[#1D2826] text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#DDA136]"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2F4842] bg-slate-50 dark:bg-[#1D2826] text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#DDA136]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-200/60 dark:border-[#2F4842] flex justify-end">
-                    <button
-                      type="submit"
-                      className="flex items-center gap-2 px-6 py-2.5 bg-[#DDA136] hover:bg-[#C58C2B] text-white rounded-xl text-sm font-semibold transition-colors shadow"
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>Save Changes</span>
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* Tab 2: Addresses */}
-            {activeTab === 'addresses' && (
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                    Saved Addresses
-                  </h2>
-                  <button className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-[#44635B] hover:bg-[#2F4842] text-white rounded-xl transition-colors">
-                    <Plus className="w-4 h-4" />
-                    <span>Add New Address</span>
+            {/* Navigation Tabs */}
+            <nav className="flex lg:flex-col gap-1.5 p-2 rounded-2xl shadow-xs bg-bg-card dark:bg-dark-bg-card border border-border-light dark:border-primary-medium/25">
+              {tabs.map((tab) => {
+                const Icon = tab.icon
+                const isActive = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-semibold rounded-xl transition-all cursor-pointer font-heading ${
+                      isActive
+                        ? 'bg-accent-gold text-primary-dark shadow-xs font-bold'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-bg-main dark:hover:bg-primary-medium/20 dark:text-text-light/70 dark:hover:text-text-light'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span>{tab.label}</span>
                   </button>
+                )
+              })}
+            </nav>
+
+            {/* Quick Orders Link Card */}
+            <Link
+              to="/profile/orders"
+              className="group flex items-center justify-between p-4 rounded-2xl border border-border-light dark:border-primary-medium/25 bg-bg-card dark:bg-dark-bg-card hover:border-accent-gold/60 transition-all shadow-xs"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-accent-gold/15 text-accent-gold flex items-center justify-center">
+                  <Package className="w-4 h-4" />
                 </div>
-
-                <div className="space-y-4">
-                  {addresses.map((addr) => (
-                    <div
-                      key={addr.id}
-                      className={`p-5 rounded-xl border transition-all ${
-                        addr.isDefault
-                          ? 'border-[#DDA136] bg-[#DDA136]/5'
-                          : 'border-slate-200 dark:border-[#2F4842] bg-slate-50/50 dark:bg-[#1D2826]/50'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-slate-800 dark:text-slate-100">
-                            {addr.type}
-                          </span>
-                          {addr.isDefault && (
-                            <span className="px-2.5 py-0.5 text-[10px] uppercase font-bold bg-[#DDA136] text-white rounded-full">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button className="p-1.5 text-slate-400 hover:text-slate-200 transition-colors">
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => deleteAddress(addr.id)}
-                            className="p-1.5 text-red-400 hover:text-red-500 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <p className="text-sm text-slate-700 dark:text-slate-200">
-                        {addr.street}
-                      </p>
-                      <p className="text-sm mt-0.5 text-slate-500 dark:text-slate-400">
-                        {addr.city}, {addr.country}
-                      </p>
-
-                      {!addr.isDefault && (
-                        <button
-                          onClick={() => setDefaultAddress(addr.id)}
-                          className="mt-3 text-xs font-bold text-[#DDA136] hover:underline"
-                        >
-                          Set as default
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                <div>
+                  <p className="text-xs font-bold font-heading text-primary-dark dark:text-text-light group-hover:text-accent-gold transition-colors">
+                    Order History
+                  </p>
+                  <p className="text-[11px] text-text-secondary">
+                    Track & review orders
+                  </p>
                 </div>
               </div>
-            )}
+              <ArrowUpRight className="w-4 h-4 text-text-secondary group-hover:text-accent-gold group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+            </Link>
 
-            {/* Tab 3: Security */}
-            {activeTab === 'security' && (
-              <div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6">
-                  Change Password
-                </h2>
-                <form onSubmit={handlePasswordSubmit} className="space-y-6 max-w-md">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                      Current Password
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.currentPassword}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, currentPassword: e.target.value })
-                      }
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2F4842] bg-slate-50 dark:bg-[#1D2826] text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#DDA136]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.newPassword}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, newPassword: e.target.value })
-                      }
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2F4842] bg-slate-50 dark:bg-[#1D2826] text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#DDA136]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                      Confirm New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
-                      }
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2F4842] bg-slate-50 dark:bg-[#1D2826] text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#DDA136]"
-                    />
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      className="px-6 py-2.5 bg-[#DDA136] hover:bg-[#C58C2B] text-white rounded-xl text-sm font-semibold transition-colors shadow"
-                    >
-                      Update Password
-                    </button>
-                  </div>
-                </form>
+            {/* Sign Out Action Button */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="group flex items-center justify-between w-full p-4 rounded-2xl border border-rose-200/70 dark:border-rose-900/30 bg-rose-50/40 dark:bg-rose-950/15 hover:bg-rose-100/60 dark:hover:bg-rose-950/30 hover:border-rose-300 dark:hover:border-rose-800/60 transition-all shadow-xs cursor-pointer text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-rose-100/80 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <LogOut className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold font-heading text-rose-600 dark:text-rose-400">
+                    Sign Out
+                  </p>
+                  <p className="text-[11px] text-rose-500/80 dark:text-rose-400/60">
+                    Log out of your account
+                  </p>
+                </div>
               </div>
-            )}
+            </button>
+          </aside>
+
+          {/* Main Content Area */}
+          <div className="lg:col-span-3">
+            <section className="rounded-3xl p-6 sm:p-8 shadow-xs bg-bg-card dark:bg-dark-bg-card border border-border-light dark:border-primary-medium/25 min-h-[420px]">
+              {activeTab === 'info' && <PersonalInfoTab />}
+              {activeTab === 'addresses' && <AddressesTab />}
+              {activeTab === 'security' && <SecurityTab />}
+            </section>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Avatar Edit Modal */}
+      <AvatarModal
+        isOpen={isAvatarModalOpen}
+        onClose={() => setIsAvatarModalOpen(false)}
+      />
+    </main>
   )
 }

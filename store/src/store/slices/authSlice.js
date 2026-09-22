@@ -1,5 +1,67 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { loginUser, sendRegisterOtp } from '@/api/auth'
+import { loginUser, sendRegisterOtp, logoutUser } from '@/api/auth'
+import { updateUserProfile } from '@/api/user'
+
+export const logoutThunk = createAsyncThunk(
+  'auth/logoutUser',
+  async (_, { dispatch }) => {
+    try {
+      await logoutUser()
+    } catch {
+      // Ignore network failure on logout
+    } finally {
+      dispatch(authSlice.actions.logout())
+    }
+  }
+)
+
+/**
+ * Normalizes user data received from the backend API or localStorage.
+ *
+ * @param {object|null} user - Raw user record from backend or localStorage
+ * @returns {object|null} Sanitized user record with clean avatar property
+ */
+const normalizeUser = (user) => {
+  if (!user || typeof user !== 'object') return null
+
+  const rawAvatar = typeof user.avatar === 'string' ? user.avatar.trim() : null
+  const isDefaultAvatar = !rawAvatar || rawAvatar === 'default' || rawAvatar === 'none'
+
+  return {
+    ...user,
+    avatar: isDefaultAvatar ? null : rawAvatar,
+  }
+}
+
+export const updateAvatarThunk = createAsyncThunk(
+  'auth/updateAvatar',
+  async (avatarUrl, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const { auth } = getState()
+      const userId = auth.user?._id || auth.user?.id
+      const finalAvatar = avatarUrl && avatarUrl.trim() ? avatarUrl.trim() : null
+      // The backend Express PATCH handler uses `if (req.body.avatar) user.avatar = req.body.avatar`.
+      // It completely ignores empty strings or null. To ensure MongoDB truly overwrites and clears
+      // any previous avatar in database, we send 'default'.
+      const payloadAvatar = finalAvatar || 'default'
+
+      if (userId) {
+        try {
+          await updateUserProfile(userId, { avatar: payloadAvatar })
+        } catch (err) {
+          console.warn('Backend avatar update warning:', err)
+        }
+      }
+
+      dispatch(authSlice.actions.updateUser({ avatar: finalAvatar }))
+      return finalAvatar
+    } catch (err) {
+      const message =
+        err.response?.data?.message || err.message || 'Failed to update avatar'
+      return rejectWithValue(message)
+    }
+  }
+)
 
 export const loginThunk = createAsyncThunk(
   'auth/login',
@@ -41,7 +103,7 @@ export const registerThunk = createAsyncThunk(
 const getStoredUser = () => {
   try {
     const user = localStorage.getItem('user')
-    return user ? JSON.parse(user) : null
+    return user ? normalizeUser(JSON.parse(user)) : null
   } catch {
     return null
   }
@@ -67,15 +129,16 @@ const authSlice = createSlice({
     authSuccess: (state, action) => {
       state.isLoading = false
       state.isAuthenticated = true
-      state.user = action.payload.user
+      const normalized = normalizeUser(action.payload.user)
+      state.user = normalized
       state.token = action.payload.token
       state.error = null
       state.registrationPendingEmail = null
       if (action.payload.token) {
         localStorage.setItem('token', action.payload.token)
       }
-      if (action.payload.user) {
-        localStorage.setItem('user', JSON.stringify(action.payload.user))
+      if (normalized) {
+        localStorage.setItem('user', JSON.stringify(normalized))
       }
     },
     authFailure: (state, action) => {
@@ -98,8 +161,11 @@ const authSlice = createSlice({
       localStorage.removeItem('user')
     },
     updateUser: (state, action) => {
-      state.user = { ...state.user, ...action.payload }
-      localStorage.setItem('user', JSON.stringify(state.user))
+      const merged = normalizeUser({ ...state.user, ...action.payload })
+      state.user = merged
+      if (merged) {
+        localStorage.setItem('user', JSON.stringify(merged))
+      }
     },
   },
   extraReducers: (builder) => {
@@ -112,15 +178,16 @@ const authSlice = createSlice({
       .addCase(loginThunk.fulfilled, (state, action) => {
         state.isLoading = false
         state.isAuthenticated = true
-        state.user = action.payload.user
+        const normalized = normalizeUser(action.payload.user)
+        state.user = normalized
         state.token = action.payload.token
         state.error = null
         state.registrationPendingEmail = null
         if (action.payload.token) {
           localStorage.setItem('token', action.payload.token)
         }
-        if (action.payload.user) {
-          localStorage.setItem('user', JSON.stringify(action.payload.user))
+        if (normalized) {
+          localStorage.setItem('user', JSON.stringify(normalized))
         }
       })
       .addCase(loginThunk.rejected, (state, action) => {
