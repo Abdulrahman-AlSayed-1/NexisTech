@@ -235,19 +235,13 @@ const cartSlice = createSlice({
       const item = action.payload
       const prodId = getCartItemId(item)
       const existing = state.items.find((i) => isMatchingItem(i, prodId))
-      const rawStock = item.stock ?? item.product?.stock
-      const itemStock = rawStock !== undefined ? Number(rawStock) : 99
-      const maxStock = !isNaN(itemStock) && itemStock > 0 ? itemStock : 99
-
       if (existing) {
-        const newQty = (Number(existing.quantity) || 1) + (Number(item.quantity) || 1)
-        existing.quantity = Math.min(maxStock, newQty)
+        existing.quantity += Number(item.quantity) || 1
       } else {
         state.items.push({
           ...item,
           productId: prodId,
-          quantity: Math.min(maxStock, Number(item.quantity) || 1),
-          stock: maxStock < 99 ? maxStock : undefined,
+          quantity: Number(item.quantity) || 1,
         })
       }
       const { subtotal, itemCount, total } = calculateTotals(state.items, state.discount)
@@ -269,11 +263,7 @@ const cartSlice = createSlice({
       const target = action.payload
       const item = state.items.find((i) => isMatchingItem(i, target))
       if (item) {
-        const rawStock = target.stock ?? item.stock ?? item.product?.stock
-        const itemStock = rawStock !== undefined ? Number(rawStock) : 99
-        const maxQuantity = !isNaN(itemStock) && itemStock > 0 ? itemStock : 99
-        const requestedQuantity = Number(target.quantity) || 1
-        item.quantity = Math.max(1, Math.min(maxQuantity, requestedQuantity))
+        item.quantity = Math.max(1, Number(target.quantity) || 1)
       }
       const { subtotal, itemCount, total } = calculateTotals(state.items, state.discount)
       state.subtotal = subtotal
@@ -312,23 +302,7 @@ const cartSlice = createSlice({
         state.isLoading = false
         const payload = action.payload?.cart || action.payload?.data || action.payload || {}
         if (payload.items) {
-          state.items = payload.items.map((newItem) => {
-            const prodId = getCartItemId(newItem)
-            const prev = state.items.find((i) => isMatchingItem(i, prodId))
-            const prevStock = prev?.stock ?? prev?.product?.stock
-            const newStock = newItem?.stock ?? newItem?.product?.stock ?? prevStock
-            return {
-              ...newItem,
-              stock: newStock !== undefined ? Number(newStock) : undefined,
-              product:
-                typeof newItem.product === 'object' && newItem.product !== null
-                  ? {
-                      ...newItem.product,
-                      stock: newStock !== undefined ? Number(newStock) : undefined,
-                    }
-                  : newItem.product,
-            }
-          })
+          state.items = payload.items
           if (payload.coupon) {
             state.couponCode = typeof payload.coupon === 'object' ? payload.coupon.code : payload.coupon
           }
