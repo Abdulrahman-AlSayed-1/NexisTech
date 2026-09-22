@@ -8,33 +8,7 @@ import Button from '@/components/common/Button'
 import { formatCurrency } from '@/utils/formatters'
 import { removeFromWishlistThunk } from '@/store/slices/wishlistSlice'
 import { addToCartThunk } from '@/store/slices/cartSlice'
-
-const getProductId = (product) =>
-  product?._id || product?.productId || product?.id
-
-const extractImages = (product) => {
-  const getImageUrl = (img) => {
-    if (!img) return null
-    if (typeof img === 'string') return img
-    if (typeof img === 'object' && img !== null) {
-      return img.url || img.secure_url || null
-    }
-    return null
-  }
-
-  const raw =
-    Array.isArray(product?.images) && product.images.length > 0
-      ? product.images
-      : typeof product?.images === 'string' && product.images
-        ? [product.images]
-        : product?.image
-          ? [product.image]
-          : product?.thumbnail
-            ? [product.thumbnail]
-            : []
-
-  return raw.map(getImageUrl).filter(Boolean)
-}
+import { getProductId, extractProductImages } from '@/utils/productUtils'
 
 /**
  * WishlistCard Component
@@ -53,7 +27,7 @@ export default function WishlistCard({ product }) {
 
   const id = getProductId(product)
   const name = product?.name || product?.title || 'Product'
-  const images = extractImages(product)
+  const images = extractProductImages(product)
   const currentImage = images[currentImageIndex] || ''
   const price = Number(product?.price || 0)
   const category = product?.category || product?.categoryName || ''

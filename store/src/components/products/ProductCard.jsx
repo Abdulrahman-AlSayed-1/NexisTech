@@ -14,42 +14,12 @@ import {
   removeFromWishlistThunk,
   selectWishlistIds,
 } from '@/store/slices/wishlistSlice'
+import {
+  getProductId,
+  extractProductImages,
+} from '@/utils/productUtils'
 
-/**
- * Extracts normalized product ID
- */
-export const getProductId = (product) =>
-  product?._id || product?.productId || product?.id
-
-/**
- * Extracts and sanitizes product image URLs into an array
- */
-export const extractProductImages = (product) => {
-  const getImageUrl = (img) => {
-    if (!img) return null
-    if (typeof img === 'string') return img
-    if (typeof img === 'object' && img !== null) {
-      return img.url || img.secure_url || null
-    }
-    return null
-  }
-
-  const raw =
-    Array.isArray(product?.images) && product.images.length > 0
-      ? product.images
-      : typeof product?.images === 'string' && product.images
-        ? [product.images]
-        : product?.image
-          ? [product.image]
-          : product?.thumbnail
-            ? [product.thumbnail]
-            : []
-
-  const list = raw.map(getImageUrl).filter(Boolean)
-  return list.length > 0
-    ? list
-    : ['https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80']
-}
+export { getProductId, extractProductImages }
 
 /**
  * ProductCard Component

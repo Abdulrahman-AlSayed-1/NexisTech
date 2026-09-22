@@ -24,10 +24,8 @@ import {
 
 import Button from '@/components/common/Button'
 import Rating from '@/components/common/Rating'
-import ProductCard, {
-  getProductId,
-  extractProductImages,
-} from '@/components/products/ProductCard'
+import ProductCard from '@/components/products/ProductCard'
+import { getProductId, extractProductImages } from '@/utils/productUtils'
 import ProductReviewModal from '@/components/products/ProductReviewModal'
 
 import { formatCurrency, calculateDiscountPercentage, formatDate } from '@/utils/formatters'

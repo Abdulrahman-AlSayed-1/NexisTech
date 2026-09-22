@@ -16,9 +16,7 @@ import {
   selectWishlistLoading,
   selectWishlistError,
 } from '@/store/slices/wishlistSlice'
-
-const getProductId = (product) =>
-  product?._id || product?.productId || product?.id
+import { getProductId } from '@/utils/productUtils'
 
 /**
  * WishlistPage Component
