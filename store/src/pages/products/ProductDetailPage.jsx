@@ -490,6 +490,9 @@ export default function ProductDetailPage() {
                     </>
                   ) : isLowStock ? (
                     <>
+                      <div className="flex items-center justify-center shrink-0">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                      </div>
                       <p className="text-xs">
                         <span className="font-bold font-heading text-amber-600 dark:text-amber-400">
                           Only {stock} units remaining

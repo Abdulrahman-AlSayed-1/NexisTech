@@ -5,8 +5,10 @@ import {
   updateCartItemApi,
   removeCartItemApi,
   applyCouponApi,
+  removeCouponApi,
   clearCartApi,
 } from '@/api/cart'
+import { getProductId } from '@/utils/productUtils'
 
 const getStoredCart = () => {
   try {
@@ -36,11 +38,24 @@ const saveCart = (state) => {
   }
 }
 
-const calculateTotals = (items, discount = 0) => {
-  const subtotal = items.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0)
+const calculateTotals = (items = [], discount = 0) => {
+  const subtotal = items.reduce((acc, item) => {
+    const price = Number(item.price ?? item.product?.price ?? 0)
+    const qty = Number(item.quantity) || 1
+    return acc + price * qty
+  }, 0)
   const count = items.reduce((acc, item) => acc + (Number(item.quantity) || 1), 0)
-  const total = Math.max(0, subtotal - discount)
-  return { subtotal, itemCount: count, total }
+  const discountVal = Number(discount) || 0
+  const total = Math.max(0, subtotal - discountVal)
+  return { subtotal, itemCount: count, discount: discountVal, total }
+}
+
+const getCartItemId = (item) => getProductId(item?.product) || getProductId(item)
+
+export const isMatchingItem = (item, target) => {
+  if (!item || !target) return false
+  const targetId = typeof target === 'object' ? getCartItemId(target) : target
+  return getCartItemId(item) === targetId || item?._id === targetId
 }
 
 export const fetchCartThunk = createAsyncThunk(
@@ -91,7 +106,12 @@ export const updateCartItemThunk = createAsyncThunk(
       dispatch(cartSlice.actions.updateQuantity(itemData))
       const token = localStorage.getItem('token')
       if (token) {
-        const prodId = itemData.productId || itemData._id || itemData.id
+        const prodId =
+          itemData.productId ||
+          itemData.product?._id ||
+          itemData.product?.id ||
+          itemData._id ||
+          itemData.id
         const data = await updateCartItemApi({
           productId: prodId,
           quantity: Math.max(1, Number(itemData.quantity) || 1),
@@ -100,6 +120,7 @@ export const updateCartItemThunk = createAsyncThunk(
       }
       return { success: true, localOnly: true }
     } catch (err) {
+      dispatch(fetchCartThunk())
       const errorMsg =
         err.response?.data?.errors?.join(', ') ||
         err.response?.data?.message ||
@@ -112,21 +133,25 @@ export const updateCartItemThunk = createAsyncThunk(
 
 export const removeCartItemThunk = createAsyncThunk(
   'cart/removeCartItem',
-  async (productId, { rejectWithValue, dispatch }) => {
+  async (target, { rejectWithValue, dispatch }) => {
     try {
       const prodId =
-        typeof productId === 'object' && productId !== null
-          ? productId.productId || productId._id || productId.id
-          : productId
+        typeof target === 'object' && target !== null
+          ? target.productId || target.product?._id || target.product?.id || target._id || target.id
+          : target
 
-      dispatch(cartSlice.actions.removeFromCart(prodId))
+      // Optimistically remove from state immediately
+      dispatch(cartSlice.actions.removeFromCart(target))
+
       const token = localStorage.getItem('token')
-      if (token) {
+      if (token && prodId) {
         const data = await removeCartItemApi(prodId)
         return data
       }
       return { success: true, localOnly: true }
     } catch (err) {
+      // Re-fetch to restore state if backend rejected
+      dispatch(fetchCartThunk())
       const errorMsg =
         err.response?.data?.errors?.join(', ') ||
         err.response?.data?.message ||
@@ -141,10 +166,32 @@ export const applyCouponThunk = createAsyncThunk(
   'cart/applyCoupon',
   async (couponCode, { rejectWithValue }) => {
     try {
-      const data = await applyCouponApi(couponCode)
+      const cleanCode = String(couponCode).trim().toUpperCase()
+      const data = await applyCouponApi(cleanCode)
+      return {
+        code: cleanCode,
+        ...data,
+      }
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        'Invalid or expired coupon code'
+      )
+    }
+  }
+)
+
+export const removeCouponThunk = createAsyncThunk(
+  'cart/removeCoupon',
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await removeCouponApi()
       return data
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || 'Invalid coupon code')
+      return rejectWithValue(
+        err.response?.data?.message || 'Failed to remove coupon'
+      )
     }
   }
 )
@@ -195,17 +242,15 @@ const cartSlice = createSlice({
     },
     addToCart: (state, action) => {
       const item = action.payload
-      const prodId = item.productId || item._id || item.id
-      const existing = state.items.find(
-        (i) => (i.productId || i._id || i.id) === prodId
-      )
+      const prodId = item.productId || item.product?._id || item._id || item.id
+      const existing = state.items.find((i) => isMatchingItem(i, prodId))
       if (existing) {
-        existing.quantity += item.quantity || 1
+        existing.quantity += Number(item.quantity) || 1
       } else {
         state.items.push({
           ...item,
           productId: prodId,
-          quantity: item.quantity || 1,
+          quantity: Number(item.quantity) || 1,
         })
       }
       const { subtotal, itemCount, total } = calculateTotals(state.items, state.discount)
@@ -215,10 +260,8 @@ const cartSlice = createSlice({
       saveCart(state)
     },
     removeFromCart: (state, action) => {
-      const productId = action.payload
-      state.items = state.items.filter(
-        (i) => (i.productId || i._id || i.id) !== productId
-      )
+      const target = action.payload
+      state.items = state.items.filter((i) => !isMatchingItem(i, target))
       const { subtotal, itemCount, total } = calculateTotals(state.items, state.discount)
       state.subtotal = subtotal
       state.itemCount = itemCount
@@ -226,10 +269,9 @@ const cartSlice = createSlice({
       saveCart(state)
     },
     updateQuantity: (state, action) => {
-      const { productId, quantity } = action.payload
-      const item = state.items.find(
-        (i) => (i.productId || i._id || i.id) === productId
-      )
+      const target = action.payload
+      const quantity = Number(target.quantity) || 1
+      const item = state.items.find((i) => isMatchingItem(i, target))
       if (item) {
         item.quantity = Math.max(1, quantity)
       }
@@ -271,6 +313,14 @@ const cartSlice = createSlice({
         const payload = action.payload?.cart || action.payload?.data || action.payload || {}
         if (payload.items) {
           state.items = payload.items
+          if (payload.coupon) {
+            state.couponCode = typeof payload.coupon === 'object' ? payload.coupon.code : payload.coupon
+          }
+          if (payload.discountAmount !== undefined) {
+            state.discount = Number(payload.discountAmount)
+          } else if (payload.discount !== undefined) {
+            state.discount = Number(payload.discount)
+          }
           const { subtotal, itemCount, total } = calculateTotals(state.items, state.discount)
           state.subtotal = payload.subtotal || subtotal
           state.itemCount = payload.itemCount || itemCount
@@ -284,9 +334,30 @@ const cartSlice = createSlice({
       })
       .addCase(applyCouponThunk.fulfilled, (state, action) => {
         const payload = action.payload || {}
-        state.couponCode = payload.code || state.couponCode
-        state.discount = payload.discountAmount || state.discount
-        state.total = Math.max(0, state.subtotal - state.discount)
+        state.couponCode = payload.code || payload.coupon?.code || state.couponCode
+        state.discount = Number(payload.discountAmount ?? (payload.subtotal && payload.total ? payload.subtotal - payload.total : state.discount))
+        if (payload.total !== undefined) {
+          state.total = Number(payload.total)
+        } else {
+          state.total = Math.max(0, state.subtotal - state.discount)
+        }
+        if (payload.subtotal !== undefined) {
+          state.subtotal = Number(payload.subtotal)
+        }
+        saveCart(state)
+      })
+      .addCase(removeCouponThunk.fulfilled, (state, action) => {
+        state.couponCode = null
+        state.discount = 0
+        const payload = action.payload || {}
+        if (payload.total !== undefined) {
+          state.total = Number(payload.total)
+        } else {
+          state.total = state.subtotal
+        }
+        if (payload.subtotal !== undefined) {
+          state.subtotal = Number(payload.subtotal)
+        }
         saveCart(state)
       })
   },

@@ -25,6 +25,11 @@ export const applyCouponApi = async (couponCode) => {
   return response.data
 }
 
+export const removeCouponApi = async () => {
+  const response = await api.delete('/carts/coupon')
+  return response.data
+}
+
 export const clearCartApi = async () => {
   const response = await api.delete('/carts/clear')
   return response.data

@@ -1,956 +1,198 @@
+import React, { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { ArrowLeft, Trash2, ShoppingCart } from 'lucide-react'
+import { toast } from 'react-toastify'
+
+import CartItemRow from '@/components/cart/CartItemRow'
+import CartOrderSummary from '@/components/cart/CartOrderSummary'
+import CartCouponBox from '@/components/cart/CartCouponBox'
+import CartEmptyState from '@/components/cart/CartEmptyState'
+
+import {
+  fetchCartThunk,
+  updateCartItemThunk,
+  removeCartItemThunk,
+  applyCouponThunk,
+  removeCouponThunk,
+  removeCoupon,
+  clearCartThunk,
+  selectCartItems,
+  selectCartTotals,
+  selectCartDiscount,
+  selectCartCoupon,
+  selectCartLoading,
+} from '@/store/slices/cartSlice'
+
 /**
- * Cart Page Placeholder
- * Route: /cart
- * To be implemented by feature team.
+ * CartPage Component
+ * Main shopping cart screen implementing clean Redux Toolkit state flow,
+ * optimistic updates, and modular decomposition.
  */
-// export default function CartPage() {
-//   return (
-//     <div className="py-16 text-center text-text-secondary dark:text-slate-400">
-//       <h1 className="text-xl font-heading font-bold text-primary-dark dark:text-text-light mb-2">
-//         Cart Page
-//       </h1>
-//       <p className="text-xs">Route: /cart — To be implemented by team</p>
-//     </div>
-//   )
-// }
-///////////////////////////////////////////////////////////////////////
-// import pro4 from "../../assets/images/pro1.jpg";
-// import pro2 from "../../assets/images/pro2.jpg"
-// import pro3 from "../../assets/images/pro3.jpg"
-// import pro5 from "../../assets/images/pro5.jpg"
-// import pro6 from "../../assets/images/pro6.jpg"
-
-// const cartItems = [
-//   {
-//     id: 4,
-//     name: 'pc is fast 49" Odyssey OLED G9 Gaming Monitor',
-//     price: 10399.99,
-//     quantity: 144,
-//     image: pro4
-//   },
-//   {
-//     id: 2,
-//     name: "Canon EOS R6 Mark II Mirrorless Camera",
-//     price: 2299,
-//     quantity: 122,
-//     image: pro2,
-//   },
-//   {
-//     id: 3,
-//     name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-//     price: 184.99,
-//     quantity: 50,
-//     image: pro3,
-//   },
-//   {
-//     id: 5,
-//     name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-//     price: 11184.99,
-//     quantity: 155,
-//     image: pro5,
-//   },
-//   {
-//     id: 6,
-//     name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-//     price: 1184.99,
-//     quantity: 30,
-//     image: pro6,
-//   },
-// ];
-
-// function CartItem({ item }) {
-//   return (
-//     <div className="flex gap-4 border-b border-border-light p-5 last:border-b-0 dark:border-primary-medium">
-
-//       {/* Image */}
-//       <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-bg-main">
-//         <img
-//           src={item.image}
-//           alt={item.name}
-//           className="h-full w-full object-cover"
-//         />
-//       </div>
-
-//       {/* Info */}
-//       <div className="min-w-0 flex-1">
-//         <h2 className="font-heading text-sm font-bold text-primary-dark dark:text-text-light">
-//           {item.name}
-//         </h2>
-
-//         <p className="mt-2 font-semibold text-accent-gold">
-//           EGP {item.price.toLocaleString()}
-//         </p>
-
-//         {/* Quantity */}
-//         <div className="mt-4 flex items-center gap-3">
-//           <button
-//             type="button"
-//             className="flex h-8 w-8 items-center justify-center rounded-md border border-border-medium text-text-secondary hover:border-primary-medium hover:text-primary-dark"
-//           >
-//             −
-//           </button>
-
-//           <span className="w-5 text-center text-sm text-primary-dark dark:text-text-light">
-//             {item.quantity}
-//           </span>
-
-//           <button
-//             type="button"
-//             className="flex h-8 w-8 items-center justify-center rounded-md border border-border-medium text-text-secondary hover:border-primary-medium hover:text-primary-dark"
-//           >
-//             +
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Price / Delete */}
-//       <div className="flex flex-col items-end justify-between">
-//         <span className="whitespace-nowrap font-semibold text-primary-dark dark:text-text-light">
-//           EGP {(item.price * item.quantity).toLocaleString()}
-//         </span>
-
-//         <button
-//           type="button"
-//           className="text-sm text-text-secondary hover:text-red-500"
-//         >
-//           Delete
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// function OrderSummary({ subtotal }) {
-//   const shipping = 0;
-//   const tax = subtotal * 0.14;
-//   const total = subtotal + shipping + tax;
-
-//   return (
-//     <div className="rounded-xl border border-border-light bg-bg-card p-6 dark:border-primary-medium dark:bg-dark-bg-card">
-
-//       <h2 className="mb-6 font-heading text-xl font-bold text-primary-dark dark:text-text-light">
-//         Order Summary
-//       </h2>
-
-//       <div className="space-y-4">
-
-//         <div className="flex justify-between">
-//           <span className="text-text-secondary">
-//             Subtotal
-//           </span>
-
-//           <span className="font-medium text-primary-dark dark:text-text-light">
-//             EGP {subtotal.toLocaleString()}
-//           </span>
-//         </div>
-
-//         <div className="flex justify-between">
-//           <span className="text-text-secondary">
-//             Shipping
-//           </span>
-
-//           <span className="font-medium text-primary-medium">
-//             Free
-//           </span>
-//         </div>
-
-//         <div className="flex justify-between">
-//           <span className="text-text-secondary">
-//             Tax (14%)
-//           </span>
-
-//           <span className="font-medium text-primary-dark dark:text-text-light">
-//             EGP {tax.toLocaleString()}
-//           </span>
-//         </div>
-
-//       </div>
-
-//       <div className="my-6 border-t border-border-light dark:border-primary-medium" />
-
-//       <div className="flex items-center justify-between">
-//         <span className="font-heading font-bold text-primary-dark dark:text-text-light">
-//           Total
-//         </span>
-
-//         <span className="text-xl font-bold text-accent-gold">
-//           EGP {total.toLocaleString()}
-//         </span>
-//       </div>
-
-//       <button
-//         type="button"
-//         className="mt-6 w-full rounded-lg bg-primary-dark px-4 py-3 font-semibold text-text-light transition hover:bg-primary-medium"
-//       >
-//         Proceed to Checkout
-//       </button>
-
-//     </div>
-//   );
-// }
-
-// function CouponBox() {
-//   return (
-//     <div className="mt-6 rounded-xl border border-border-light bg-bg-card p-5 dark:border-primary-medium dark:bg-dark-bg-card">
-
-//       <h2 className="mb-4 font-heading font-bold text-primary-dark dark:text-text-light">
-//         Coupon Code
-//       </h2>
-
-//       <div className="flex gap-3">
-
-//         <input
-//           type="text"
-//           placeholder="Enter coupon code"
-//           className="min-w-0 flex-1 rounded-lg border border-border-medium bg-bg-input px-4 py-3 text-sm text-primary-dark outline-none placeholder:text-text-secondary focus:border-accent-gold dark:bg-dark-bg-main dark:text-text-light"
-//         />
-
-//         <button
-//           type="button"
-//           className="rounded-lg bg-accent-gold px-6 py-3 font-semibold text-primary-dark transition hover:bg-accent-gold-hover"
-//         >
-//           Apply
-//         </button>
-
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default function CartPage() {
-//   const subtotal = cartItems.reduce(
-//     (total, item) => total + item.price * item.quantity,
-//     0
-//   );
-
-//   return (
-//     <main className="min-h-screen bg-bg-main py-10 dark:bg-dark-bg-main">
-
-//       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-//         {/* Header */}
-//         <div className="mb-8">
-//           <h1 className="font-heading text-3xl font-bold text-primary-dark dark:text-text-light">
-//             Shopping Cart
-//           </h1>
-
-//           <p className="mt-2 text-text-secondary">
-//             Review your items before checkout.
-//           </p>
-//         </div>
-
-//         {/* Content */}
-//         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-//           {/* Left */}
-//           <div className="lg:col-span-2">
-
-//             <div className="overflow-hidden rounded-xl border border-border-light bg-bg-card dark:border-primary-medium dark:bg-dark-bg-card">
-
-//               {cartItems.map((item) => (
-//                 <CartItem
-//                   key={item.id}
-//                   item={item}
-//                 />
-//               ))}
-
-//             </div>
-
-//             <CouponBox />
-
-//             <button
-//               type="button"
-//               className="mt-5 text-sm font-medium text-primary-medium hover:text-primary-dark"
-//             >
-//               ← Continue Shopping
-//             </button>
-
-//           </div>
-
-//           {/* Right */}
-//           <div>
-//             <OrderSummary subtotal={subtotal} />
-//           </div>
-
-//         </div>
-//       </div>
-
-//     </main>
-//   );
-// }
-
-////////////////////////////////////////////////////////////////
-
-
-
-// import pro4 from "../../assets/images/pro1.jpg";
-// import pro2 from "../../assets/images/pro2.jpg";
-// import pro3 from "../../assets/images/pro3.jpg";
-// import pro5 from "../../assets/images/pro5.jpg";
-// import pro6 from "../../assets/images/pro6.jpg";
-
-// const initialCartItems = [
-//   {
-//     id: 4,
-//     name: 'pc is fast 49" Odyssey OLED G9 Gaming Monitor',
-//     price: 10399.99,
-//     quantity: 144,
-//     image: pro4,
-//   },
-//   {
-//     id: 2,
-//     name: "Canon EOS R6 Mark II Mirrorless Camera",
-//     price: 2299,
-//     quantity: 122,
-//     image: pro2,
-//   },
-//   {
-//     id: 3,
-//     name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-//     price: 184.99,
-//     quantity: 50,
-//     image: pro3,
-//   },
-//   {
-//     id: 5,
-//     name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-//     price: 11184.99,
-//     quantity: 155,
-//     image: pro5,
-//   },
-//   {
-//     id: 6,
-//     name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-//     price: 1184.99,
-//     quantity: 30,
-//     image: pro6,
-//   },
-// ];
-
-// function CartItem({ item, onIncrease, onDecrease, onDelete }) {
-//   return (
-//     <div className="flex gap-4 border-b border-border-light p-5 last:border-b-0 dark:border-primary-medium">
-      
-//       {/* Image */}
-//       <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-bg-main">
-//         <img
-//           src={item.image}
-//           alt={item.name}
-//           className="h-full w-full object-cover"
-//         />
-//       </div>
-
-//       {/* Info */}
-//       <div className="min-w-0 flex-1">
-//         <h2 className="font-heading text-sm font-bold text-primary-dark dark:text-text-light">
-//           {item.name}
-//         </h2>
-
-//         <p className="mt-2 font-semibold text-accent-gold">
-//           EGP {item.price.toLocaleString()}
-//         </p>
-
-//         {/* Quantity */}
-//         <div className="mt-4 flex items-center gap-3">
-//           <button
-//             type="button"
-//             onClick={() => onDecrease(item.id)}
-//             className="flex h-8 w-8 items-center justify-center rounded-md border border-border-medium text-text-secondary hover:border-primary-medium hover:text-primary-dark"
-//           >
-//             −
-//           </button>
-
-//           <span className="w-5 text-center text-sm text-primary-dark dark:text-text-light">
-//             {item.quantity}
-//           </span>
-
-//           <button
-//             type="button"
-//             onClick={() => onIncrease(item.id)}
-//             className="flex h-8 w-8 items-center justify-center rounded-md border border-border-medium text-text-secondary hover:border-primary-medium hover:text-primary-dark"
-//           >
-//             +
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Price / Delete */}
-//       <div className="flex flex-col items-end justify-between">
-//         <span className="whitespace-nowrap font-semibold text-primary-dark dark:text-text-light">
-//           EGP {(item.price * item.quantity).toLocaleString()}
-//         </span>
-
-//         <button
-//           type="button"
-//           onClick={() => onDelete(item.id)}
-//           className="text-sm text-text-secondary hover:text-red-500"
-//         >
-//           Delete
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// function OrderSummary({ subtotal, onCheckout }) {
-//   const shipping = 0;
-//   const tax = subtotal * 0.14;
-//   const total = subtotal + shipping + tax;
-
-//   return (
-//     <div className="rounded-xl border border-border-light bg-bg-card p-6 dark:border-primary-medium dark:bg-dark-bg-card">
-      
-//       <h2 className="mb-6 font-heading text-xl font-bold text-primary-dark dark:text-text-light">
-//         Order Summary
-//       </h2>
-
-//       <div className="space-y-4">
-
-//         <div className="flex justify-between">
-//           <span className="text-text-secondary">
-//             Subtotal
-//           </span>
-
-//           <span className="font-medium text-primary-dark dark:text-text-light">
-//             EGP {subtotal.toLocaleString()}
-//           </span>
-//         </div>
-
-//         <div className="flex justify-between">
-//           <span className="text-text-secondary">
-//             Shipping
-//           </span>
-
-//           <span className="font-medium text-primary-medium">
-//             Free
-//           </span>
-//         </div>
-
-//         <div className="flex justify-between">
-//           <span className="text-text-secondary">
-//             Tax (14%)
-//           </span>
-
-//           <span className="font-medium text-primary-dark dark:text-text-light">
-//             EGP {tax.toLocaleString()}
-//           </span>
-//         </div>
-
-//       </div>
-
-//       <div className="my-6 border-t border-border-light dark:border-primary-medium" />
-
-//       <div className="flex items-center justify-between">
-//         <span className="font-heading font-bold text-primary-dark dark:text-text-light">
-//           Total
-//         </span>
-
-//         <span className="text-xl font-bold text-accent-gold">
-//           EGP {total.toLocaleString()}
-//         </span>
-//       </div>
-
-//       <button
-//         type="button"
-//         onClick={onCheckout}
-//         className="mt-6 w-full rounded-lg bg-primary-dark px-4 py-3 font-semibold text-text-light transition hover:bg-primary-medium"
-//       >
-//         Proceed to Checkout
-//       </button>
-
-//     </div>
-//   );
-// }
-
-// function CouponBox() {
-//   const [coupon, setCoupon] = useState("");
-
-//   const handleApply = () => {
-//     if (!coupon.trim()) {
-//       alert("Please enter coupon code");
-//       return;
-//     }
-
-//     alert(`Coupon "${coupon}" applied`);
-//     setCoupon("");
-//   };
-
-//   return (
-//     <div className="mt-6 rounded-xl border border-border-light bg-bg-card p-5 dark:border-primary-medium dark:bg-dark-bg-card">
-
-//       <h2 className="mb-4 font-heading font-bold text-primary-dark dark:text-text-light">
-//         Coupon Code
-//       </h2>
-
-//       <div className="flex gap-3">
-
-//         <input
-//           type="text"
-//           value={coupon}
-//           onChange={(e) => setCoupon(e.target.value)}
-//           placeholder="Enter coupon code"
-//           className="min-w-0 flex-1 rounded-lg border border-border-medium bg-bg-input px-4 py-3 text-sm text-primary-dark outline-none placeholder:text-text-secondary focus:border-accent-gold dark:bg-dark-bg-main dark:text-text-light"
-//         />
-
-//         <button
-//           type="button"
-//           onClick={handleApply}
-//           className="rounded-lg bg-accent-gold px-6 py-3 font-semibold text-primary-dark transition hover:bg-accent-gold-hover"
-//         >
-//           Apply
-//         </button>
-
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default function CartPage() {
-//   const [cartItems, setCartItems] = useState(initialCartItems);
-
-//   const handleIncrease = (id) => {
-//     setCartItems((items) =>
-//       items.map((item) =>
-//         item.id === id
-//           ? {
-//               ...item,
-//               quantity: item.quantity + 1,
-//             }
-//           : item
-//       )
-//     );
-//   };
-
-//   const handleDecrease = (id) => {
-//     setCartItems((items) =>
-//       items.map((item) =>
-//         item.id === id
-//           ? {
-//               ...item,
-//               quantity: Math.max(item.quantity - 1, 1),
-//             }
-//           : item
-//       )
-//     );
-//   };
-
-//   const handleDelete = (id) => {
-//     setCartItems((items) =>
-//       items.filter((item) => item.id !== id)
-//     );
-//   };
-
-//   const handleCheckout = () => {
-//     window.location.href = "/checkout";
-//   };
-
-//   const handleContinueShopping = () => {
-//     window.location.href = "/products";
-//   };
-
-//   const subtotal = cartItems.reduce(
-//     (total, item) => total + item.price * item.quantity,
-//     0
-//   );
-
-//   return (
-//     <main className="min-h-screen bg-bg-main py-10 dark:bg-dark-bg-main">
-
-//       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-//         {/* Header */}
-//         <div className="mb-8">
-//           <h1 className="font-heading text-3xl font-bold text-primary-dark dark:text-text-light">
-//             Shopping Cart
-//           </h1>
-
-//           <p className="mt-2 text-text-secondary">
-//             Review your items before checkout.
-//           </p>
-//         </div>
-
-//         {/* Content */}
-//         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-//           {/* Left */}
-//           <div className="lg:col-span-2">
-
-//             <div className="overflow-hidden rounded-xl border border-border-light bg-bg-card dark:border-primary-medium dark:bg-dark-bg-card">
-
-//               {cartItems.map((item) => (
-//                 <CartItem
-//                   key={item.id}
-//                   item={item}
-//                   onIncrease={handleIncrease}
-//                   onDecrease={handleDecrease}
-//                   onDelete={handleDelete}
-//                 />
-//               ))}
-
-//             </div>
-
-//             <CouponBox />
-
-//             <button
-//               type="button"
-//               onClick={handleContinueShopping}
-//               className="mt-5 text-sm font-medium text-primary-medium hover:text-primary-dark"
-//             >
-//               ← Continue Shopping
-//             </button>
-
-//           </div>
-
-//           {/* Right */}
-//           <div>
-//             <OrderSummary
-//               subtotal={subtotal}
-//               onCheckout={handleCheckout}
-//             />
-//           </div>
-
-//         </div>
-//       </div>
-
-//     </main>
-//   );
-// }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-import { useState } from "react";
-
-import pro4 from "../../assets/images/pro1.jpg";
-import pro2 from "../../assets/images/pro2.jpg";
-import pro3 from "../../assets/images/pro3.jpg";
-import pro5 from "../../assets/images/pro5.jpg";
-import pro6 from "../../assets/images/pro6.jpg";
-
-const initialCartItems = [
-  {
-    id: 4,
-    name: 'pc is fast 49" Odyssey OLED G9 Gaming Monitor',
-    price: 10399.99,
-    quantity: 144,
-    image: pro4,
-  },
-  {
-    id: 2,
-    name: "Canon EOS R6 Mark II Mirrorless Camera",
-    price: 2299,
-    quantity: 122,
-    image: pro2,
-  },
-  {
-    id: 3,
-    name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-    price: 184.99,
-    quantity: 50,
-    image: pro3,
-  },
-  {
-    id: 5,
-    name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-    price: 11184.99,
-    quantity: 155,
-    image: pro5,
-  },
-  {
-    id: 6,
-    name: "Keychron Q1 Pro Wireless Mechanical Keyboard",
-    price: 1184.99,
-    quantity: 30,
-    image: pro6,
-  },
-];
-
-function CartItem({ item, onIncrease, onDecrease, onDelete }) {
-  return (
-    <div className="flex gap-4 border-b border-border-light p-5 last:border-b-0 dark:border-primary-medium">
-      
-      {/* Image */}
-      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-bg-main">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="h-full w-full object-cover"
-        />
-      </div>
-
-      {/* Info */}
-      <div className="min-w-0 flex-1">
-        <h2 className="font-heading text-sm font-bold text-primary-dark dark:text-text-light">
-          {item.name}
-        </h2>
-
-        <p className="mt-2 font-semibold text-accent-gold">
-          EGP {item.price.toLocaleString()}
-        </p>
-
-        {/* Quantity */}
-        <div className="mt-4 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onDecrease(item.id)}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-border-medium text-text-secondary hover:border-primary-medium hover:text-primary-dark"
-          >
-            −
-          </button>
-
-          <span className="w-5 text-center text-sm text-primary-dark dark:text-text-light">
-            {item.quantity}
-          </span>
-
-          <button
-            type="button"
-            onClick={() => onIncrease(item.id)}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-border-medium text-text-secondary hover:border-primary-medium hover:text-primary-dark"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
-      {/* Price / Delete */}
-      <div className="flex flex-col items-end justify-between">
-        <span className="whitespace-nowrap font-semibold text-primary-dark dark:text-text-light">
-          EGP {(item.price * item.quantity).toLocaleString()}
-        </span>
-
-        <button
-          type="button"
-          onClick={() => onDelete(item.id)}
-          className="text-sm text-text-secondary hover:text-red-500"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function OrderSummary({ subtotal, onCheckout }) {
-  const shipping = 0;
-  const tax = subtotal * 0.14;
-  const total = subtotal + shipping + tax;
-
-  return (
-    <div className="rounded-xl border border-border-light bg-bg-card p-6 dark:border-primary-medium dark:bg-dark-bg-card">
-      
-      <h2 className="mb-6 font-heading text-xl font-bold text-primary-dark dark:text-text-light">
-        Order Summary
-      </h2>
-
-      <div className="space-y-4">
-
-        <div className="flex justify-between">
-          <span className="text-text-secondary">
-            Subtotal
-          </span>
-
-          <span className="font-medium text-primary-dark dark:text-text-light">
-            EGP {subtotal.toLocaleString()}
-          </span>
-        </div>
-
-        <div className="flex justify-between">
-          <span className="text-text-secondary">
-            Shipping
-          </span>
-
-          <span className="font-medium text-primary-medium">
-            Free
-          </span>
-        </div>
-
-        <div className="flex justify-between">
-          <span className="text-text-secondary">
-            Tax (14%)
-          </span>
-
-          <span className="font-medium text-primary-dark dark:text-text-light">
-            EGP {tax.toLocaleString()}
-          </span>
-        </div>
-
-      </div>
-
-      <div className="my-6 border-t border-border-light dark:border-primary-medium" />
-
-      <div className="flex items-center justify-between">
-        <span className="font-heading font-bold text-primary-dark dark:text-text-light">
-          Total
-        </span>
-
-        <span className="text-xl font-bold text-accent-gold">
-          EGP {total.toLocaleString()}
-        </span>
-      </div>
-
-      <button
-        type="button"
-        onClick={onCheckout}
-        className="mt-6 w-full rounded-lg bg-primary-dark px-4 py-3 font-semibold text-text-light transition hover:bg-primary-medium"
-      >
-        Proceed to Checkout
-      </button>
-
-    </div>
-  );
-}
-
-function CouponBox() {
-  const [coupon, setCoupon] = useState("");
-
-  const handleApply = () => {
-    if (!coupon.trim()) {
-      alert("Please enter coupon code");
-      return;
-    }
-
-    alert(`Coupon "${coupon}" applied`);
-    setCoupon("");
-  };
-
-  return (
-    <div className="mt-6 rounded-xl border border-border-light bg-bg-card p-5 dark:border-primary-medium dark:bg-dark-bg-card">
-
-      <h2 className="mb-4 font-heading font-bold text-primary-dark dark:text-text-light">
-        Coupon Code
-      </h2>
-
-      <div className="flex gap-3">
-
-        <input
-          type="text"
-          value={coupon}
-          onChange={(e) => setCoupon(e.target.value)}
-          placeholder="Enter coupon code"
-          className="min-w-0 flex-1 rounded-lg border border-border-medium bg-bg-input px-4 py-3 text-sm text-primary-dark outline-none placeholder:text-text-secondary focus:border-accent-gold dark:bg-dark-bg-main dark:text-text-light"
-        />
-
-        <button
-          type="button"
-          onClick={handleApply}
-          className="rounded-lg bg-accent-gold px-6 py-3 font-semibold text-primary-dark transition hover:bg-accent-gold-hover"
-        >
-          Apply
-        </button>
-
-      </div>
-    </div>
-  );
-}
-
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-  const handleIncrease = (id) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
-          : item
-      )
-    );
-  };
+  const items = useSelector(selectCartItems) || []
+  const { subtotal, itemCount, discount, total } = useSelector(selectCartTotals)
+  const directDiscount = useSelector(selectCartDiscount) || 0
+  const effectiveDiscount = Number(discount || directDiscount || 0)
+  const appliedCoupon = useSelector(selectCartCoupon)
+  const isLoading = useSelector(selectCartLoading)
 
-  const handleDecrease = (id) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity: Math.max(item.quantity - 1, 1),
-            }
-          : item
-      )
-    );
-  };
+  useEffect(() => {
+    dispatch(fetchCartThunk())
+  }, [dispatch])
 
-  const handleDelete = (id) => {
-    setCartItems((items) =>
-      items.filter((item) => item.id !== id)
-    );
-  };
+  const handleUpdateQuantity = (payload) => {
+    dispatch(updateCartItemThunk(payload))
+  }
 
-  const handleCheckout = () => {
-    window.location.href = "/checkout";
-  };
+  const handleRemoveItem = (target) => {
+    dispatch(removeCartItemThunk(target))
+  }
 
-  const handleContinueShopping = () => {
-    window.location.href = "/products";
-  };
+  const handleApplyCoupon = async (code) => {
+    const actionResult = await dispatch(applyCouponThunk(code))
+    if (applyCouponThunk.rejected.match(actionResult)) {
+      const message = actionResult.payload || 'Invalid promo code'
+      toast.error(message)
+      return { error: message }
+    } else {
+      toast.success(`Coupon "${code}" applied successfully!`)
+      return { success: true }
+    }
+  }
 
-  const subtotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  const handleRemoveCoupon = async () => {
+    try {
+      await dispatch(removeCouponThunk()).unwrap()
+      toast.info('Coupon removed')
+    } catch {
+      dispatch(removeCoupon())
+      toast.info('Coupon removed')
+    }
+  }
+
+  const handleClearCart = () => {
+    if (window.confirm('Are you sure you want to remove all items from your cart?')) {
+      dispatch(clearCartThunk())
+    }
+  }
+
+  const handleProceedToCheckout = () => {
+    navigate('/checkout')
+  }
+
+  const isEmpty = items.length === 0
 
   return (
-    <main className="min-h-screen bg-bg-main py-10 dark:bg-dark-bg-main">
-
+    <main className="min-h-screen bg-bg-main dark:bg-dark-bg-main py-8 sm:py-12 transition-colors">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-heading text-3xl font-bold text-primary-dark dark:text-text-light">
-            Shopping Cart
-          </h1>
-
-          <p className="mt-2 text-text-secondary">
-            Review your items before checkout.
-          </p>
-        </div>
-
-        {/* Content */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-          {/* Left */}
-          <div className="lg:col-span-2">
-
-            <div className="overflow-hidden rounded-xl border border-border-light bg-bg-card dark:border-primary-medium dark:bg-dark-bg-card">
-
-              {cartItems.map((item) => (
-                <CartItem
-                  key={item.id}
-                  item={item}
-                  onIncrease={handleIncrease}
-                  onDecrease={handleDecrease}
-                  onDelete={handleDelete}
-                />
-              ))}
-
+        {/* Page Header & Navigation */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold text-text-secondary dark:text-slate-400 uppercase tracking-wider mb-1 font-heading">
+              <Link to="/products" className="hover:text-primary-dark dark:hover:text-white flex items-center gap-1 transition-colors">
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Continue Shopping
+              </Link>
             </div>
+            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-primary-dark dark:text-text-light flex items-center gap-3">
+              <ShoppingCart className="w-7 h-7 text-accent-gold shrink-0" />
+              Shopping Cart
+              {!isEmpty && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-accent-gold/15 text-accent-gold">
+                  {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                </span>
+              )}
+            </h1>
+          </div>
 
-            <CouponBox />
-
+          {!isEmpty && (
             <button
               type="button"
-              onClick={handleContinueShopping}
-              className="mt-5 text-sm font-medium text-primary-medium hover:text-primary-dark"
+              onClick={handleClearCart}
+              className="text-xs font-semibold text-text-secondary dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1.5 self-start sm:self-auto px-3 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors cursor-pointer"
             >
-              ← Continue Shopping
+              <Trash2 className="w-3.5 h-3.5" />
+              Clear Cart
             </button>
-
-          </div>
-
-          {/* Right */}
-          <div>
-            <OrderSummary
-              subtotal={subtotal}
-              onCheckout={handleCheckout}
-            />
-          </div>
-
+          )}
         </div>
+
+        {/* Content Area */}
+        {isEmpty ? (
+          <div className="bg-bg-card dark:bg-dark-bg-card rounded-3xl border border-border-light dark:border-primary-medium/30 p-8 shadow-2xs">
+            <CartEmptyState />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Left Column: Cart Items List & Coupon Box */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="overflow-hidden rounded-2xl border border-border-light dark:border-primary-medium/30 bg-bg-card dark:bg-dark-bg-card shadow-2xs">
+                <div className="p-4 sm:p-5 border-b border-border-light dark:border-primary-medium/20 flex items-center justify-between">
+                  <h2 className="font-heading text-sm font-bold text-primary-dark dark:text-text-light uppercase tracking-wider">
+                    Cart Items ({itemCount})
+                  </h2>
+                  <span className="text-xs text-text-secondary dark:text-slate-400">
+                    Prices include standard taxes
+                  </span>
+                </div>
+
+                <div>
+                  {items.map((item, index) => {
+                    const key = item.productId || item.product?._id || item._id || item.id || `cart-item-${index}`
+                    return (
+                      <CartItemRow
+                        key={key}
+                        item={item}
+                        onUpdateQuantity={handleUpdateQuantity}
+                        onRemove={handleRemoveItem}
+                        isUpdating={isLoading}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Coupon Box */}
+              <CartCouponBox
+                appliedCoupon={appliedCoupon}
+                discountAmount={effectiveDiscount}
+                onApplyCoupon={handleApplyCoupon}
+                onRemoveCoupon={handleRemoveCoupon}
+                isLoading={isLoading}
+              />
+
+              {/* Bottom Back to Products Link */}
+              <div className="pt-2">
+                <Link
+                  to="/products"
+                  className="inline-flex items-center text-sm font-bold text-primary-dark dark:text-text-light hover:text-accent-gold transition-colors font-heading"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Electronics Catalog
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Column: Order Summary & Checkout */}
+            <div className="lg:col-span-1 sticky top-24">
+              <CartOrderSummary
+                subtotal={subtotal}
+                discount={effectiveDiscount}
+                couponCode={appliedCoupon}
+                shipping={0}
+                total={total}
+                itemCount={itemCount}
+                onProceedToCheckout={handleProceedToCheckout}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        )}
       </div>
-
     </main>
-  );
+  )
 }
-
