@@ -107,18 +107,20 @@ export default function ShippingAddressForm({ showErrors = false }) {
 
   return (
     <div className="bg-bg-card dark:bg-dark-bg-card rounded-2xl border border-border-light dark:border-primary-medium/30 p-6 sm:p-8 shadow-sm space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-border-light dark:border-primary-medium/30">
-        <div>
-          <h2 className="text-lg sm:text-xl font-heading font-bold text-primary-dark dark:text-text-light">
-            Shipping & Delivery Details
-          </h2>
-          <p className="text-xs text-text-secondary dark:text-slate-400 mt-0.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 pb-4 border-b border-border-light dark:border-primary-medium/30">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h2 className="text-lg sm:text-xl font-heading font-bold text-primary-dark dark:text-text-light">
+              Shipping & Delivery Details
+            </h2>
+            <Badge variant="gold" size="sm" dot className="shrink-0">
+              Egypt Delivery
+            </Badge>
+          </div>
+          <p className="text-xs text-text-secondary dark:text-slate-400">
             Select a saved address or enter a new destination for fast delivery across Egypt
           </p>
         </div>
-        <Badge variant="gold" size="sm" dot>
-          Egypt Delivery
-        </Badge>
       </div>
 
       {/* 1. Saved Addresses Selector (synced with orders & profile) */}

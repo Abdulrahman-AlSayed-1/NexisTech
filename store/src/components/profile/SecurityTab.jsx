@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import { Lock, Eye, EyeOff, ShieldCheck, Mail, ArrowLeft, KeyRound, RefreshCw } from 'lucide-react'
 
 import Button from '@/components/common/Button'
-import { selectCurrentUser } from '@/store/slices/authSlice'
-import { loginUser, sendForgotPasswordOtp, verifyForgotPasswordOtp } from '@/api/auth'
+import {
+  selectCurrentUser,
+  requestPasswordChangeOtpThunk,
+  resendPasswordOtpThunk,
+  verifyPasswordChangeOtpThunk,
+} from '@/store/slices/authSlice'
 
 /**
  * SecurityTab Component
@@ -13,6 +17,7 @@ import { loginUser, sendForgotPasswordOtp, verifyForgotPasswordOtp } from '@/api
  * Validates current password, sends a 6-digit verification code, and updates the database.
  */
 export default function SecurityTab() {
+  const dispatch = useDispatch()
   const currentUser = useSelector(selectCurrentUser)
 
   const [step, setStep] = useState('form') // 'form' | 'otp'
@@ -73,26 +78,18 @@ export default function SecurityTab() {
 
     try {
       setIsLoading(true)
-
-      // 1. Verify current credentials against the backend
-      try {
-        await loginUser({
+      await dispatch(
+        requestPasswordChangeOtpThunk({
           email,
-          password: passwordData.currentPassword,
+          currentPassword: passwordData.currentPassword,
         })
-      } catch {
-        toast.error('Current password is incorrect. Please try again.')
-        return
-      }
-
-      // 2. Request real backend password update OTP
-      await sendForgotPasswordOtp({ email })
+      ).unwrap()
 
       toast.success(`Verification code sent to ${email}`)
       setStep('otp')
       setCountdown(60)
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to initiate password update.'
+      const msg = typeof err === 'string' ? err : err?.message || 'Failed to initiate password update.'
       toast.error(msg)
     } finally {
       setIsLoading(false)
@@ -114,18 +111,20 @@ export default function SecurityTab() {
     try {
       setIsLoading(true)
 
-      await verifyForgotPasswordOtp({
-        email,
-        otp: cleanOtp,
-        newPassword: passwordData.newPassword,
-      })
+      await dispatch(
+        verifyPasswordChangeOtpThunk({
+          email,
+          otp: cleanOtp,
+          newPassword: passwordData.newPassword,
+        })
+      ).unwrap()
 
       toast.success('Password updated successfully!')
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
       setOtp('')
       setStep('form')
     } catch (err) {
-      const msg = err.response?.data?.message || 'Invalid or expired verification code.'
+      const msg = typeof err === 'string' ? err : err?.message || 'Invalid or expired verification code.'
       toast.error(msg)
     } finally {
       setIsLoading(false)
@@ -137,11 +136,14 @@ export default function SecurityTab() {
 
     try {
       setIsResending(true)
-      await sendForgotPasswordOtp({ email: currentUser?.email })
+      await dispatch(
+        resendPasswordOtpThunk({ email: currentUser?.email })
+      ).unwrap()
       toast.info('A fresh verification code has been sent.')
       setCountdown(60)
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to resend code.')
+      const msg = typeof err === 'string' ? err : err?.message || 'Failed to resend code.'
+      toast.error(msg)
     } finally {
       setIsResending(false)
     }

@@ -50,26 +50,26 @@ export default function OrderCard({ order }) {
   return (
     <article className="rounded-2xl border border-border-light dark:border-primary-medium/25 bg-bg-card dark:bg-dark-bg-card p-4 sm:p-5 shadow-xs transition-all duration-200 hover:border-accent-gold/60 dark:hover:border-accent-gold/60 hover:shadow-md">
       {/* Top Header Row */}
-      <div className="flex items-center justify-between gap-3 border-b border-border-light/70 dark:border-primary-medium/20 pb-3">
-        <div className="flex items-center gap-2.5 flex-wrap">
+      <div className="flex items-center justify-between gap-2.5 sm:gap-4 border-b border-border-light/70 dark:border-primary-medium/20 pb-3">
+        <div className="flex items-center gap-2 min-w-0 flex-wrap sm:flex-nowrap">
           <Link
             to={`/profile/orders/${orderId}`}
-            className="font-mono text-sm font-bold text-text-primary dark:text-text-light hover:text-accent-gold dark:hover:text-accent-gold transition-colors focus:outline-none focus:underline"
+            className="font-mono text-xs sm:text-sm font-bold text-text-primary dark:text-text-light hover:text-accent-gold dark:hover:text-accent-gold transition-colors focus:outline-none focus:underline shrink-0"
           >
             #{String(orderId).slice(-8).toUpperCase()}
           </Link>
-          <Badge status={status} size="sm" dot>
+          <Badge status={status} size="sm" dot className="shrink-0">
             {status}
           </Badge>
           {placedDate && (
-            <span className="hidden sm:inline-block text-xs text-text-secondary">
+            <span className="hidden sm:inline-block text-xs text-text-secondary shrink-0">
               · {placedDate}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="font-heading font-bold text-base sm:text-lg text-primary-dark dark:text-text-gold">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <span className="font-heading font-bold text-sm sm:text-base md:text-lg text-primary-dark dark:text-text-gold whitespace-nowrap">
             {formatCurrency(total)}
           </span>
           <button
@@ -77,7 +77,7 @@ export default function OrderCard({ order }) {
             onClick={() => setIsExpanded((prev) => !prev)}
             aria-expanded={isExpanded}
             aria-label={isExpanded ? 'Collapse order products' : 'Expand order products'}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-text-secondary hover:text-accent-gold hover:bg-bg-input/70 dark:hover:bg-primary-medium/25 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent-gold"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-text-secondary hover:text-accent-gold hover:bg-bg-input/70 dark:hover:bg-primary-medium/25 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent-gold shrink-0"
           >
             <ChevronDown
               className={`h-4 w-4 transition-transform duration-300 ${

@@ -224,7 +224,7 @@ export default function Carts() {
           {[1, 2, 3].map((n) => (
             <div
               key={n}
-              className="bg-white dark:bg-[var(--color-dark-bg-card)] p-6 rounded-2xl border border-border-light dark:border-white/10 animate-pulse space-y-4"
+              className="bg-white dark:bg-dark-bg-card p-6 rounded-2xl border border-border-light dark:border-white/10 animate-pulse space-y-4"
             >
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -244,7 +244,7 @@ export default function Carts() {
 
       {/* Empty State */}
       {!isLoading && !error && filteredCarts.length === 0 && (
-        <div className="bg-white dark:bg-[var(--color-dark-bg-card)] p-12 rounded-3xl border border-border-light dark:border-white/10 text-center flex flex-col items-center justify-center space-y-3">
+        <div className="bg-white dark:bg-dark-bg-card p-12 rounded-3xl border border-border-light dark:border-white/10 text-center flex flex-col items-center justify-center space-y-3">
           <div className="w-16 h-16 rounded-2xl bg-primary-dark/5 dark:bg-white/5 text-text-secondary dark:text-slate-400 flex items-center justify-center">
             <ShoppingCart className="w-8 h-8 stroke-[1.5]" />
           </div>
@@ -295,7 +295,7 @@ export default function Carts() {
           pageSize={pageSize}
           itemLabel="carts"
           onPageChange={(newPage) => dispatch(setPage(newPage))}
-          className="p-4 bg-white dark:bg-[var(--color-dark-bg-card)] rounded-2xl border border-border-light dark:border-white/10 shadow-xs"
+          className="p-4 bg-white dark:bg-dark-bg-card rounded-2xl border border-border-light dark:border-white/10 shadow-xs"
         />
       )}
 

@@ -35,6 +35,7 @@ import {
   selectProductDetailLoading,
   selectProductsError,
   clearSelectedProduct,
+  addProductReviewThunk,
 } from '@/store/slices/productsSlice'
 import { addToCartThunk } from '@/store/slices/cartSlice'
 import {
@@ -45,7 +46,6 @@ import {
 
 import { formatCurrency, calculateDiscountPercentage, formatDate } from '@/utils/formatters'
 import { getProductId, extractProductImages } from '@/utils/productUtils'
-import { addProductReview } from '@/api/products'
 
 /**
  * ProductDetailPage Component
@@ -99,10 +99,9 @@ export default function ProductDetailPage() {
     }
   }, [dispatch, id])
 
-  // Ensure catalog has items for related products recommendation
   useEffect(() => {
     if (catalogProducts.length === 0) {
-      dispatch(fetchStoreProducts({ limit: 50 }))
+      dispatch(fetchStoreProducts())
     }
   }, [dispatch, catalogProducts.length])
 
@@ -207,6 +206,7 @@ export default function ProductDetailPage() {
       navigate('/checkout')
     } catch (err) {
       toast.error(err || 'Failed to proceed to checkout')
+    } finally {
       setIsBuyingNow(false)
     }
   }
@@ -242,19 +242,21 @@ export default function ProductDetailPage() {
 
     try {
       setIsSubmittingReview(true)
-      await addProductReview(productId, {
-        rating: reviewRating,
-        comment: reviewComment.trim(),
-      })
+      await dispatch(
+        addProductReviewThunk({
+          productId,
+          reviewData: {
+            rating: reviewRating,
+            comment: reviewComment.trim(),
+          },
+        })
+      ).unwrap()
       toast.success('Review submitted successfully! Thank you for your feedback.')
       setIsReviewModalOpen(false)
       setReviewComment('')
       setReviewRating(5)
-      dispatch(fetchProductById(productId))
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || err.message || 'Failed to submit review'
-      )
+      toast.error(err || 'Failed to submit review')
     } finally {
       setIsSubmittingReview(false)
     }
@@ -591,7 +593,7 @@ export default function ProductDetailPage() {
                   onClick={handleBuyNow}
                   disabled={isOutOfStock || isBuyingNow}
                   isLoading={isBuyingNow}
-                  className="w-full justify-center shadow-md cursor-pointer font-bold text-sm bg-primary-dark hover:bg-primary-medium text-white"
+                  className="w-full justify-center shadow-md cursor-pointer font-bold text-sm"
                 >
                   <Zap className="w-4 h-4 mr-2 text-accent-gold" />
                   Buy Now
@@ -636,39 +638,27 @@ export default function ProductDetailPage() {
         {/* Tabbed Overview, Specs, Reviews */}
         <div id="details-tabs" className="mt-16 sm:mt-20">
           <div className="flex border-b border-border-light dark:border-primary-medium/30 gap-2 sm:gap-6 overflow-x-auto">
-            <button
-              type="button"
-              onClick={() => setActiveTab('overview')}
-              className={`pb-4 text-sm sm:text-base font-bold font-heading transition-colors cursor-pointer border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'overview'
-                  ? 'border-accent-gold text-accent-gold'
-                  : 'border-transparent text-text-secondary hover:text-text-primary dark:text-slate-400 dark:hover:text-text-light'
-              }`}
-            >
-              <Cpu className="w-4 h-4" /> Overview & Features
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('specs')}
-              className={`pb-4 text-sm sm:text-base font-bold font-heading transition-colors cursor-pointer border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'specs'
-                  ? 'border-accent-gold text-accent-gold'
-                  : 'border-transparent text-text-secondary hover:text-text-primary dark:text-slate-400 dark:hover:text-text-light'
-              }`}
-            >
-              <Layers className="w-4 h-4" /> Technical Specifications
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('reviews')}
-              className={`pb-4 text-sm sm:text-base font-bold font-heading transition-colors cursor-pointer border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'reviews'
-                  ? 'border-accent-gold text-accent-gold'
-                  : 'border-transparent text-text-secondary hover:text-text-primary dark:text-slate-400 dark:hover:text-text-light'
-              }`}
-            >
-              <MessageSquare className="w-4 h-4" /> Verified Reviews ({reviewsCount})
-            </button>
+            {[
+              { id: 'overview', label: 'Overview & Features', icon: Cpu },
+              { id: 'specs',    label: 'Technical Specifications', icon: Layers },
+              { id: 'reviews',  label: `Verified Reviews (${reviewsCount})`, icon: MessageSquare },
+            ].map((tab) => {
+              const TabIcon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`pb-4 text-sm sm:text-base font-bold font-heading transition-colors cursor-pointer border-b-2 -mb-px flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'border-accent-gold text-accent-gold'
+                      : 'border-transparent text-text-secondary hover:text-text-primary dark:text-slate-400 dark:hover:text-text-light'
+                  }`}
+                >
+                  <TabIcon className="w-4 h-4" /> {tab.label}
+                </button>
+              )
+            })}
           </div>
 
           {activeTab === 'overview' && (

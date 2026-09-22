@@ -253,7 +253,7 @@ function OrdersPage() {
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-[var(--color-text-gold)]">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-text-gold">
               Admin · Management
             </p>
             <Badge variant="success" size="sm">
@@ -287,7 +287,7 @@ function OrdersPage() {
             value={searchTerm}
             onChange={(event) => handleSearchChange(event.target.value)}
             placeholder="Search ID, customer..."
-            className="w-full rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] py-3 pl-11 pr-4 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-accent-gold)] dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/30 dark:placeholder:text-slate-300 dark:text-white"
+            className="w-full rounded-2xl border border-border-light bg-bg-card py-3 pl-11 pr-4 text-sm text-text-primary outline-none focus:border-accent-gold dark:bg-dark-bg-main dark:border-primary-medium/30 dark:placeholder:text-slate-300 dark:text-white"
           />
         </div>
 
@@ -326,22 +326,22 @@ function OrdersPage() {
       </div>
 
       {isLoading && (
-        <div className="rounded-2xl bg-[var(--color-bg-card)] dark:bg-[var(--color-dark-bg-card)] px-6 py-12 text-center text-sm text-[var(--color-text-secondary)] dark:text-slate-400 shadow-sm border border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30">
+        <div className="rounded-2xl bg-bg-card dark:bg-dark-bg-card px-6 py-12 text-center text-sm text-text-secondary dark:text-slate-400 shadow-sm border border-border-light dark:border-primary-medium/30">
           Loading orders...
         </div>
       )}
 
       {error && !isLoading && (
-        <div className="rounded-2xl bg-[var(--color-bg-card)] dark:bg-[var(--color-dark-bg-card)] px-6 py-12 text-center text-sm text-red-500 shadow-sm border border-red-200 dark:border-red-900/40">
+        <div className="rounded-2xl bg-bg-card dark:bg-dark-bg-card px-6 py-12 text-center text-sm text-red-500 shadow-sm border border-red-200 dark:border-red-900/40">
           {error}
         </div>
       )}
 
       
       {!isLoading && !error && (
-        <div className="overflow-x-auto rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] shadow-sm dark:border-[var(--color-primary-medium)]/30 dark:bg-[var(--color-dark-bg-card)]">
+        <div className="overflow-x-auto rounded-2xl border border-border-light bg-bg-card shadow-sm dark:border-primary-medium/30 dark:bg-dark-bg-card">
           <div className="min-w-[720px]">
-            <div className="grid grid-cols-6 gap-4 bg-[var(--color-bg-main)] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)] dark:bg-[var(--color-dark-bg-main)] dark:text-[var(--color-text-gold)] text-center">
+            <div className="grid grid-cols-6 gap-4 bg-bg-main px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-text-secondary dark:bg-dark-bg-main dark:text-text-gold text-center">
               <span>Order</span>
               <span>Customer</span>
               <span>Date</span>
@@ -351,7 +351,7 @@ function OrdersPage() {
             </div>
 
             {paginatedOrders.length === 0 && (
-              <div className="px-6 py-10 text-center text-sm text-[var(--color-text-secondary)] dark:text-slate-400 dark:bg-[var(--color-dark-bg-card)]">
+              <div className="px-6 py-10 text-center text-sm text-text-secondary dark:text-slate-400 dark:bg-dark-bg-card">
                 No orders match your search or filters.
               </div>
             )}
@@ -361,11 +361,11 @@ function OrdersPage() {
                 key={order.originalId || order.id}
                 type="button"
                 onClick={() => handleOpenOrder(order)}
-                className="grid w-full grid-cols-6 items-center gap-4 whitespace-nowrap border-t border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/20 px-6 py-4 text-center transition-colors hover:bg-[var(--color-bg-main)] dark:bg-[var(--color-dark-bg-card)] dark:hover:bg-[var(--color-primary-medium)]/25 group cursor-pointer"
+                className="grid w-full grid-cols-6 items-center gap-4 whitespace-nowrap border-t border-border-light dark:border-primary-medium/20 px-6 py-4 text-center transition-colors hover:bg-bg-main dark:bg-dark-bg-card dark:hover:bg-primary-medium/25 group cursor-pointer"
               >
                 {/* 1. Order ID & Note Indicator */}
                 <div className="flex items-center justify-center gap-1.5 min-w-0">
-                  <span className="font-mono text-sm font-semibold text-[var(--color-text-gold)]">
+                  <span className="font-mono text-sm font-semibold text-text-gold">
                     {order.id}
                   </span>
 
@@ -387,7 +387,7 @@ function OrdersPage() {
                           })
                         }}
                         onMouseLeave={() => setHoveredNote(null)}
-                        className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--color-accent-gold)]/15 text-[var(--color-accent-gold)] border border-[var(--color-accent-gold)]/30 hover:bg-[var(--color-accent-gold)]/25 transition-colors cursor-help"
+                        className="flex h-5 w-5 items-center justify-center rounded-md bg-accent-gold/15 text-accent-gold border border-accent-gold/30 hover:bg-accent-gold/25 transition-colors cursor-help"
                       >
                         <FileText className="w-3 h-3" />
                       </span>
@@ -397,13 +397,13 @@ function OrdersPage() {
 
                 {/* 2. Customer Avatar */}
                 <div className="flex items-center justify-center">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-bg-input)] text-sm font-bold text-[var(--color-primary-dark)] dark:bg-[var(--color-primary-medium)]/50 dark:text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-input text-sm font-bold text-primary-dark dark:bg-primary-medium/50 dark:text-white">
                     {order.customer}
                   </span>
                 </div>
 
                 {/* 3. Date */}
-                <span className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-slate-200 text-center">
+                <span className="text-sm font-medium text-text-secondary dark:text-slate-200 text-center">
                   {order.date}
                 </span>
 
@@ -414,7 +414,7 @@ function OrdersPage() {
 
                 {/* 5. Payment */}
                 <div className="flex flex-col items-center justify-center gap-1 text-center">
-                  <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)] dark:text-white">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-text-primary dark:text-white">
                     {renderPaymentMethodIcon(order.method)}
                     <span>{order.method || 'Cash'}</span>
                   </div>
@@ -423,7 +423,7 @@ function OrdersPage() {
                 </div>
 
                 {/* 6. Total */}
-                <span className="text-sm font-bold text-[var(--color-text-primary)] dark:text-white text-center">
+                <span className="text-sm font-bold text-text-primary dark:text-white text-center">
                   {formatCurrency(order.total, currency)}
                 </span>
               </button>
@@ -476,7 +476,7 @@ function OrdersPage() {
 
             return (
               <div
-                className="pointer-events-none fixed z-50 flex flex-col items-start w-64 p-3 rounded-2xl bg-white/95 dark:bg-[var(--color-dark-bg-card)]/95 backdrop-blur-md text-[var(--color-text-primary)] dark:text-white text-xs shadow-[0_18px_38px_-6px_rgba(47,72,66,0.22)] dark:shadow-[0_20px_45px_rgba(0,0,0,0.65)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40 ring-1 ring-black/5 dark:ring-white/10 transition-all text-left"
+                className="pointer-events-none fixed z-50 flex flex-col items-start w-64 p-3 rounded-2xl bg-white/95 dark:bg-dark-bg-card/95 backdrop-blur-md text-text-primary dark:text-white text-xs shadow-[0_18px_38px_-6px_rgba(47,72,66,0.22)] dark:shadow-[0_20px_45px_rgba(0,0,0,0.65)] border border-border-medium dark:border-primary-medium/40 ring-1 ring-black/5 dark:ring-white/10 transition-all text-left"
                 style={{
                   top: `${top}px`,
                   left: `${clampedX}px`,
@@ -486,9 +486,9 @@ function OrdersPage() {
                 }}
               >
                 {/* Header bar */}
-                <div className="flex items-center justify-between w-full pb-2 mb-2 border-b border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] dark:text-slate-400 font-heading">
+                <div className="flex items-center justify-between w-full pb-2 mb-2 border-b border-border-light dark:border-primary-medium/30 text-[10px] font-bold uppercase tracking-widest text-text-secondary dark:text-slate-400 font-heading">
                   <span>Order Notes</span>
-                  <span className="text-[var(--color-text-gold)] font-mono font-semibold">
+                  <span className="text-text-gold font-mono font-semibold">
                     {hoveredNote.order.id}
                   </span>
                 </div>
@@ -497,10 +497,10 @@ function OrdersPage() {
                 {hoveredNote.order.adminNote && (
                   <div className="w-full rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 p-2.5 shadow-2xs">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="flex h-4 w-4 items-center justify-center rounded-md bg-amber-500/20 text-amber-700 dark:text-[var(--color-text-gold)]">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-md bg-amber-500/20 text-amber-700 dark:text-text-gold">
                         <FileText className="w-2.5 h-2.5" />
                       </span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-[var(--color-text-gold)] font-heading">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-text-gold font-heading">
                         Internal Admin Note
                       </span>
                     </div>
@@ -531,9 +531,9 @@ function OrdersPage() {
 
                 {/* Tooltip arrow matching light and dark surface + border */}
                 {showBelow ? (
-                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-white dark:bg-[var(--color-dark-bg-card)] border-l border-t border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40" />
+                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-white dark:bg-dark-bg-card border-l border-t border-border-medium dark:border-primary-medium/40" />
                 ) : (
-                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-white dark:bg-[var(--color-dark-bg-card)] border-r border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40" />
+                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-white dark:bg-dark-bg-card border-r border-b border-border-medium dark:border-primary-medium/40" />
                 )}
               </div>
             )

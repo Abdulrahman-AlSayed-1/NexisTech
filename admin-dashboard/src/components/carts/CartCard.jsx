@@ -68,7 +68,7 @@ export default function CartCard({
   }
 
   return (
-    <div className="bg-white dark:bg-[var(--color-dark-bg-card)] rounded-2xl border border-border-light dark:border-white/10 shadow-xs hover:border-primary-medium/30 transition-all overflow-hidden">
+    <div className="bg-white dark:bg-dark-bg-card rounded-2xl border border-border-light dark:border-white/10 shadow-xs hover:border-primary-medium/30 transition-all overflow-hidden">
       {/* Card Header */}
       <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Customer Info */}

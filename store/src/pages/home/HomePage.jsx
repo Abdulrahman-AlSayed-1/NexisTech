@@ -20,10 +20,10 @@ export default function HomePage() {
 
   return (
    <div className="w-full">
-      <section className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 -mt-6 sm:-mt-8 bg-[radial-gradient(circle_at_center,var(--color-primary-medium)_0%,var(--color-primary-dark)_100%)] dark:bg-[radial-gradient(circle_at_center,var(--color-primary-medium)/30_0%,var(--color-primary-dark)_100%)] text-text-light py-16 sm:py-24 px-4 sm:px-16 lg:px-32 overflow-hidden transition-colors duration-500 shadow-inner border-b border-white/5">
+      <section className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 -mt-6 sm:-mt-8 bg-radial from-primary-medium to-primary-dark dark:from-primary-medium/30 dark:to-primary-dark text-text-light py-16 sm:py-24 px-4 sm:px-16 lg:px-32 overflow-hidden transition-colors duration-500 shadow-inner border-b border-white/5">
         <div className="absolute inset-0 opacity-[0.08] mix-blend-overlay bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-size-[45px_45px] mask-[radial-gradient(circle_at_center,black_40%,transparent_85%)] [-webkit-mask-image:radial-gradient(circle_at_center,black_40%,transparent_85%)]" />
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-accent-gold)/5_0%,transparent_65%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-radial from-accent-gold/5 to-transparent pointer-events-none" />
         <div className="max-w-7xl mx-auto flex flex-col items-start text-left space-y-7 relative z-10">
           
           <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-heading font-bold uppercase tracking-wider text-accent-gold backdrop-blur-md shadow-2xs hover:border-white/20 transition-all duration-300">
@@ -55,7 +55,7 @@ export default function HomePage() {
                 const catSection = document.getElementById('catSection')
                 if (catSection) catSection.scrollIntoView({ behavior: 'smooth' })
               }}
-              className="border-white hover:bg-white/5 hover:border-white/50"
+              className="border border-white/20 hover:bg-white/5 hover:border-white/50"
             >
               Browse Categories
             </Button>

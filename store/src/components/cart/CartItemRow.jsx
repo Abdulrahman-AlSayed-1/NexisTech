@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { Trash2, Minus, Plus } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatters'
 import { extractProductImages, getCartItemId, getProductId } from '@/utils/productUtils'
-import { selectProducts } from '@/store/slices/productsSlice'
-import { getProductById } from '@/api/products'
+import { selectProducts, fetchProductById } from '@/store/slices/productsSlice'
 
 /**
  * CartItemRow Component
@@ -17,6 +16,7 @@ export default function CartItemRow({
   onRemove,
   isUpdating = false,
 }) {
+  const dispatch = useDispatch()
   const catalogProducts = useSelector(selectProducts) || []
   const product = item?.product || item || {}
   const productId = item ? getCartItemId(item) : ''
@@ -32,7 +32,8 @@ export default function CartItemRow({
       (!catalogProduct || catalogProduct.stock === undefined) &&
       productId
     ) {
-      getProductById(productId)
+      dispatch(fetchProductById(productId))
+        .unwrap()
         .then((res) => {
           const p = res?.product || res?.data || res
           if (p && p.stock !== undefined) {
@@ -41,7 +42,7 @@ export default function CartItemRow({
         })
         .catch(() => {})
     }
-  }, [item, productId, product.stock, catalogProduct])
+  }, [dispatch, item, productId, product.stock, catalogProduct])
 
   if (!item) return null
 
@@ -113,7 +114,7 @@ export default function CartItemRow({
       </div>
 
       {/* Stepper, Subtotal, & Delete */}
-      <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-light dark:border-primary-medium/20">
+      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-light dark:border-primary-medium/20">
         {/* Quantity Stepper & Stock Limit Warning */}
         <div className="flex flex-col items-end sm:items-center">
           <div className="inline-flex items-center rounded-xl bg-bg-main dark:bg-dark-bg-main border border-border-medium dark:border-primary-medium/50 p-0.5">

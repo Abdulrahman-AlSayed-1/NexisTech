@@ -32,7 +32,7 @@ export default function CategorySection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {CATEGORIES.map((item) => {
             const Icon = item.icon
             const count = categoryCounts?.[item.id] || 0
@@ -40,7 +40,7 @@ export default function CategorySection() {
               <div
                 key={item.id}
                 onClick={() => navigate(`/products?subcategory=${item.id}`)}
-                className="group bg-bg-card dark:bg-dark-bg-card rounded-2xl border border-border-light dark:border-primary-medium/10 p-6 flex flex-col items-center justify-center text-center shadow-xs hover:shadow-md hover:border-accent-gold dark:hover:border-accent-gold active:scale-[0.98] transition-all duration-300 cursor-pointer"
+                className="group bg-bg-card dark:bg-dark-bg-card rounded-2xl border border-border-light dark:border-primary-medium/10 p-4 sm:p-6 flex flex-col items-center justify-center text-center shadow-xs hover:shadow-md hover:border-accent-gold dark:hover:border-accent-gold active:scale-[0.98] transition-all duration-300 cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-xl bg-bg-main dark:bg-primary-medium/20 text-primary-dark dark:text-accent-gold flex items-center justify-center transition-all duration-300 shadow-2xs group-hover:bg-bg-input/50 dark:group-hover:bg-primary-medium/30">
                   <Icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />

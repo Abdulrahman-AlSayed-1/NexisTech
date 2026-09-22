@@ -1,5 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { loginUser, sendRegisterOtp, logoutUser } from '@/api/auth'
+import {
+  loginUser,
+  sendRegisterOtp,
+  logoutUser,
+  sendForgotPasswordOtp,
+  verifyForgotPasswordOtp,
+} from '@/api/auth'
 import { updateUserProfile } from '@/api/user'
 
 export const logoutThunk = createAsyncThunk(
@@ -59,6 +65,72 @@ export const updateAvatarThunk = createAsyncThunk(
       const message =
         err.response?.data?.message || err.message || 'Failed to update avatar'
       return rejectWithValue(message)
+    }
+  }
+)
+
+export const updateUserProfileThunk = createAsyncThunk(
+  'auth/updateUserProfile',
+  async (payload, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const { auth } = getState()
+      const userId = auth.user?._id || auth.user?.id
+      if (userId) {
+        try {
+          await updateUserProfile(userId, payload)
+        } catch (err) {
+          console.warn('Backend user profile update warning:', err)
+        }
+      }
+      dispatch(authSlice.actions.updateUser(payload))
+      return payload
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Failed to update profile'
+      )
+    }
+  }
+)
+
+export const requestPasswordChangeOtpThunk = createAsyncThunk(
+  'auth/requestPasswordChangeOtp',
+  async ({ email, currentPassword }, { rejectWithValue }) => {
+    try {
+      await loginUser({ email, password: currentPassword })
+      const data = await sendForgotPasswordOtp({ email })
+      return data
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Current password incorrect or failed to send OTP.'
+      )
+    }
+  }
+)
+
+export const resendPasswordOtpThunk = createAsyncThunk(
+  'auth/resendPasswordOtp',
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      const data = await sendForgotPasswordOtp({ email })
+      return data
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Failed to resend verification code.'
+      )
+    }
+  }
+)
+
+export const verifyPasswordChangeOtpThunk = createAsyncThunk(
+  'auth/verifyPasswordChangeOtp',
+  async ({ email, otp, newPassword }, { rejectWithValue }) => {
+    try {
+      const data = await verifyForgotPasswordOtp({ email, otp, newPassword })
+      return data
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Invalid or expired OTP code.'
+      )
     }
   }
 )

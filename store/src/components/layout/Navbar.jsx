@@ -237,7 +237,7 @@ export default function Navbar() {
             {/* User Button (Navigates to Profile or Login) */}
             <button
               onClick={isAuthenticated ? handleProfileNavigation : handleLoginNavigation}
-              className="flex items-center gap-1.5 h-8 px-3.5 border border-accent-gold/40 rounded-full bg-accent-gold hover:bg-accent-gold-hover text-primary-dark font-heading font-semibold text-xs shadow-2xs transition-all cursor-pointer select-none"
+              className="flex items-center gap-1.5 h-8 px-2 sm:px-3.5 border border-accent-gold/40 rounded-full bg-accent-gold hover:bg-accent-gold-hover text-primary-dark font-heading font-semibold text-xs shadow-2xs transition-all cursor-pointer select-none"
               aria-label={isAuthenticated ? 'My Profile' : 'Sign In'}
             >
               {isAuthenticated && userAvatar ? (
@@ -249,7 +249,7 @@ export default function Navbar() {
               ) : (
                 <User className="w-3.5 h-3.5 shrink-0" />
               )}
-              <span className="truncate max-w-[100px]">{isAuthenticated ? displayName : 'Login'}</span>
+              <span className="hidden sm:inline truncate max-w-[100px]">{isAuthenticated ? displayName : 'Login'}</span>
             </button>
           </div>
         </div>

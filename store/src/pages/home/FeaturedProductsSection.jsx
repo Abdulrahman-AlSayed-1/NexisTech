@@ -1,24 +1,29 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Loader2 } from 'lucide-react'
 
 import ProductCard from '@/components/products/ProductCard'
+import Pagination from '@/components/common/Pagination'
 import {
   fetchFeaturedProducts,
   selectFeaturedProducts,
   selectFeaturedLoading,
 } from '@/store/slices/productsSlice'
 
+const PAGE_SIZE = 8
+
 export default function FeaturedProductsSection() {
   const dispatch = useDispatch()
   const featuredProducts = useSelector(selectFeaturedProducts)
   const isLoading = useSelector(selectFeaturedLoading)
   const sliderRef = useRef(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     dispatch(fetchFeaturedProducts())
   }, [dispatch])
+
 
   // Auto-scroll on mobile only — cleanup on unmount
   useEffect(() => {
@@ -39,6 +44,13 @@ export default function FeaturedProductsSection() {
     const timer = setInterval(tick, 3000)
     return () => clearInterval(timer)
   }, [featuredProducts, isLoading])
+
+  const totalPages = Math.max(1, Math.ceil(featuredProducts.length / PAGE_SIZE))
+  const safePage = Math.min(currentPage, totalPages)
+  const paginatedProducts = featuredProducts.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  )
 
   if (isLoading) {
     return (
@@ -83,7 +95,7 @@ export default function FeaturedProductsSection() {
           ref={sliderRef}
           className="flex overflow-x-auto md:grid md:grid-cols-3 lg:grid-cols-4 gap-6 pb-4 md:pb-0 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {featuredProducts.slice(0, 8).map((product) => (
+          {paginatedProducts.map((product) => (
             <div
               key={product._id || product.id}
               className="w-full max-sm:w-65 shrink-0 snap-center"
@@ -92,6 +104,23 @@ export default function FeaturedProductsSection() {
             </div>
           ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={featuredProducts.length}
+              pageSize={PAGE_SIZE}
+              itemLabel="featured products"
+              onPageChange={(page) => {
+                setCurrentPage(page)
+                sliderRef.current?.scrollTo({ left: 0 })
+              }}
+            />
+          </div>
+        )}
       </div>
     </section>
   )

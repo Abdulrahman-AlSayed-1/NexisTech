@@ -16,7 +16,7 @@ export default function CartFilters({
   onSortChange,
 }) {
   return (
-    <div className="bg-white dark:bg-[var(--color-dark-bg-card)] p-4 rounded-2xl border border-border-light dark:border-white/10 shadow-xs flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
+    <div className="bg-white dark:bg-dark-bg-card p-4 rounded-2xl border border-border-light dark:border-white/10 shadow-xs flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
       {/* Search Input */}
       <div className="relative flex-1 max-w-md">
         <Search className="w-4 h-4 text-text-secondary dark:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />

@@ -51,10 +51,10 @@ export default function Dropdown({
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
-        className={`flex w-full items-center justify-between gap-3 rounded-2xl border bg-[var(--color-bg-card)] px-4 py-3 text-left text-sm text-[var(--color-text-primary)] outline-none transition-colors dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/30 dark:text-white ${
+        className={`flex w-full items-center justify-between gap-3 rounded-2xl border bg-bg-card px-4 py-3 text-left text-sm text-text-primary outline-none transition-colors dark:bg-dark-bg-main dark:border-primary-medium/30 dark:text-white ${
           isOpen
-            ? 'border-[var(--color-accent-gold)] ring-2 ring-[var(--color-accent-gold)]/20'
-            : 'border-[var(--color-border-light)] hover:border-[var(--color-accent-gold)]'
+            ? 'border-accent-gold ring-2 ring-accent-gold/20'
+            : 'border-border-light hover:border-accent-gold'
         }`}
       >
         <span className="truncate">
@@ -62,14 +62,14 @@ export default function Dropdown({
         </span>
 
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-[var(--color-text-secondary)] dark:text-slate-400 transition-transform duration-200  ${
+          className={`h-4 w-4 shrink-0 text-text-secondary dark:text-slate-400 transition-transform duration-200  ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-bg-card)] p-1 shadow-xl dark:bg-[var(--color-dark-bg-card)] dark:border-[var(--color-primary-medium)]/40">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border-light bg-bg-card p-1 shadow-xl dark:bg-dark-bg-card dark:border-primary-medium/40">
           {normalizedOptions.map((option) => {
             const isSelected = option.value === value
 
@@ -80,13 +80,13 @@ export default function Dropdown({
                 onClick={() => handleSelect(option)}
                 className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition-colors cursor-pointer ${
                   isSelected
-                    ? 'bg-[var(--color-primary-medium)] text-white font-semibold'
-                    : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-input)] dark:text-slate-200 dark:hover:bg-[var(--color-primary-medium)]/30 dark:hover:text-white'
+                    ? 'bg-primary-medium text-white font-semibold'
+                    : 'text-text-primary hover:bg-bg-input dark:text-slate-200 dark:hover:bg-primary-medium/30 dark:hover:text-white'
                 }`}
               >
                 <span>{option.label}</span>
 
-                {isSelected && <Check className="h-4 w-4 text-[var(--color-text-gold)]" />}
+                {isSelected && <Check className="h-4 w-4 text-text-gold" />}
               </button>
             )
           })}

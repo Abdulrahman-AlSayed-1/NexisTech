@@ -4,8 +4,7 @@ import { toast } from 'react-toastify'
 import { User, Mail, Phone, Save, Camera, Trash2 } from 'lucide-react'
 
 import Button from '@/components/common/Button'
-import { selectCurrentUser, updateUser, updateAvatarThunk } from '@/store/slices/authSlice'
-import { updateUserProfile } from '@/api/user'
+import { selectCurrentUser, updateUserProfileThunk, updateAvatarThunk } from '@/store/slices/authSlice'
 import AvatarModal from '@/components/profile/AvatarModal'
 
 /**
@@ -72,21 +71,10 @@ export default function PersonalInfoTab() {
         phone: formData.phone.trim(),
       }
 
-      // Try server sync if user ID exists
-      const userId = currentUser?._id || currentUser?.id
-      if (userId) {
-        try {
-          await updateUserProfile(userId, updatedPayload)
-        } catch {
-          // Backend patch endpoint might be partially implemented; proceed with client sync
-        }
-      }
-
-      // Update Redux state and local storage
-      dispatch(updateUser(updatedPayload))
+      await dispatch(updateUserProfileThunk(updatedPayload)).unwrap()
       toast.success('Profile updated successfully!')
     } catch (err) {
-      toast.error(err.message || 'Failed to update profile')
+      toast.error(err || 'Failed to update profile')
     } finally {
       setIsLoading(false)
     }

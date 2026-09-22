@@ -11,6 +11,7 @@ import {
   fetchMyOrdersThunk,
   selectOrders,
   selectOrdersLoading,
+  selectOrdersError,
   selectOrdersCurrentPage,
   selectOrdersTotalPages,
   selectOrdersTotalCount,
@@ -25,7 +26,7 @@ export default function OrdersPage() {
 
   const orders = useSelector(selectOrders)
   const isLoading = useSelector(selectOrdersLoading)
-  const error = useSelector((state) => state.orders.error)
+  const error = useSelector(selectOrdersError)
   const currentPage = useSelector(selectOrdersCurrentPage)
   const totalPages = useSelector(selectOrdersTotalPages)
   const totalOrders = useSelector(selectOrdersTotalCount)

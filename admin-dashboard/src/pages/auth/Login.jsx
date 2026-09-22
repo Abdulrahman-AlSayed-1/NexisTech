@@ -119,11 +119,11 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-10 overflow-hidden bg-gradient-to-br from-[var(--color-dark-bg-main)] via-[var(--color-dark-bg-card)] to-[var(--color-primary-dark)] transition-colors duration-300">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-10 overflow-hidden bg-gradient-to-br from-dark-bg-main via-dark-bg-card to-primary-dark transition-colors duration-300">
       {/* Dynamic Atmospheric Glows & Background Accents */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 sm:w-[540px] sm:h-[540px] bg-[var(--color-primary-medium)]/30 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 sm:w-[600px] sm:h-[600px] bg-[var(--color-text-gold)]/20 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[var(--color-primary-dark)]/40 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute -top-32 -left-32 w-96 h-96 sm:w-[540px] sm:h-[540px] bg-primary-medium/30 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 sm:w-[600px] sm:h-[600px] bg-text-gold/20 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary-dark/40 rounded-full blur-[160px] pointer-events-none" />
 
       {/* Cybernetic Tech Dot Grid Overlay */}
       <div 
@@ -139,10 +139,10 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md lg:max-w-4xl rounded-3xl border border-white/20 dark:border-white/10 shadow-[0_25px_80px_-15px_rgba(0,0,0,0.6)] backdrop-blur-2xl flex overflow-hidden ring-1 ring-white/15">
         
         {/* Left Brand Showcase (Desktop only) */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[var(--color-primary-dark)]/95 via-[var(--color-primary-medium)]/95 to-[var(--color-dark-bg-main)]/95 p-10 text-white flex-col justify-between relative overflow-hidden border-r border-white/10">
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-dark/95 via-primary-medium/95 to-dark-bg-main/95 p-10 text-white flex-col justify-between relative overflow-hidden border-r border-white/10">
           {/* Subtle Ambient Decorative Glows */}
-          <div className="absolute -top-24 -left-24 w-72 h-72 bg-[var(--color-text-gold)]/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-[var(--color-primary-medium)]/40 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -left-24 w-72 h-72 bg-text-gold/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-primary-medium/40 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-10">
@@ -151,7 +151,7 @@ export default function Login() {
 
             <h1 className="text-3xl xl:text-4xl font-heading font-bold leading-tight mb-4 tracking-tight">
               Manage Your Store <br />
-              <span className="text-[var(--color-text-gold)]">Like a Pro</span>
+              <span className="text-text-gold">Like a Pro</span>
             </h1>
             <p className="text-emerald-100/80 text-sm mb-8 leading-relaxed font-body">
               Enterprise administration dashboard for electronics hardware, inventory tracking,
@@ -160,31 +160,31 @@ export default function Login() {
 
             <div className="space-y-3 font-body">
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl text-sm font-medium border border-white/10 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-[var(--color-text-gold)] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-text-gold shrink-0" />
                 <span>Product &amp; Inventory Management</span>
               </div>
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl text-sm font-medium border border-white/10 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-[var(--color-text-gold)] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-text-gold shrink-0" />
                 <span>Live Order Fulfillment &amp; Tracking</span>
               </div>
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl text-sm font-medium border border-white/10 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-[var(--color-text-gold)] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-text-gold shrink-0" />
                 <span>Customer Directory &amp; Role Access</span>
               </div>
             </div>
           </div>
 
           <div className="relative z-10 pt-6 border-t border-white/10 flex items-center gap-2 text-xs text-emerald-100/70 font-body">
-            <ShieldCheck className="w-4 h-4 text-[var(--color-text-gold)] shrink-0" />
+            <ShieldCheck className="w-4 h-4 text-text-gold shrink-0" />
             <span>Encrypted Nexis Tech Admin Authentication</span>
           </div>
         </div>
 
         {/* Right Form Panel (Elevated Glassmorphic Surface) */}
-        <div className="w-full lg:w-1/2 p-6 sm:p-10 flex flex-col justify-center relative overflow-hidden bg-gradient-to-b from-white/95 via-[var(--color-border-light)]/95 to-[var(--color-bg-main)]/95 dark:from-[var(--color-dark-bg-main)]/95 dark:via-[var(--color-dark-bg-card)]/95 dark:to-[var(--color-primary-dark)]/95 backdrop-blur-xl">
+        <div className="w-full lg:w-1/2 p-6 sm:p-10 flex flex-col justify-center relative overflow-hidden bg-gradient-to-b from-white/95 via-border-light/95 to-bg-main/95 dark:from-dark-bg-main/95 dark:via-dark-bg-card/95 dark:to-primary-dark/95 backdrop-blur-xl">
           {/* Subtle Ambient Refractions behind the Form */}
-          <div className="absolute -top-16 -right-16 w-44 h-44 bg-[var(--color-text-gold)]/15 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 w-44 h-44 bg-[var(--color-primary-medium)]/15 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -top-16 -right-16 w-44 h-44 bg-text-gold/15 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 w-44 h-44 bg-primary-medium/15 rounded-full blur-2xl pointer-events-none" />
 
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-6 relative z-10">
@@ -192,10 +192,10 @@ export default function Login() {
           </div>
 
           <div className="text-center lg:text-left mb-6 relative z-10">
-            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-[var(--color-text-primary)] dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-text-primary dark:text-white tracking-tight">
               Welcome Back
             </h2>
-            <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-gray-400 font-body mt-1">
+            <p className="text-xs sm:text-sm text-text-secondary dark:text-gray-400 font-body mt-1">
               Sign in to your Nexis Tech admin portal
             </p>
           </div>
@@ -208,7 +208,7 @@ export default function Login() {
             onClick={handleQuickFill}
             className="relative z-10 w-full mb-6 flex items-center justify-center gap-2 px-3.5 py-2.5 text-xs font-semibold font-body"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-text-gold)] shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-text-gold shrink-0" />
             <span>Quick Fill Demo Credentials (admin@nexis.com)</span>
           </Button>
 
@@ -225,12 +225,12 @@ export default function Login() {
             <div className="space-y-1.5">
               <label
                 htmlFor="login-email"
-                className="block text-xs font-bold text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)] uppercase tracking-wider font-heading"
+                className="block text-xs font-bold text-primary-dark dark:text-text-light uppercase tracking-wider font-heading"
               >
                 Email Address <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] dark:text-gray-400 pointer-events-none">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary dark:text-gray-400 pointer-events-none">
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
@@ -240,7 +240,7 @@ export default function Login() {
                   placeholder="admin@nexis.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-white/90 dark:bg-[var(--color-dark-bg-main)]/90 border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40 rounded-xl text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-light)] placeholder-[var(--color-text-secondary)]/50 font-body transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-medium)] dark:focus:ring-[var(--color-text-gold)] focus:border-transparent shadow-xs"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white/90 dark:bg-dark-bg-main/90 border border-border-medium dark:border-primary-medium/40 rounded-xl text-sm text-text-primary dark:text-text-light placeholder-text-secondary/50 font-body transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-medium dark:focus:ring-text-gold focus:border-transparent shadow-xs"
                 />
               </div>
             </div>
@@ -250,13 +250,13 @@ export default function Login() {
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="login-password"
-                  className="block text-xs font-bold text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)] uppercase tracking-wider font-heading"
+                  className="block text-xs font-bold text-primary-dark dark:text-text-light uppercase tracking-wider font-heading"
                 >
                   Password <span className="text-rose-500">*</span>
                 </label>
               </div>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] dark:text-gray-400 pointer-events-none">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary dark:text-gray-400 pointer-events-none">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -266,12 +266,12 @@ export default function Login() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 bg-white/90 dark:bg-[var(--color-dark-bg-main)]/90 border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40 rounded-xl text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-light)] placeholder-[var(--color-text-secondary)]/50 font-body transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-medium)] dark:focus:ring-[var(--color-text-gold)] focus:border-transparent shadow-xs"
+                  className="w-full pl-10 pr-10 py-2.5 bg-white/90 dark:bg-dark-bg-main/90 border border-border-medium dark:border-primary-medium/40 rounded-xl text-sm text-text-primary dark:text-text-light placeholder-text-secondary/50 font-body transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-medium dark:focus:ring-text-gold focus:border-transparent shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -293,9 +293,9 @@ export default function Login() {
 
           {/* Divider */}
           <div className="relative z-10 flex items-center my-6">
-            <div className="flex-grow border-t border-[var(--color-border-medium)]/60 dark:border-white/10" />
-            <span className="px-3 text-xs text-[var(--color-text-secondary)] dark:text-gray-400 font-body">OR</span>
-            <div className="flex-grow border-t border-[var(--color-border-medium)]/60 dark:border-white/10" />
+            <div className="flex-grow border-t border-border-medium/60 dark:border-white/10" />
+            <span className="px-3 text-xs text-text-secondary dark:text-gray-400 font-body">OR</span>
+            <div className="flex-grow border-t border-border-medium/60 dark:border-white/10" />
           </div>
 
           {/* Google Sign In Button */}
@@ -327,7 +327,7 @@ export default function Login() {
             <span>Continue with Google</span>
           </Button>
 
-          <p className="relative z-10 text-[11px] text-center text-[var(--color-text-secondary)] dark:text-gray-400 mt-6 font-body">
+          <p className="relative z-10 text-[11px] text-center text-text-secondary dark:text-gray-400 mt-6 font-body">
             Authorized Personnel Only • Nexis Tech Commerce
           </p>
         </div>

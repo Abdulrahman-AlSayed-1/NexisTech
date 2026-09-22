@@ -29,10 +29,10 @@ function Toggle({ checked, onChange, label }) {
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold-hover)] ${
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent-gold-hover ${
         checked
-          ? 'bg-[var(--color-primary-dark)] dark:bg-[var(--color-text-gold)]'
-          : 'bg-[var(--color-border-medium)] dark:bg-[var(--color-primary-medium)]/40'
+          ? 'bg-primary-dark dark:bg-text-gold'
+          : 'bg-border-medium dark:bg-primary-medium/40'
       }`}
     >
       <span
@@ -49,19 +49,19 @@ function Toggle({ checked, onChange, label }) {
 
 function SectionCard({ icon: Icon, title, description, children }) {
   return (
-    <div className="bg-white dark:bg-[var(--color-dark-bg-card)] rounded-2xl border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 shadow-xs p-6 sm:p-7 space-y-5 transition-colors">
-      <div className="flex items-start gap-3 pb-4 border-b border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30">
+    <div className="bg-white dark:bg-dark-bg-card rounded-2xl border border-border-medium dark:border-primary-medium/30 shadow-xs p-6 sm:p-7 space-y-5 transition-colors">
+      <div className="flex items-start gap-3 pb-4 border-b border-border-light dark:border-primary-medium/30">
         {Icon && (
-          <div className="w-10 h-10 rounded-xl bg-[var(--color-primary-medium)]/15 dark:bg-[var(--color-primary-medium)]/30 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)] border border-[var(--color-primary-medium)]/25 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-primary-medium/15 dark:bg-primary-medium/30 text-primary-dark dark:text-text-gold border border-primary-medium/25 flex items-center justify-center shrink-0">
             <Icon className="w-5 h-5" />
           </div>
         )}
         <div className="space-y-0.5">
-          <h2 className="text-base font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+          <h2 className="text-base font-bold font-heading text-primary-dark dark:text-text-light">
             {title}
           </h2>
           {description && (
-            <p className="text-xs text-[var(--color-text-secondary)] font-body">
+            <p className="text-xs text-text-secondary font-body">
               {description}
             </p>
           )}
@@ -78,15 +78,15 @@ function SettingRow({ label, hint, children, isFirst }) {
       className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 ${
         isFirst
           ? ''
-          : 'border-t border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/20'
+          : 'border-t border-border-light dark:border-primary-medium/20'
       }`}
     >
       <div className="space-y-0.5">
-        <p className="text-sm font-semibold font-heading text-[var(--color-text-primary)] dark:text-[var(--color-text-light)]">
+        <p className="text-sm font-semibold font-heading text-text-primary dark:text-text-light">
           {label}
         </p>
         {hint && (
-          <p className="text-xs text-[var(--color-text-secondary)] font-body">
+          <p className="text-xs text-text-secondary font-body">
             {hint}
           </p>
         )}
@@ -146,19 +146,19 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       {/* Header Banner */}
-      <div className="bg-white dark:bg-[var(--color-dark-bg-card)] p-6 sm:p-8 rounded-3xl border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors">
+      <div className="bg-white dark:bg-dark-bg-card p-6 sm:p-8 rounded-3xl border border-border-medium dark:border-primary-medium/30 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary-dark)] text-white dark:bg-[var(--color-primary-medium)] flex items-center justify-center shrink-0 shadow-sm border border-[var(--color-primary-medium)]/30">
-            <SettingsIcon className="w-6 h-6 text-[var(--color-text-gold)]" />
+          <div className="w-12 h-12 rounded-2xl bg-primary-dark text-white dark:bg-primary-medium flex items-center justify-center shrink-0 shadow-sm border border-primary-medium/30">
+            <SettingsIcon className="w-6 h-6 text-text-gold" />
           </div>
           <div className="space-y-1">
             <Badge variant="primary" size="sm">
               PREFERENCES
             </Badge>
-            <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold font-heading text-primary-dark dark:text-text-light tracking-tight">
               Dashboard Settings
             </h1>
-            <p className="text-xs text-[var(--color-text-secondary)] font-body">
+            <p className="text-xs text-text-secondary font-body">
               Configure interface themes, landing views, table densities, and alerts.
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function SettingsPage() {
           >
             <div className="flex items-center gap-3">
               {isDarkMode ? (
-                <Moon className="w-4 h-4 text-[var(--color-text-gold)]" />
+                <Moon className="w-4 h-4 text-text-gold" />
               ) : (
                 <Sun className="w-4 h-4 text-amber-500" />
               )}
@@ -339,10 +339,10 @@ export default function SettingsPage() {
         }
       >
         <div className="space-y-2">
-          <p className="text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-light)]">
+          <p className="text-sm text-text-primary dark:text-text-light">
             Are you sure you want to reset all dashboard settings to their standard defaults?
           </p>
-          <p className="text-xs text-[var(--color-text-secondary)] font-body leading-relaxed">
+          <p className="text-xs text-text-secondary font-body leading-relaxed">
             This will reset your default landing page, catalog table page sizes, currency format, and notification positions.
           </p>
         </div>

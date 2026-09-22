@@ -208,14 +208,14 @@ export default function UserList() {
       </div>
 
       {/* Add New User Card */}
-      <div className="bg-white dark:bg-[var(--color-dark-bg-card)] rounded-2xl p-6 sm:p-8 shadow-xs border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30">
-        <div className="flex items-center gap-2 mb-5 pb-3 border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30">
-          <UserPlus className="w-5 h-5 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]" />
+      <div className="bg-white dark:bg-dark-bg-card rounded-2xl p-6 sm:p-8 shadow-xs border border-border-medium dark:border-primary-medium/30">
+        <div className="flex items-center gap-2 mb-5 pb-3 border-b border-border-medium dark:border-primary-medium/30">
+          <UserPlus className="w-5 h-5 text-primary-dark dark:text-text-gold" />
           <div>
-            <h2 className="text-base font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+            <h2 className="text-base font-bold font-heading text-primary-dark dark:text-text-light">
               Create Account
             </h2>
-            <p className="text-xs text-[var(--color-text-secondary)]">
+            <p className="text-xs text-text-secondary">
               Register store customers or administrators. Use an <span className="font-semibold text-primary-dark dark:text-text-gold">@nexis.com</span> email for admin privileges.
             </p>
           </div>
@@ -263,7 +263,7 @@ export default function UserList() {
               required
             />
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[var(--color-text-secondary)] font-heading">
+              <label className="text-xs font-semibold text-text-secondary font-heading">
                 Account Role <span className="text-rose-500">*</span>
               </label>
               <Dropdown
@@ -307,13 +307,13 @@ export default function UserList() {
       </div>
 
       {/* Users Table Card */}
-      <div className="bg-white dark:bg-[var(--color-dark-bg-card)] rounded-2xl border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 shadow-xs overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-dark-bg-card rounded-2xl border border-border-medium dark:border-primary-medium/30 shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-border-medium dark:border-primary-medium/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+            <h3 className="text-sm font-bold font-heading text-primary-dark dark:text-text-light">
               Nexis Personnel & Customers Directory
             </h3>
-            <span className="text-xs text-[var(--color-text-secondary)] font-body">
+            <span className="text-xs text-text-secondary font-body">
               Showing {filteredUsers.length} of {nexisUsers.length} accounts
             </span>
           </div>
@@ -386,7 +386,7 @@ export default function UserList() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="bg-[var(--color-bg-main)]/60 dark:bg-[var(--color-dark-bg-main)] text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)] border-b border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30">
+              <thead className="bg-bg-main/60 dark:bg-dark-bg-main text-primary-dark dark:text-text-light border-b border-border-medium dark:border-primary-medium/30">
                 <tr>
                   <th className="px-6 py-3.5 font-bold font-heading text-xs tracking-wider uppercase">
                     User
@@ -402,12 +402,12 @@ export default function UserList() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-border-medium)]/30 font-body">
+              <tbody className="divide-y divide-border-medium/30 font-body">
                 {paginatedUsers.length === 0 ? (
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-6 py-12 text-center text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-slate-400 font-body"
+                      className="px-6 py-12 text-center text-xs sm:text-sm text-text-secondary dark:text-slate-400 font-body"
                     >
                       No users match your search or filter criteria.
                     </td>
@@ -427,18 +427,18 @@ export default function UserList() {
                   return (
                     <tr
                       key={userId}
-                      className="hover:bg-[var(--color-bg-main)]/30 dark:hover:bg-[var(--color-dark-bg-main)]/40 transition-colors"
+                      className="hover:bg-bg-main/30 dark:hover:bg-dark-bg-main/40 transition-colors"
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-[var(--color-primary-medium)]/15 dark:bg-[var(--color-primary-medium)]/30 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)] border border-[var(--color-primary-medium)]/25 flex items-center justify-center font-bold text-xs font-heading shrink-0">
+                          <div className="w-9 h-9 rounded-xl bg-primary-medium/15 dark:bg-primary-medium/30 text-primary-dark dark:text-text-gold border border-primary-medium/25 flex items-center justify-center font-bold text-xs font-heading shrink-0">
                             {initials}
                           </div>
                           <div>
-                            <p className="font-semibold text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-light)] font-heading">
+                            <p className="font-semibold text-sm text-text-primary dark:text-text-light font-heading">
                               {displayName}
                             </p>
-                            <p className="text-xs text-[var(--color-text-secondary)] font-body">
+                            <p className="text-xs text-text-secondary font-body">
                               ID: {userId?.slice?.(-6) || userId}
                             </p>
                           </div>
@@ -446,7 +446,7 @@ export default function UserList() {
                       </td>
 
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-[var(--color-text-secondary)] dark:text-[var(--color-border-medium)] text-xs font-body">
+                        <div className="flex items-center gap-1.5 text-text-secondary dark:text-border-medium text-xs font-body">
                           <Mail className="w-3.5 h-3.5 shrink-0" />
                           <span>{user.email}</span>
                         </div>
@@ -455,9 +455,9 @@ export default function UserList() {
                       <td className="px-6 py-4">
                         <Badge variant={isAdmin ? 'primary' : 'neutral'} size="sm">
                           {isAdmin ? (
-                            <Shield className="w-3 h-3 text-[var(--color-text-gold)]" />
+                            <Shield className="w-3 h-3 text-text-gold" />
                           ) : (
-                            <UserIcon className="w-3 h-3 text-[var(--color-text-secondary)]" />
+                            <UserIcon className="w-3 h-3 text-text-secondary" />
                           )}
                           <span>{role}</span>
                         </Badge>
@@ -495,7 +495,7 @@ export default function UserList() {
             pageSize={pageSize}
             itemLabel="users"
             onPageChange={goToPage}
-            className="border-t border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/30 px-6 py-4 bg-[var(--color-bg-card)] dark:bg-[var(--color-dark-bg-card)]"
+            className="border-t border-border-light dark:border-primary-medium/30 px-6 py-4 bg-bg-card dark:bg-dark-bg-card"
           />
         )}
       </div>
@@ -531,16 +531,16 @@ export default function UserList() {
         }
       >
         <div className="space-y-2">
-          <p className="text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-light)]">
+          <p className="text-sm text-text-primary dark:text-text-light">
             Are you sure you want to delete the account for{' '}
-            <strong className="font-bold text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]">
+            <strong className="font-bold text-primary-dark dark:text-text-gold">
               {`${userToDelete?.firstName || ''} ${userToDelete?.lastName || ''}`.trim() ||
                 userToDelete?.name ||
                 userToDelete?.email}
             </strong>
             ?
           </p>
-          <p className="text-xs text-[var(--color-text-secondary)] font-body leading-relaxed">
+          <p className="text-xs text-text-secondary font-body leading-relaxed">
             This action will permanently revoke access and remove the user profile from the database. This action cannot be undone.
           </p>
         </div>

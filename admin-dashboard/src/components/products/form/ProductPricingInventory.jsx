@@ -25,16 +25,16 @@ export default function ProductPricingInventory({
     : 0
 
   return (
-    <div className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-[var(--color-dark-bg-card)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 shadow-xs space-y-5">
+    <div className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-dark-bg-card border border-border-medium dark:border-primary-medium/30 shadow-xs space-y-5">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary-medium)]/15 text-[var(--color-primary-dark)] dark:bg-[var(--color-primary-medium)]/30 dark:text-[var(--color-text-gold)] border border-[var(--color-primary-medium)]/20 flex items-center justify-center shadow-2xs">
-          <DollarSign className="w-5 h-5 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]" />
+        <div className="w-10 h-10 rounded-xl bg-primary-medium/15 text-primary-dark dark:bg-primary-medium/30 dark:text-text-gold border border-primary-medium/20 flex items-center justify-center shadow-2xs">
+          <DollarSign className="w-5 h-5 text-primary-dark dark:text-text-gold" />
         </div>
         <div>
-          <h3 className="text-sm font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+          <h3 className="text-sm font-bold font-heading text-primary-dark dark:text-text-light">
             Pricing & Inventory
           </h3>
-          <p className="text-[11px] text-[var(--color-text-secondary)] font-body">
+          <p className="text-[11px] text-text-secondary font-body">
             Configure catalog retail price, promotional discounts, and stock quantities.
           </p>
         </div>

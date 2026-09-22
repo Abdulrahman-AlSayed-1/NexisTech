@@ -110,7 +110,7 @@ export default function ProductDetails({
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {/* Gallery Preview */}
           <div className="space-y-2">
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[var(--color-border-medium)] bg-[var(--color-bg-input)]/40 dark:border-[var(--color-primary-medium)]/30 dark:bg-[var(--color-dark-bg-main)]">
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border-medium bg-bg-input/40 dark:border-primary-medium/30 dark:bg-dark-bg-main">
               <img
                 src={activeImage}
                 alt={name}
@@ -155,8 +155,8 @@ export default function ProductDetails({
                     onClick={() => setSelectedImgIndex(idx)}
                     className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 transition-all cursor-pointer ${
                       selectedImgIndex === idx
-                        ? 'border-[var(--color-primary-medium)] dark:border-[var(--color-text-gold)] ring-2 ring-[var(--color-primary-medium)]/20'
-                        : 'border-[var(--color-border-medium)] opacity-60 hover:opacity-100 dark:border-white/10'
+                        ? 'border-primary-medium dark:border-text-gold ring-2 ring-primary-medium/20'
+                        : 'border-border-medium opacity-60 hover:opacity-100 dark:border-white/10'
                     }`}
                   >
                     <img
@@ -174,11 +174,11 @@ export default function ProductDetails({
           <div className="flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-lg bg-[var(--color-bg-input)] px-2.5 py-1 text-xs font-bold text-[var(--color-primary-medium)] dark:bg-[var(--color-primary-medium)]/30 dark:text-[var(--color-text-gold)]">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-bg-input px-2.5 py-1 text-xs font-bold text-primary-medium dark:bg-primary-medium/30 dark:text-text-gold">
                   <Layers className="h-3 w-3" />
                   {category}
                 </span>
-                <span className="rounded-lg bg-[var(--color-bg-input)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text-secondary)] dark:bg-[var(--color-dark-bg-main)] dark:text-slate-300">
+                <span className="rounded-lg bg-bg-input px-2.5 py-1 text-xs font-semibold text-text-secondary dark:bg-dark-bg-main dark:text-slate-300">
                   {brand}
                 </span>
                 <Badge
@@ -190,23 +190,23 @@ export default function ProductDetails({
                 </Badge>
               </div>
 
-              <h2 className="text-xl font-bold font-heading text-[var(--color-primary-dark)] dark:text-white leading-tight">
+              <h2 className="text-xl font-bold font-heading text-primary-dark dark:text-white leading-tight">
                 {name}
               </h2>
 
               {/* Price Display */}
-              <div className="rounded-xl border border-[var(--color-border-light)] bg-[var(--color-bg-main)]/50 p-3 dark:border-[var(--color-primary-medium)]/20 dark:bg-[var(--color-dark-bg-main)]/50">
-                <div className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase">
+              <div className="rounded-xl border border-border-light bg-bg-main/50 p-3 dark:border-primary-medium/20 dark:bg-dark-bg-main/50">
+                <div className="text-[11px] font-semibold text-text-secondary uppercase">
                   Price
                 </div>
                 <div className="mt-0.5 flex items-baseline gap-2">
-                  <span className="text-2xl font-black font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]">
+                  <span className="text-2xl font-black font-heading text-primary-dark dark:text-text-gold">
                     {formatPrice(displayPrice)}{' '}
                     <span className="text-sm font-semibold">{currency}</span>
                   </span>
                   {hasDiscount && (
                     <>
-                      <span className="text-sm text-[var(--color-text-secondary)] line-through">
+                      <span className="text-sm text-text-secondary line-through">
                         {formatPrice(price)} {currency}
                       </span>
                       <Badge
@@ -239,7 +239,7 @@ export default function ProductDetails({
 
             {/* Product ID Pill */}
             {productId && (
-              <div className="rounded-xl bg-[var(--color-bg-input)]/40 p-2.5 text-[11px] font-mono text-[var(--color-text-secondary)] dark:bg-[var(--color-dark-bg-main)]/40">
+              <div className="rounded-xl bg-bg-input/40 p-2.5 text-[11px] font-mono text-text-secondary dark:bg-dark-bg-main/40">
                 <span className="font-semibold font-sans">Product ID: </span>
                 {productId}
               </div>
@@ -248,28 +248,28 @@ export default function ProductDetails({
         </div>
 
         {/* Description */}
-        <div className="space-y-2 border-t border-[var(--color-border-light)] pt-4 dark:border-[var(--color-primary-medium)]/20">
-          <h4 className="text-xs font-bold font-heading uppercase tracking-wider text-[var(--color-text-secondary)]">
+        <div className="space-y-2 border-t border-border-light pt-4 dark:border-primary-medium/20">
+          <h4 className="text-xs font-bold font-heading uppercase tracking-wider text-text-secondary">
             Description
           </h4>
-          <p className="text-xs leading-relaxed text-[var(--color-text-primary)] dark:text-slate-200 font-body whitespace-pre-line">
+          <p className="text-xs leading-relaxed text-text-primary dark:text-slate-200 font-body whitespace-pre-line">
             {description || 'No detailed description provided.'}
           </p>
         </div>
 
         {/* Tags */}
         {Array.isArray(tags) && tags.length > 0 && (
-          <div className="space-y-2 border-t border-[var(--color-border-light)] pt-4 dark:border-[var(--color-primary-medium)]/20">
-            <h4 className="text-xs font-bold font-heading uppercase tracking-wider text-[var(--color-text-secondary)]">
+          <div className="space-y-2 border-t border-border-light pt-4 dark:border-primary-medium/20">
+            <h4 className="text-xs font-bold font-heading uppercase tracking-wider text-text-secondary">
               Tags
             </h4>
             <div className="flex flex-wrap gap-1.5">
               {tags.map((tag, idx) => (
                 <span
                   key={`${tag}-${idx}`}
-                  className="inline-flex items-center gap-1 rounded-lg bg-[var(--color-bg-input)]/80 px-2.5 py-1 text-xs font-medium text-[var(--color-text-primary)] dark:bg-[var(--color-primary-medium)]/30 dark:text-slate-200"
+                  className="inline-flex items-center gap-1 rounded-lg bg-bg-input/80 px-2.5 py-1 text-xs font-medium text-text-primary dark:bg-primary-medium/30 dark:text-slate-200"
                 >
-                  <Tag className="h-3 w-3 text-[var(--color-text-secondary)]" />
+                  <Tag className="h-3 w-3 text-text-secondary" />
                   {tag}
                 </span>
               ))}

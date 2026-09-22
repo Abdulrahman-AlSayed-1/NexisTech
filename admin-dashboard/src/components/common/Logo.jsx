@@ -21,26 +21,26 @@ export default function Logo({
       ? '#FFFFFF'
       : 'var(--color-primary-dark)'
 
-  const svgClass = isAuto ? 'text-[var(--color-primary-dark)] dark:text-white' : ''
+  const svgClass = isAuto ? 'text-primary-dark dark:text-white' : ''
 
   // Typography color classes from theme CSS variables
   const nexisColor = isAuto
-    ? 'text-[var(--color-text-primary)] dark:text-white'
+    ? 'text-text-primary dark:text-white'
     : isLight
       ? 'text-white'
-      : 'text-[var(--color-text-primary)]'
+      : 'text-text-primary'
 
   const techColor = isAuto
-    ? 'text-[var(--color-primary-medium)] dark:text-[var(--color-text-gold)]'
+    ? 'text-primary-medium dark:text-text-gold'
     : isLight
-      ? 'text-[var(--color-text-gold)]'
-      : 'text-[var(--color-primary-medium)]'
+      ? 'text-text-gold'
+      : 'text-primary-medium'
 
   const tagColor = isAuto
-    ? 'text-[var(--color-text-secondary)] dark:text-[var(--color-border-light)]'
+    ? 'text-text-secondary dark:text-border-light'
     : isLight
-      ? 'text-[var(--color-border-light)]'
-      : 'text-[var(--color-text-secondary)]'
+      ? 'text-border-light'
+      : 'text-text-secondary'
 
   const iconSizes = {
     sm: 'w-6 h-6',

@@ -373,8 +373,8 @@ export const selectCartLoading = (state) => state.cart.isLoading
 
 // Memoized derived totals selector
 export const selectCartTotals = createSelector(
-  [selectCartItems, selectCartDiscount],
-  (items, discount) => calculateTotals(items, discount)
+  [selectCartSubtotal, selectCartCount, selectCartDiscount, selectCartTotal],
+  (subtotal, itemCount, discount, total) => ({ subtotal, itemCount, discount, total })
 )
 
 export default cartSlice.reducer

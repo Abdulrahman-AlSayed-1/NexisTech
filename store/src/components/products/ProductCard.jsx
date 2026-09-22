@@ -222,44 +222,42 @@ export default function ProductCard({ product, className = '' }) {
             </h3>
           </Link>
 
-          {/* Rating */}
-          <div className="flex items-center gap-2 mt-2">
-            <Rating value={rating} size="sm" />
-            <span className="text-xs font-semibold text-text-secondary dark:text-slate-400">
-              ({reviewsCount})
-            </span>
+          {/* Rating & Stock Status Row */}
+          <div className="flex items-center justify-between gap-2 mt-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Rating value={rating} size="sm" />
+              <span className="text-xs font-semibold text-text-secondary dark:text-slate-400 shrink-0">
+                ({reviewsCount})
+              </span>
+            </div>
+
+            {/* Stock indicator */}
+            {isOutOfStock ? (
+              <span className="text-[10px] font-bold text-rose-500 font-heading uppercase whitespace-nowrap shrink-0">
+                Out of Stock
+              </span>
+            ) : isLowStock ? (
+              <span className="text-[10px] font-bold text-amber-500 font-heading uppercase whitespace-nowrap shrink-0">
+                Only {stock} left
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-heading uppercase flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                <Check className="w-2.5 h-2.5 shrink-0" /> In Stock
+              </span>
+            )}
           </div>
         </div>
 
         {/* Pricing and Cart Actions */}
         <div className="pt-3 border-t border-border-light/70 dark:border-primary-medium/20 space-y-3">
-          {/* Price Tag & Stock Status */}
-          <div className="flex items-baseline justify-between gap-2">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-base sm:text-lg font-extrabold font-heading text-primary-dark dark:text-text-light">
-                  {formatCurrency(activePrice)}
-                </span>
-                {hasDiscount && (
-                  <span className="text-xs text-text-secondary line-through">
-                    {formatCurrency(price)}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Stock indicator */}
-            {isOutOfStock ? (
-              <span className="text-[10px] font-bold text-rose-500 font-heading uppercase">
-                Out of Stock
-              </span>
-            ) : isLowStock ? (
-              <span className="text-[10px] font-bold text-amber-500 font-heading uppercase">
-                Only {stock} left
-              </span>
-            ) : (
-              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-heading uppercase flex items-center gap-0.5">
-                <Check className="w-2.5 h-2.5" /> In Stock
+          {/* Price Tag Row */}
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-base sm:text-lg font-extrabold font-heading text-primary-dark dark:text-text-light whitespace-nowrap">
+              {formatCurrency(activePrice)}
+            </span>
+            {hasDiscount && (
+              <span className="text-xs text-text-secondary line-through whitespace-nowrap">
+                {formatCurrency(price)}
               </span>
             )}
           </div>

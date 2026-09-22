@@ -23,7 +23,7 @@ export default function SubscribeSection() {
       closeOnClick: true, 
       closeButton: false,
       pauseOnHover: false,
-      className: "!bg-[#1d2826] !min-h-0 !py-2 !px-4.5 !rounded-full !shadow-md !border !border-white/5 !w-fit !mx-auto",
+      className: "!bg-dark-bg-card !min-h-0 !py-2 !px-4.5 !rounded-full !shadow-md !border !border-white/5 !w-fit !mx-auto",
     }
   );
       setEmail('') 
@@ -33,8 +33,8 @@ export default function SubscribeSection() {
   return (
     <section className="w-full py-16 bg-bg-main/5 dark:bg-transparent transition-colors duration-500 border-t border-border-light/40 dark:border-primary-medium/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="group relative rounded-3xl p-8 sm:p-12 lg:p-16 overflow-hidden bg-[radial-gradient(circle_at_center,var(--color-primary-medium)_0%,var(--color-primary-dark)_100%)] dark:bg-[radial-gradient(circle_at_center,#253531_0%,#161f1d_100%)] text-text-light border border-white/5 dark:border-primary-medium/20 shadow-md">   
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-accent-gold)/5_0%,transparent_70%)] pointer-events-none" />
+        <div className="group relative rounded-3xl p-8 sm:p-12 lg:p-16 overflow-hidden bg-radial from-primary-medium to-primary-dark dark:from-dark-bg-card dark:to-dark-bg-main text-text-light border border-white/5 dark:border-primary-medium/20 shadow-md">   
+          <div className="absolute inset-0 bg-radial from-accent-gold/5 to-transparent pointer-events-none" />
           <div className="relative z-10 max-w-2xl mx-auto text-center flex flex-col items-center space-y-6">
             
             <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-accent-gold dark:group-hover:text-text-light shadow-2xs backdrop-blur-md">

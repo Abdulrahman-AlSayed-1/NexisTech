@@ -52,23 +52,23 @@ export default function ProductMediaGallery({
   }
 
   return (
-    <div className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-[var(--color-dark-bg-card)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 shadow-xs space-y-5">
+    <div className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-dark-bg-card border border-border-medium dark:border-primary-medium/30 shadow-xs space-y-5">
       {/* Gallery Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[var(--color-primary-medium)]/15 text-[var(--color-primary-dark)] dark:bg-[var(--color-primary-medium)]/30 dark:text-[var(--color-text-gold)] border border-[var(--color-primary-medium)]/20 flex items-center justify-center shadow-2xs">
-            <ImageIcon className="w-5 h-5 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]" />
+          <div className="w-10 h-10 rounded-xl bg-primary-medium/15 text-primary-dark dark:bg-primary-medium/30 dark:text-text-gold border border-primary-medium/20 flex items-center justify-center shadow-2xs">
+            <ImageIcon className="w-5 h-5 text-primary-dark dark:text-text-gold" />
           </div>
           <div>
-            <h3 className="text-sm font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+            <h3 className="text-sm font-bold font-heading text-primary-dark dark:text-text-light">
               Studio Media Gallery
             </h3>
-            <p className="text-[11px] text-[var(--color-text-secondary)] font-body">
+            <p className="text-[11px] text-text-secondary font-body">
               Upload up to 5 photos. Slot #1 is the primary storefront cover photo.
             </p>
           </div>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full font-heading bg-[var(--color-bg-main)] dark:bg-[var(--color-dark-bg-main)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)]">
+        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full font-heading bg-bg-main dark:bg-dark-bg-main border border-border-medium dark:border-primary-medium/30 text-primary-dark dark:text-text-gold">
           {allMediaItems.length} / 5 Photos
         </span>
       </div>
@@ -82,10 +82,10 @@ export default function ProductMediaGallery({
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-2xl p-8 sm:p-10 text-center cursor-pointer transition-all duration-150 ${
             isDragging
-              ? 'border-[var(--color-primary-medium)] bg-[var(--color-primary-medium)]/10 scale-[0.99]'
+              ? 'border-primary-medium bg-primary-medium/10 scale-[0.99]'
               : error
               ? 'border-rose-400 bg-rose-50/30'
-              : 'border-[var(--color-border-medium)] hover:border-[var(--color-primary-medium)] dark:border-[var(--color-primary-medium)]/40 dark:hover:border-[var(--color-text-gold)] bg-[var(--color-bg-main)]/40 hover:bg-[var(--color-bg-input)]/70'
+              : 'border-border-medium hover:border-primary-medium dark:border-primary-medium/40 dark:hover:border-text-gold bg-bg-main/40 hover:bg-bg-input/70'
           }`}
         >
           <input
@@ -96,13 +96,13 @@ export default function ProductMediaGallery({
             onChange={handleInputChange}
             className="hidden"
           />
-          <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[var(--color-dark-bg-card)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)] flex items-center justify-center mx-auto mb-3 shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-white dark:bg-dark-bg-card border border-border-medium dark:border-primary-medium/30 text-primary-dark dark:text-text-gold flex items-center justify-center mx-auto mb-3 shadow-xs">
             <UploadCloud className="w-6 h-6" />
           </div>
-          <p className="text-xs font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+          <p className="text-xs font-bold font-heading text-primary-dark dark:text-text-light">
             Click to browse photos or drag and drop files here
           </p>
-          <p className="text-[11px] text-[var(--color-text-secondary)] font-body mt-1">
+          <p className="text-[11px] text-text-secondary font-body mt-1">
             Supports PNG, JPG, WEBP • Upload up to 5 photos • Max 4MB total
           </p>
         </div>
@@ -111,7 +111,7 @@ export default function ProductMediaGallery({
         <div className="space-y-4">
           {/* Slot #1: Large Primary Cover Hero */}
           {coverItem && (
-            <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40 bg-[var(--color-bg-main)]/60 dark:bg-[var(--color-dark-bg-main)] group shadow-xs">
+            <div className="relative rounded-2xl overflow-hidden border border-border-medium dark:border-primary-medium/40 bg-bg-main/60 dark:bg-dark-bg-main group shadow-xs">
               <img
                 src={coverItem.url}
                 alt="Main storefront cover"
@@ -119,7 +119,7 @@ export default function ProductMediaGallery({
               />
               {/* Top Badges & Controls */}
               <div className="absolute inset-x-0 top-0 p-3.5 flex items-center justify-between bg-gradient-to-b from-black/70 via-black/20 to-transparent">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-primary-dark)]/90 backdrop-blur-sm border border-[var(--color-text-gold)]/40 text-[10px] font-bold tracking-wider text-[var(--color-text-gold)] uppercase font-heading shadow-xs">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-dark/90 backdrop-blur-sm border border-text-gold/40 text-[10px] font-bold tracking-wider text-text-gold uppercase font-heading shadow-xs">
                   <Sparkles className="w-3 h-3" />
                   Primary Storefront Cover
                 </span>
@@ -137,13 +137,13 @@ export default function ProductMediaGallery({
                 </button>
               </div>
               {/* Bottom Info Bar */}
-              <div className="absolute inset-x-0 bottom-0 bg-[var(--color-primary-dark)]/90 backdrop-blur-sm px-4 py-2 flex items-center justify-between text-white text-[11px] font-body">
+              <div className="absolute inset-x-0 bottom-0 bg-primary-dark/90 backdrop-blur-sm px-4 py-2 flex items-center justify-between text-white text-[11px] font-body">
                 <span className="text-[10px] font-bold tracking-wider uppercase font-heading text-white/80">
                   {coverItem.type === 'existing'
                     ? 'Current Cloudinary Asset'
                     : 'New Image Ready To Upload'}
                 </span>
-                <span className="text-[10px] text-[var(--color-text-gold)] font-mono font-bold">
+                <span className="text-[10px] text-text-gold font-mono font-bold">
                   COVER PHOTO (SLOT 1)
                 </span>
               </div>
@@ -153,14 +153,14 @@ export default function ProductMediaGallery({
           {/* Slots #2–#5: Supporting Photos Grid */}
           {supportingItems.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-[var(--color-primary-medium)] dark:text-[var(--color-text-gold)] uppercase tracking-wider block font-heading">
+              <span className="text-[10px] font-bold text-primary-medium dark:text-text-gold uppercase tracking-wider block font-heading">
                 Supporting Gallery Angles ({supportingItems.length})
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {supportingItems.map((item, idx) => (
                   <div
                     key={item.id || idx}
-                    className="relative rounded-xl overflow-hidden border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40 bg-[var(--color-bg-main)]/60 dark:bg-[var(--color-dark-bg-main)] group shadow-2xs aspect-4/3 sm:aspect-square"
+                    className="relative rounded-xl overflow-hidden border border-border-medium dark:border-primary-medium/40 bg-bg-main/60 dark:bg-dark-bg-main group shadow-2xs aspect-4/3 sm:aspect-square"
                   >
                     <img
                       src={item.url}
@@ -181,7 +181,7 @@ export default function ProductMediaGallery({
                         <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
                     </div>
-                    <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/75 text-[9px] font-bold font-mono text-[var(--color-text-gold)]">
+                    <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/75 text-[9px] font-bold font-mono text-text-gold">
                       SLOT {idx + 2}
                     </div>
                   </div>
@@ -199,8 +199,8 @@ export default function ProductMediaGallery({
               onDrop={handleDrop}
               className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-150 flex items-center justify-center gap-3.5 ${
                 isDragging
-                  ? 'border-[var(--color-primary-medium)] bg-[var(--color-primary-medium)]/10 scale-[0.99]'
-                  : 'border-[var(--color-border-medium)] hover:border-[var(--color-primary-medium)] dark:border-[var(--color-primary-medium)]/40 bg-[var(--color-bg-main)]/30 hover:bg-[var(--color-bg-input)]/60'
+                  ? 'border-primary-medium bg-primary-medium/10 scale-[0.99]'
+                  : 'border-border-medium hover:border-primary-medium dark:border-primary-medium/40 bg-bg-main/30 hover:bg-bg-input/60'
               }`}
             >
               <input
@@ -211,15 +211,15 @@ export default function ProductMediaGallery({
                 onChange={handleInputChange}
                 className="hidden"
               />
-              <div className="w-9 h-9 rounded-lg bg-white dark:bg-[var(--color-dark-bg-card)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/30 text-[var(--color-primary-dark)] dark:text-[var(--color-text-gold)] flex items-center justify-center shadow-2xs shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-white dark:bg-dark-bg-card border border-border-medium dark:border-primary-medium/30 text-primary-dark dark:text-text-gold flex items-center justify-center shadow-2xs shrink-0">
                 <UploadCloud className="w-4 h-4" />
               </div>
               <div className="text-left">
-                <p className="text-xs font-bold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)]">
+                <p className="text-xs font-bold font-heading text-primary-dark dark:text-text-light">
                   Add more photos ({5 - allMediaItems.length} slot
                   {5 - allMediaItems.length > 1 ? 's' : ''} available)
                 </p>
-                <p className="text-[10px] text-[var(--color-text-secondary)] font-body">
+                <p className="text-[10px] text-text-secondary font-body">
                   Click to browse or drop additional angles here
                 </p>
               </div>

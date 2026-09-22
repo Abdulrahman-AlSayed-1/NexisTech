@@ -48,7 +48,7 @@ function NavBar() {
           <button
             type="button"
             aria-label="Notifications"
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-primary)] border border-[var(--color-border-light)] shadow-xs transition-all duration-200 hover:border-[var(--color-accent-gold-hover)] hover:text-[var(--color-accent-gold-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold-hover)] dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/40 dark:text-[var(--color-text-gold)] dark:hover:bg-[var(--color-primary-medium)]/30"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-bg-main text-text-primary border border-border-light shadow-xs transition-all duration-200 hover:border-accent-gold-hover hover:text-accent-gold-hover focus:outline-none focus:ring-2 focus:ring-accent-gold-hover dark:bg-dark-bg-main dark:border-primary-medium/40 dark:text-text-gold dark:hover:bg-primary-medium/30"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -65,14 +65,14 @@ function NavBar() {
               <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
               <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
             </svg>
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[var(--color-accent-gold-hover)] ring-2 ring-[var(--color-bg-card)] dark:ring-[var(--color-primary-dark)]" />
+            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-accent-gold-hover ring-2 ring-bg-card dark:ring-primary-dark" />
           </button>
 
           {/* Theme toggle button */}
           <button
             type="button"
             aria-label="Toggle theme"
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-bg-main)] text-[var(--color-text-primary)] border border-[var(--color-border-light)] shadow-xs transition-all duration-200 hover:border-[var(--color-accent-gold-hover)] hover:text-[var(--color-accent-gold-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-gold-hover)] dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/40 dark:text-[var(--color-text-gold)] dark:hover:bg-[var(--color-primary-medium)]/30"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-bg-main text-text-primary border border-border-light shadow-xs transition-all duration-200 hover:border-accent-gold-hover hover:text-accent-gold-hover focus:outline-none focus:ring-2 focus:ring-accent-gold-hover dark:bg-dark-bg-main dark:border-primary-medium/40 dark:text-text-gold dark:hover:bg-primary-medium/30"
             onClick={() => dispatch(toggleTheme())}
           >
             {theme === 'dark' ? (
@@ -117,16 +117,16 @@ function NavBar() {
           </button>
 
           {/* User info badge */}
-          <div className="hidden md:flex items-center gap-3 rounded-xl border border-[var(--color-border-light)] bg-[var(--color-bg-main)] px-3 py-1.5 shadow-xs transition-colors dark:bg-[var(--color-dark-bg-main)] dark:border-[var(--color-primary-medium)]/40">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-accent-gold-hover)] text-sm font-bold text-white shadow-xs">
+          <div className="hidden md:flex items-center gap-3 rounded-xl border border-border-light bg-bg-main px-3 py-1.5 shadow-xs transition-colors dark:bg-dark-bg-main dark:border-primary-medium/40">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-gold-hover text-sm font-bold text-white shadow-xs">
               {initialLetter}
             </div>
 
             <div className="flex min-w-0 flex-col leading-tight">
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent-gold-hover)] dark:text-[var(--color-text-gold)]">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent-gold-hover dark:text-text-gold">
                 {displayRole}
               </span>
-              <span className="truncate text-sm font-semibold text-[var(--color-text-primary)] dark:text-[var(--color-text-light)]">
+              <span className="truncate text-sm font-semibold text-text-primary dark:text-text-light">
                 {displayName}
               </span>
             </div>

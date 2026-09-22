@@ -31,7 +31,7 @@ export default function AddProduct() {
       <div>
         <Link
           to="/dashboard/products"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-[var(--color-dark-bg-card)] border border-[var(--color-border-medium)] dark:border-[var(--color-primary-medium)]/40 text-xs font-semibold font-heading text-[var(--color-primary-dark)] dark:text-[var(--color-text-light)] hover:bg-[var(--color-bg-main)]/60 hover:border-[var(--color-primary-medium)] shadow-2xs transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-dark-bg-card border border-border-medium dark:border-primary-medium/40 text-xs font-semibold font-heading text-primary-dark dark:text-text-light hover:bg-bg-main/60 hover:border-primary-medium shadow-2xs transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Products</span>

@@ -4,6 +4,7 @@ import {
   getFeaturedProducts,
   getProductById,
   searchProducts,
+  addProductReview,
 } from '@/api/products'
 import { isElectronicsOrHardwareProduct, getEffectiveSubcategory } from '@/constants/categories'
 
@@ -59,6 +60,21 @@ export const searchProductsThunk = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || err.message || 'Failed to search products'
+      )
+    }
+  }
+)
+
+export const addProductReviewThunk = createAsyncThunk(
+  'products/addProductReview',
+  async ({ productId, reviewData }, { dispatch, rejectWithValue }) => {
+    try {
+      const data = await addProductReview(productId, reviewData)
+      dispatch(fetchProductById(productId))
+      return data
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || err.message || 'Failed to submit review'
       )
     }
   }

@@ -66,10 +66,10 @@ function QuickEditForm({ product, currency, onClose }) {
   return (
     <form id="quick-edit-form" onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <h4 className="text-sm font-bold font-heading text-[var(--color-primary-dark)] dark:text-white truncate">
+        <h4 className="text-sm font-bold font-heading text-primary-dark dark:text-white truncate">
           {product?.name}
         </h4>
-        <p className="text-xs text-[var(--color-text-secondary)] font-body">
+        <p className="text-xs text-text-secondary font-body">
           Update pricing, inventory, and promotional highlights quickly.
         </p>
       </div>
@@ -120,13 +120,13 @@ function QuickEditForm({ product, currency, onClose }) {
             onChange={(e) =>
               setFormData({ ...formData, isActive: e.target.checked })
             }
-            className="h-4 w-4 rounded border-[var(--color-border-medium)] text-[var(--color-primary-medium)] focus:ring-[var(--color-primary-medium)] dark:border-white/20 dark:bg-[var(--color-dark-bg-main)]"
+            className="h-4 w-4 rounded border-border-medium text-primary-medium focus:ring-primary-medium dark:border-white/20 dark:bg-dark-bg-main"
           />
           <div className="flex flex-col">
-            <span className="text-xs font-bold font-heading text-[var(--color-primary-dark)] dark:text-white">
+            <span className="text-xs font-bold font-heading text-primary-dark dark:text-white">
               Active in Store
             </span>
-            <span className="text-[11px] text-[var(--color-text-secondary)] font-body">
+            <span className="text-[11px] text-text-secondary font-body">
               Make product live and visible to customers across the catalog
             </span>
           </div>
@@ -139,20 +139,20 @@ function QuickEditForm({ product, currency, onClose }) {
             onChange={(e) =>
               setFormData({ ...formData, featured: e.target.checked })
             }
-            className="h-4 w-4 rounded border-[var(--color-border-medium)] text-[var(--color-primary-medium)] focus:ring-[var(--color-primary-medium)] dark:border-white/20 dark:bg-[var(--color-dark-bg-main)]"
+            className="h-4 w-4 rounded border-border-medium text-primary-medium focus:ring-primary-medium dark:border-white/20 dark:bg-dark-bg-main"
           />
           <div className="flex flex-col">
-            <span className="text-xs font-bold font-heading text-[var(--color-primary-dark)] dark:text-white">
+            <span className="text-xs font-bold font-heading text-primary-dark dark:text-white">
               Featured Product
             </span>
-            <span className="text-[11px] text-[var(--color-text-secondary)] font-body">
+            <span className="text-[11px] text-text-secondary font-body">
               Show this product on promotional and featured dashboard sections
             </span>
           </div>
         </label>
       </div>
 
-      <div className="flex w-full items-center justify-end gap-2.5 pt-4 border-t border-[var(--color-border-light)] dark:border-[var(--color-primary-medium)]/20">
+      <div className="flex w-full items-center justify-end gap-2.5 pt-4 border-t border-border-light dark:border-primary-medium/20">
         <Button
           variant="outline"
           size="sm"

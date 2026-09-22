@@ -1,9 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { ArrowLeft, Trash2, ShoppingCart } from 'lucide-react'
+import { ArrowLeft, Trash2, ShoppingCart, AlertCircle } from 'lucide-react'
 import { toast } from 'react-toastify'
 
+import Button from '@/components/common/Button'
+import Modal from '@/components/common/Modal'
 import CartItemRow from '@/components/cart/CartItemRow'
 import CartOrderSummary from '@/components/cart/CartOrderSummary'
 import CartCouponBox from '@/components/cart/CartCouponBox'
@@ -42,6 +44,8 @@ export default function CartPage() {
   const appliedCoupon = useSelector(selectCartCoupon)
   const isLoading = useSelector(selectCartLoading)
 
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false)
+
   useEffect(() => {
     dispatch(fetchCartThunk())
     dispatch(fetchStoreProducts())
@@ -78,9 +82,7 @@ export default function CartPage() {
   }
 
   const handleClearCart = () => {
-    if (window.confirm('Are you sure you want to remove all items from your cart?')) {
-      dispatch(clearCartThunk())
-    }
+    setIsClearModalOpen(true)
   }
 
   const handleProceedToCheckout = () => {
@@ -202,6 +204,50 @@ export default function CartPage() {
           </div>
         )}
       </div>
+
+      {/* Clear Cart Confirmation Modal */}
+      <Modal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        title="Clear Cart"
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={() => setIsClearModalOpen(false)}
+            >
+              Keep Cart
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              size="md"
+              onClick={() => {
+                dispatch(clearCartThunk())
+                setIsClearModalOpen(false)
+              }}
+            >
+              Yes, Clear All
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex items-start gap-3.5 py-1">
+          <div className="w-9 h-9 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-text-primary dark:text-text-light font-heading">
+              Remove all items from your cart?
+            </p>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              This will empty your cart. Items will need to be re-added if you change your mind.
+            </p>
+          </div>
+        </div>
+      </Modal>
     </main>
   )
 }

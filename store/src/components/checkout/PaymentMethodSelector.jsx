@@ -43,7 +43,7 @@ export default function PaymentMethodSelector() {
 
   return (
     <div className="bg-bg-card dark:bg-dark-bg-card rounded-2xl border border-border-light dark:border-primary-medium/30 p-6 sm:p-8 shadow-sm space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-border-light dark:border-primary-medium/30">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 pb-4 border-b border-border-light dark:border-primary-medium/30">
         <div>
           <h2 className="text-lg sm:text-xl font-heading font-bold text-primary-dark dark:text-text-light">
             Payment Method
@@ -52,7 +52,7 @@ export default function PaymentMethodSelector() {
             Select your preferred payment option to complete your order
           </p>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+        <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium shrink-0">
           <Lock className="w-3.5 h-3.5" />
           <span>SSL 256-Bit Encrypted</span>
         </div>

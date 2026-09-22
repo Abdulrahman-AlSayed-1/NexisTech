@@ -7,7 +7,7 @@ export default function CartStats({ stats, currency = 'EGP' }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total Active Carts */}
-      <div className="bg-white dark:bg-[var(--color-dark-bg-card)] p-5 rounded-2xl border border-border-light dark:border-white/10 shadow-xs">
+      <div className="bg-white dark:bg-dark-bg-card p-5 rounded-2xl border border-border-light dark:border-white/10 shadow-xs">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary dark:text-slate-400">
             Active Carts
@@ -26,7 +26,7 @@ export default function CartStats({ stats, currency = 'EGP' }) {
       </div>
 
       {/* Total Pipeline Value */}
-      <div className="bg-white dark:bg-[var(--color-dark-bg-card)] p-5 rounded-2xl border border-border-light dark:border-white/10 shadow-xs">
+      <div className="bg-white dark:bg-dark-bg-card p-5 rounded-2xl border border-border-light dark:border-white/10 shadow-xs">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary dark:text-slate-400">
             Pending Cart Value
@@ -44,7 +44,7 @@ export default function CartStats({ stats, currency = 'EGP' }) {
       </div>
 
       {/* Total Items in Carts */}
-      <div className="bg-white dark:bg-[var(--color-dark-bg-card)] p-5 rounded-2xl border border-border-light dark:border-white/10 shadow-xs">
+      <div className="bg-white dark:bg-dark-bg-card p-5 rounded-2xl border border-border-light dark:border-white/10 shadow-xs">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary dark:text-slate-400">
             Reserved Items
@@ -62,7 +62,7 @@ export default function CartStats({ stats, currency = 'EGP' }) {
       </div>
 
       {/* Avg Cart Value */}
-      <div className="bg-white dark:bg-[var(--color-dark-bg-card)] p-5 rounded-2xl border border-border-light dark:border-white/10 shadow-xs">
+      <div className="bg-white dark:bg-dark-bg-card p-5 rounded-2xl border border-border-light dark:border-white/10 shadow-xs">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary dark:text-slate-400">
             Avg. Cart Size

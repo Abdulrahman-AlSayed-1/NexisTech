@@ -160,6 +160,7 @@ export const selectIsPlacingOrder = (state) => state.orders.isPlacingOrder
 export const selectOrdersCurrentPage = (state) => state.orders.currentPage
 export const selectOrdersTotalPages = (state) => state.orders.totalPages
 export const selectOrdersTotalCount = (state) => state.orders.totalOrders
+export const selectOrdersError = (state) => state.orders.error
 
 // Memoized order statistics selector
 export const selectOrderStats = createSelector(
