@@ -232,6 +232,7 @@ const cartSlice = createSlice({
       saveCart(state)
     },
     addToCart: (state, action) => {
+      const item = action.payload
       const prodId = getCartItemId(item)
       const existing = state.items.find((i) => isMatchingItem(i, prodId))
       if (existing) {
