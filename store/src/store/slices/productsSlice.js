@@ -5,7 +5,7 @@ import {
   getProductById,
   searchProducts,
 } from '@/api/products'
-import { isElectronicsOrHardwareProduct } from '@/constants/categories'
+import { isElectronicsOrHardwareProduct, getEffectiveSubcategory } from '@/constants/categories'
 
 export const fetchStoreProducts = createAsyncThunk(
   'products/fetchStoreProducts',
@@ -99,11 +99,12 @@ const productsSlice = createSlice({
         state.isLoading = false
         const payload = action.payload || {}
         const rawProducts = payload.products || payload.data || (Array.isArray(payload) ? payload : [])
-        // Strictly filter to ensure store isolation
-        state.items = rawProducts.filter(isElectronicsOrHardwareProduct)
-        state.totalItems = payload.total || state.items.length
-        state.totalPages = payload.pages || Math.max(1, Math.ceil(state.totalItems / 12))
-        state.currentPage = payload.page || 1
+        // Strictly filter to ensure store isolation: Nexis Tech is electronics & hardware only
+        const filtered = rawProducts.filter(isElectronicsOrHardwareProduct)
+        state.items = filtered
+        state.totalItems = filtered.length
+        state.totalPages = Math.max(1, Math.ceil(filtered.length / 12))
+        state.currentPage = payload.currentPage || payload.page || 1
       })
       .addCase(fetchStoreProducts.rejected, (state, action) => {
         state.isLoading = false
@@ -158,6 +159,8 @@ export const selectProducts = (state) => state.products.items
 export const selectFeaturedProducts = (state) => state.products.featuredItems
 export const selectSelectedProduct = (state) => state.products.selectedProduct
 export const selectProductsLoading = (state) => state.products.isLoading
+export const selectProductDetailLoading = (state) => state.products.isDetailLoading
+export const selectProductsError = (state) => state.products.error
 export const selectSearchResults = (state) => state.products.searchResults
 
 // Memoized category counts selector
@@ -166,7 +169,7 @@ export const selectCategoryCounts = createSelector(
   (products) => {
     const counts = { all: products.length }
     for (const p of products) {
-      const sub = (p.subcategory || '').toLowerCase().trim()
+      const sub = getEffectiveSubcategory(p)
       if (sub) {
         counts[sub] = (counts[sub] || 0) + 1
       }

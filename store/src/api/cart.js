@@ -5,13 +5,13 @@ export const getCart = async () => {
   return response.data
 }
 
-export const addToCartApi = async (itemData) => {
-  const response = await api.post('/carts/items', itemData)
+export const addToCartApi = async ({ productId, quantity }) => {
+  const response = await api.post('/carts/items', { productId, quantity })
   return response.data
 }
 
-export const updateCartItemApi = async (itemData) => {
-  const response = await api.patch('/carts/items', itemData)
+export const updateCartItemApi = async ({ productId, quantity }) => {
+  const response = await api.patch('/carts/items', { productId, quantity })
   return response.data
 }
 

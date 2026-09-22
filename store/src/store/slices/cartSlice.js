@@ -47,6 +47,8 @@ export const fetchCartThunk = createAsyncThunk(
   'cart/fetchCart',
   async (_, { rejectWithValue }) => {
     try {
+      const token = localStorage.getItem('token')
+      if (!token) return null
       const data = await getCart()
       return data
     } catch (err) {
@@ -59,12 +61,25 @@ export const addToCartThunk = createAsyncThunk(
   'cart/addToCart',
   async (itemData, { rejectWithValue, dispatch }) => {
     try {
-      // Optimistically update
+      // Optimistically update local state with rich product metadata
       dispatch(cartSlice.actions.addToCart(itemData))
-      const data = await addToCartApi(itemData)
-      return data
+      const token = localStorage.getItem('token')
+      if (token) {
+        const prodId = itemData.productId || itemData._id || itemData.id
+        const data = await addToCartApi({
+          productId: prodId,
+          quantity: Math.max(1, Number(itemData.quantity) || 1),
+        })
+        return data
+      }
+      return { success: true, localOnly: true }
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message)
+      const errorMsg =
+        err.response?.data?.errors?.join(', ') ||
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to add item to cart'
+      return rejectWithValue(errorMsg)
     }
   }
 )
@@ -74,10 +89,23 @@ export const updateCartItemThunk = createAsyncThunk(
   async (itemData, { rejectWithValue, dispatch }) => {
     try {
       dispatch(cartSlice.actions.updateQuantity(itemData))
-      const data = await updateCartItemApi(itemData)
-      return data
+      const token = localStorage.getItem('token')
+      if (token) {
+        const prodId = itemData.productId || itemData._id || itemData.id
+        const data = await updateCartItemApi({
+          productId: prodId,
+          quantity: Math.max(1, Number(itemData.quantity) || 1),
+        })
+        return data
+      }
+      return { success: true, localOnly: true }
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message)
+      const errorMsg =
+        err.response?.data?.errors?.join(', ') ||
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to update cart item'
+      return rejectWithValue(errorMsg)
     }
   }
 )
@@ -86,11 +114,25 @@ export const removeCartItemThunk = createAsyncThunk(
   'cart/removeCartItem',
   async (productId, { rejectWithValue, dispatch }) => {
     try {
-      dispatch(cartSlice.actions.removeFromCart(productId))
-      const data = await removeCartItemApi(productId)
-      return data
+      const prodId =
+        typeof productId === 'object' && productId !== null
+          ? productId.productId || productId._id || productId.id
+          : productId
+
+      dispatch(cartSlice.actions.removeFromCart(prodId))
+      const token = localStorage.getItem('token')
+      if (token) {
+        const data = await removeCartItemApi(prodId)
+        return data
+      }
+      return { success: true, localOnly: true }
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message)
+      const errorMsg =
+        err.response?.data?.errors?.join(', ') ||
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to remove cart item'
+      return rejectWithValue(errorMsg)
     }
   }
 )
@@ -112,8 +154,12 @@ export const clearCartThunk = createAsyncThunk(
   async (_, { rejectWithValue, dispatch }) => {
     try {
       dispatch(cartSlice.actions.clearCart())
-      const data = await clearCartApi()
-      return data
+      const token = localStorage.getItem('token')
+      if (token) {
+        const data = await clearCartApi()
+        return data
+      }
+      return { success: true, localOnly: true }
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message)
     }

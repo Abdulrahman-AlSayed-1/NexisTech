@@ -24,14 +24,23 @@ const saveWishlist = (items) => {
   }
 }
 
+export const getEntityId = (item) => {
+  if (!item) return ''
+  if (typeof item === 'string') return item
+  return item._id || item.productId || item.id || ''
+}
+
 export const fetchWishlistThunk = createAsyncThunk(
   'wishlist/fetchWishlist',
-  async (_, { rejectWithValue }) => {
+  async () => {
     try {
+      const token = localStorage.getItem('token')
+      if (!token) return { wishlist: { products: getStoredWishlist() } }
       const data = await getMyWishlist()
       return data
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message)
+    } catch {
+      // Fallback to local stored wishlist if unauthenticated or network failure
+      return { wishlist: { products: getStoredWishlist() } }
     }
   }
 )
@@ -41,11 +50,18 @@ export const addToWishlistThunk = createAsyncThunk(
   async (product, { rejectWithValue, dispatch }) => {
     try {
       dispatch(wishlistSlice.actions.addToWishlist(product))
-      const prodId = product._id || product.productId || product.id
-      const data = await addToWishlistApi(prodId)
-      return data
+      const token = localStorage.getItem('token')
+      if (token) {
+        const prodId =
+          typeof product === 'string'
+            ? product
+            : product._id || product.productId || product.id
+        const data = await addToWishlistApi(prodId)
+        return data
+      }
+      return { success: true, localOnly: true }
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message)
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to update wishlist')
     }
   }
 )
@@ -54,11 +70,20 @@ export const removeFromWishlistThunk = createAsyncThunk(
   'wishlist/removeFromWishlist',
   async (productId, { rejectWithValue, dispatch }) => {
     try {
-      dispatch(wishlistSlice.actions.removeFromWishlist(productId))
-      const data = await removeFromWishlistApi(productId)
-      return data
+      const prodId =
+        typeof productId === 'object' && productId !== null
+          ? productId._id || productId.productId || productId.id
+          : productId
+
+      dispatch(wishlistSlice.actions.removeFromWishlist(prodId))
+      const token = localStorage.getItem('token')
+      if (token) {
+        const data = await removeFromWishlistApi(prodId)
+        return data
+      }
+      return { success: true, localOnly: true }
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message)
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to remove from wishlist')
     }
   }
 )
@@ -68,10 +93,14 @@ export const clearWishlistThunk = createAsyncThunk(
   async (_, { rejectWithValue, dispatch }) => {
     try {
       dispatch(wishlistSlice.actions.clearWishlist())
-      const data = await clearWishlistApi()
-      return data
+      const token = localStorage.getItem('token')
+      if (token) {
+        const data = await clearWishlistApi()
+        return data
+      }
+      return { success: true, localOnly: true }
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || err.message)
+      return rejectWithValue(err.response?.data?.message || err.message || 'Failed to clear wishlist')
     }
   }
 )
@@ -90,16 +119,15 @@ const wishlistSlice = createSlice({
   initialState,
   reducers: {
     setWishlist: (state, action) => {
-      state.items = action.payload.products || action.payload || []
+      const p = action.payload || {}
+      state.items = p.wishlist?.products || p.products || p || []
       state.totalProducts = state.items.length
       saveWishlist(state.items)
     },
     addToWishlist: (state, action) => {
       const product = action.payload
-      const targetId = product._id || product.productId || product.id
-      const exists = state.items.some(
-        (i) => (i._id || i.productId || i.id) === targetId
-      )
+      const targetId = getEntityId(product)
+      const exists = state.items.some((i) => getEntityId(i) === targetId)
       if (!exists) {
         state.items.push(product)
         state.totalProducts = state.items.length
@@ -107,10 +135,8 @@ const wishlistSlice = createSlice({
       }
     },
     removeFromWishlist: (state, action) => {
-      const productId = action.payload
-      state.items = state.items.filter(
-        (i) => (i._id || i.productId || i.id) !== productId
-      )
+      const targetId = getEntityId(action.payload)
+      state.items = state.items.filter((i) => getEntityId(i) !== targetId)
       state.totalProducts = state.items.length
       saveWishlist(state.items)
     },
@@ -129,6 +155,7 @@ const wishlistSlice = createSlice({
         state.isLoading = false
         const payload = action.payload || {}
         const serverItems =
+          payload.wishlist?.products ||
           payload.products ||
           payload.data ||
           (Array.isArray(payload) ? payload : [])
@@ -158,7 +185,7 @@ export const selectWishlistError = (state) => state.wishlist.error
 // Memoized IDs set for fast membership checks
 export const selectWishlistIds = createSelector(
   [selectWishlistItems],
-  (items) => new Set(items.map((i) => i._id || i.productId || i.id))
+  (items) => new Set(items.map(getEntityId).filter(Boolean))
 )
 
 export const selectIsInWishlist = (productId) => (state) =>

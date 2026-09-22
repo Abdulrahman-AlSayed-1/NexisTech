@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { useCountUp } from 'react-countup'
 
 /**
@@ -22,7 +22,7 @@ import { useCountUp } from 'react-countup'
  */
 export default function Counter({
   value = 0,
-  duration = 2,
+  duration = 1.5,
   decimals,
   prefix = '',
   suffix = '',
@@ -40,7 +40,7 @@ export default function Counter({
 
   const resolvedSuffix = currency ? ` ${currency}` : suffix
 
-  useCountUp({
+  const { update } = useCountUp({
     ref: countUpRef,
     start: 0,
     end: isInvalid ? 0 : numericValue,
@@ -49,12 +49,27 @@ export default function Counter({
     separator,
     prefix,
     suffix: resolvedSuffix,
-    enableReinitialize: true,
   })
+
+  // Explicitly trigger countup animation update when Redux async value arrives
+  useEffect(() => {
+    if (!isInvalid && update) {
+      update(numericValue)
+    }
+  }, [numericValue, isInvalid, update])
 
   if (isInvalid) {
     return <span className={className}>{value}</span>
   }
 
-  return <span ref={countUpRef} className={className} />
+  return (
+    <span ref={countUpRef} className={className}>
+      {prefix}
+      {numericValue.toLocaleString('en-US', {
+        minimumFractionDigits: resolvedDecimals,
+        maximumFractionDigits: resolvedDecimals,
+      })}
+      {resolvedSuffix}
+    </span>
+  )
 }

@@ -75,3 +75,45 @@ export function isElectronicsOrHardwareProduct(product) {
 
   return false
 }
+
+/**
+ * Resolves the effective electronics subcategory for a product,
+ * seamlessly mapping generic test subcategories (e.g. 'team-1-product', 'macbook')
+ * to standard catalog taxonomies based on product name and keywords.
+ *
+ * @param {object} product
+ * @returns {string}
+ */
+export function getEffectiveSubcategory(product) {
+  if (!product) return ''
+  const sub = (product.subcategory || '').trim().toLowerCase()
+  if (ALLOWED_SUBCATEGORIES.includes(sub)) return sub
+
+  const name = (product.name || product.title || '').toLowerCase()
+  const cat = (product.category || '').toLowerCase()
+
+  if (name.includes('headphone') || name.includes('airpods') || name.includes('quietcomfort') || name.includes('audio') || name.includes('earbud')) {
+    return 'audio'
+  }
+  if (name.includes('macbook') || name.includes('laptop') || name.includes('xps') || name.includes('zephyrus')) {
+    return 'laptops'
+  }
+  if (name.includes('iphone') || name.includes('galaxy s') || name.includes('smartphone') || (name.includes('phone') && !name.includes('headphone')) || cat.includes('phone')) {
+    return 'smartphones'
+  }
+  if (name.includes('ipad') || name.includes('galaxy tab') || name.includes('tablet')) {
+    return 'tablets'
+  }
+  if (name.includes('mouse') || name.includes('keyboard') || name.includes('charger') || name.includes('cable') || name.includes('case')) {
+    return 'accessories'
+  }
+  if (name.includes('watch') || name.includes('band') || name.includes('wearable')) {
+    return 'wearables'
+  }
+  if (name.includes('camera') || name.includes('drone')) {
+    return 'cameras'
+  }
+
+  return sub
+}
+
