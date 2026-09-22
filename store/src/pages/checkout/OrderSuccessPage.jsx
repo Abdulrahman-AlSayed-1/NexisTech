@@ -33,7 +33,7 @@ export default function OrderSuccessPage() {
       : null
 
   const [order, setOrder] = useState(initialCachedOrder || reduxCurrentOrder)
-  const [fetchAttempted, setFetchAttempted] = useState(false)
+  const [fetchAttempted, setFetchAttempted] = useState(() => Boolean(initialCachedOrder || reduxCurrentOrder))
 
   const targetOrderId =
     paramOrderId || order?._id || order?.id || reduxCurrentOrder?._id
@@ -55,8 +55,6 @@ export default function OrderSuccessPage() {
         .finally(() => {
           setFetchAttempted(true)
         })
-    } else if (order) {
-      setFetchAttempted(true)
     }
   }, [dispatch, order, targetOrderId])
 

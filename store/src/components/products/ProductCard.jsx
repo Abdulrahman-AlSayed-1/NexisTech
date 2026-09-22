@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { Heart, ShoppingCart, Eye, ChevronLeft, ChevronRight, Check } from 'lucide-react'
@@ -18,8 +18,6 @@ import {
   getProductId,
   extractProductImages,
 } from '@/utils/productUtils'
-
-export { getProductId, extractProductImages }
 
 /**
  * ProductCard Component

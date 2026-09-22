@@ -12,7 +12,7 @@ import {
   validateEgyptianPhone,
 } from '@/store/slices/checkoutSlice'
 
-export const EGYPT_CITIES = [
+const EGYPT_CITIES = [
   'Cairo',
   'Giza',
   'Alexandria',

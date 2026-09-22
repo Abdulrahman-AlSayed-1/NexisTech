@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 import { SlidersHorizontal, Layers, RotateCcw } from 'lucide-react'
@@ -58,7 +58,9 @@ export default function ProductsPage() {
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   // Sync URL search params when external navigation occurs
-  useEffect(() => {
+  const [prevSearchParams, setPrevSearchParams] = useState(searchParams)
+  if (searchParams !== prevSearchParams) {
+    setPrevSearchParams(searchParams)
     const urlQuery = searchParams.get('search') || searchParams.get('q') || ''
     const urlSub = searchParams.get('subcategory') || ''
     const urlBrand = searchParams.get('brand') || ''
@@ -66,17 +68,20 @@ export default function ProductsPage() {
     if (urlQuery !== searchQuery) setSearchQuery(urlQuery)
     if (urlSub !== selectedSubcategory) setSelectedSubcategory(urlSub)
     if (urlBrand !== selectedBrand) setSelectedBrand(urlBrand)
-  }, [searchParams])
+  }
+
+  // Reset pagination whenever any filter changes
+  const filterKey = `${searchQuery}|${selectedSubcategory}|${selectedBrand}|${sortBy}|${inStockOnly}|${minPrice}|${maxPrice}`
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey)
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey)
+    setCurrentPage(1)
+  }
 
   // Fetch catalog on initial load
   useEffect(() => {
     dispatch(fetchStoreProducts({ limit: 100 }))
   }, [dispatch])
-
-  // Reset pagination whenever any filter changes
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchQuery, selectedSubcategory, selectedBrand, sortBy, inStockOnly, minPrice, maxPrice])
 
   // Multi-Criteria Filtering & Sorting Logic
   const filteredProducts = useMemo(() => {

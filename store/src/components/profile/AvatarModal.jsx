@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { Sparkles, Link as LinkIcon, Upload, Trash2, Check } from 'lucide-react'
@@ -46,13 +46,16 @@ export default function AvatarModal({ isOpen, onClose }) {
 
   const currentAvatar = currentUser?.avatar || null
 
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen)
     if (isOpen) {
       setSelectedUrl(currentAvatar || '')
       setCustomUrlInput(currentAvatar || '')
       setImageError(false)
+      setActiveTab('presets')
     }
-  }, [isOpen, currentAvatar])
+  }
 
   const handleSelectPreset = (url) => {
     setSelectedUrl(url)

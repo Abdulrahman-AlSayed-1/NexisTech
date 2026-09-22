@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
@@ -9,34 +9,32 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
-  CheckCircle2,
-  AlertTriangle,
   ChevronRight,
+  Share2,
   Minus,
   Plus,
-  Share2,
-  MessageSquare,
-  Sparkles,
-  Cpu,
-  Layers,
   ArrowLeft,
+  Sparkles,
+  MessageSquare,
+  Cpu,
+  AlertTriangle,
+  CheckCircle2,
+  Layers,
 } from 'lucide-react'
 
 import Button from '@/components/common/Button'
 import Rating from '@/components/common/Rating'
 import ProductCard from '@/components/products/ProductCard'
-import { getProductId, extractProductImages } from '@/utils/productUtils'
 import ProductReviewModal from '@/components/products/ProductReviewModal'
 
-import { formatCurrency, calculateDiscountPercentage, formatDate } from '@/utils/formatters'
 import {
   fetchProductById,
   fetchStoreProducts,
-  clearSelectedProduct,
+  selectProducts,
   selectSelectedProduct,
   selectProductDetailLoading,
   selectProductsError,
-  selectProducts,
+  clearSelectedProduct,
 } from '@/store/slices/productsSlice'
 import { addToCartThunk } from '@/store/slices/cartSlice'
 import {
@@ -44,11 +42,17 @@ import {
   removeFromWishlistThunk,
   selectWishlistIds,
 } from '@/store/slices/wishlistSlice'
+
+import { formatCurrency, calculateDiscountPercentage, formatDate } from '@/utils/formatters'
+import { getProductId, extractProductImages } from '@/utils/productUtils'
 import { addProductReview } from '@/api/products'
 
 /**
  * ProductDetailPage Component
- * Cohesive, production-grade product showcase page adhering to Nexis Tech standards.
+ * Production-ready product showcase compliant with Nexis Tech design tokens.
+ * Features multi-image gallery with active thumbnail selector, interactive zoom on main stage,
+ * stock status pill with remaining stock counters, interactive quantity stepper, direct Add to Cart / Buy Now,
+ * tabbed specifications and verified customer reviews with rating distributions and submission modal.
  */
 export default function ProductDetailPage() {
   const { id } = useParams()
@@ -76,12 +80,18 @@ export default function ProductDetailPage() {
   const [reviewComment, setReviewComment] = useState('')
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
 
+  // Adjust local image index and quantity synchronously during render on id change
+  const [prevId, setPrevId] = useState(id)
+  if (id !== prevId) {
+    setPrevId(id)
+    setActiveImageIdx(0)
+    setQuantity(1)
+  }
+
   // Fetch product detail on mount or id change
   useEffect(() => {
     if (id) {
       dispatch(fetchProductById(id))
-      setActiveImageIdx(0)
-      setQuantity(1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
     return () => {

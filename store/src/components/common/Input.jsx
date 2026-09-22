@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * @typedef {Object} InputProps
  * @property {string} [label] - Input label rendered above the control

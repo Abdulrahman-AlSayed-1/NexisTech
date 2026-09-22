@@ -1,4 +1,3 @@
-import React from 'react'
 import { MapPin, CreditCard } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/utils/formatters'
 

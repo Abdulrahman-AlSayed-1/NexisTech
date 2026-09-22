@@ -1,4 +1,3 @@
-import React from 'react'
 import { Package, Check, XCircle } from 'lucide-react'
 
 const ORDER_STAGES = [

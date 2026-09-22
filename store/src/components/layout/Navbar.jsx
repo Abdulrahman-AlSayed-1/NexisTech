@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { Search, Moon, Sun, Heart, ShoppingCart, User, X, Menu } from 'lucide-react'
@@ -26,12 +26,23 @@ export default function Navbar() {
   const cartCount = useSelector(selectCartCount)
   const favCount = useSelector(selectWishlistCount)
   const theme = useSelector(selectTheme)
-  const mobileDisplay = useSelector(selectIsMobileMenuOpen)
   const searchActive = useSelector(selectIsSearchOpen)
+  const mobileDisplay = useSelector(selectIsMobileMenuOpen)
 
   const [searchValue, setSearchValue] = useState('')
   const [scrollMode, setScrollMode] = useState(false)
   const searchInputRef = useRef(null)
+
+  const searchClose = useCallback(() => {
+    dispatch(closeSearch())
+    setSearchValue('')
+  }, [dispatch])
+
+  useEffect(() => {
+    if (searchValue.trim().length > 1) {
+      dispatch(searchProductsThunk(searchValue.trim()))
+    }
+  }, [searchValue, dispatch])
 
   useEffect(() => {
     const onScroll = () => {
@@ -55,7 +66,7 @@ export default function Navbar() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [searchActive])
+  }, [searchActive, searchClose])
 
   const displayName = user?.username || (user?.role ? user.role.toUpperCase() : 'USER')
   const userAvatar =
@@ -67,10 +78,6 @@ export default function Navbar() {
 
   const toggleThemeMode = () => dispatch(toggleTheme())
   const handleToggleSearch = () => dispatch(toggleSearch())
-  const searchClose = () => {
-    dispatch(closeSearch())
-    setSearchValue('')
-  }
   const navbarMobileDisplay = () => dispatch(toggleMobileMenu())
 
   const handleProfileNavigation = () => {

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, Package } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatters'
 import { getCartItemId } from '@/utils/productUtils'

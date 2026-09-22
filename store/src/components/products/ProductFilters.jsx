@@ -1,4 +1,3 @@
-import React from 'react'
 import { SlidersHorizontal, Search, X, RotateCcw } from 'lucide-react'
 import Button from '@/components/common/Button'
 import { ELECTRONICS_BRANDS } from '@/constants/categories'

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Trash2, Minus, Plus } from 'lucide-react'
@@ -17,17 +17,16 @@ export default function CartItemRow({
   onRemove,
   isUpdating = false,
 }) {
-  if (!item) return null
-
   const catalogProducts = useSelector(selectProducts) || []
-  const product = item.product || item
-  const productId = getCartItemId(item)
+  const product = item?.product || item || {}
+  const productId = item ? getCartItemId(item) : ''
   const catalogProduct = catalogProducts.find((p) => getProductId(p) === productId)
   const [fetchedStock, setFetchedStock] = useState(null)
 
   useEffect(() => {
     // If stock is not present in cart item or catalog, fetch live product stock
     if (
+      item &&
       product.stock === undefined &&
       item.stock === undefined &&
       (!catalogProduct || catalogProduct.stock === undefined) &&
@@ -42,7 +41,9 @@ export default function CartItemRow({
         })
         .catch(() => {})
     }
-  }, [productId, product.stock, item.stock, catalogProduct])
+  }, [item, productId, product.stock, catalogProduct])
+
+  if (!item) return null
 
   const itemId = item._id || item.id || ''
   const name = item.name || product.name || product.title || 'Product'

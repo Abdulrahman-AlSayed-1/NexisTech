@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * @typedef {'dark' | 'light' | 'auto'} LogoVariant
  * @typedef {'sm' | 'md' | 'lg'} LogoSize

@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * @typedef {'primary' | 'secondary' | 'outline' | 'gold' | 'danger' | 'ghost' | 'subtle' | 'none'} ButtonVariant
  * @typedef {'sm' | 'md' | 'lg' | 'none'} ButtonSize

@@ -8,7 +8,7 @@ import {
   removeCouponApi,
   clearCartApi,
 } from '@/api/cart'
-import { getProductId, getCartItemId } from '@/utils/productUtils'
+import { getCartItemId } from '@/utils/productUtils'
 
 const getStoredCart = () => {
   try {

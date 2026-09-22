@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Tag, Check, X } from 'lucide-react'
 import Button from '@/components/common/Button'
 import { formatCurrency } from '@/utils/formatters'

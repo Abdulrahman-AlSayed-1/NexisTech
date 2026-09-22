@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * @typedef {'primary' | 'gold' | 'success' | 'warning' | 'danger' | 'info' | 'violet' | 'cyan' | 'neutral' | 'solid-success' | 'solid-danger' | 'solid-gold' | 'custom' | 'none'} BadgeVariant
  * @typedef {'pending' | 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'returned' | 'paid' | 'failed' | 'refunded' | 'instock' | 'outofstock' | 'sale' | 'new'} BadgeStatus

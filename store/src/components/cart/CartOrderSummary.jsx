@@ -1,4 +1,3 @@
-import React from 'react'
 import { ShieldCheck, Truck, RotateCcw, ArrowRight } from 'lucide-react'
 import Button from '@/components/common/Button'
 import { formatCurrency } from '@/utils/formatters'
