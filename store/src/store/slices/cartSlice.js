@@ -100,25 +100,15 @@ export const addToCartThunk = createAsyncThunk(
 
 export const updateCartItemThunk = createAsyncThunk(
   'cart/updateCartItem',
-  async (itemData, { rejectWithValue, dispatch, getState }) => {
+  async (itemData, { rejectWithValue, dispatch }) => {
     try {
-      const currentCartItems = getState().cart.items || []
-      const existing = currentCartItems.find((i) => isMatchingItem(i, itemData))
-      const rawStock = itemData.stock ?? existing?.stock ?? existing?.product?.stock
-      const knownStock = Number(rawStock)
-      const requestedQty = Number(itemData.quantity) || 1
-
-      if (!isNaN(knownStock) && knownStock > 0 && requestedQty > knownStock) {
-        return rejectWithValue(`Only ${knownStock} units available in stock`)
-      }
-
       dispatch(cartSlice.actions.updateQuantity(itemData))
       const token = localStorage.getItem('token')
       if (token) {
         const prodId = getCartItemId(itemData)
         const data = await updateCartItemApi({
           productId: prodId,
-          quantity: Math.max(1, requestedQty),
+          quantity: Math.max(1, Number(itemData.quantity) || 1),
         })
         return data
       }
