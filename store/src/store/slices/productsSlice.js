@@ -11,7 +11,8 @@ export const fetchStoreProducts = createAsyncThunk(
   'products/fetchStoreProducts',
   async (params = {}, { rejectWithValue }) => {
     try {
-      const data = await getStoreProducts(params)
+      const queryParams = { limit: 100, ...params }
+      const data = await getStoreProducts(queryParams)
       return data
     } catch (err) {
       return rejectWithValue(

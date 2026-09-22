@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Trash2, Minus, Plus } from 'lucide-react'
 import { formatCurrency } from '@/utils/formatters'
 import { extractProductImages, getCartItemId, getProductId } from '@/utils/productUtils'
 import { selectProducts } from '@/store/slices/productsSlice'
+import { getProductById } from '@/api/products'
 
 /**
  * CartItemRow Component
@@ -22,6 +23,26 @@ export default function CartItemRow({
   const product = item.product || item
   const productId = getCartItemId(item)
   const catalogProduct = catalogProducts.find((p) => getProductId(p) === productId)
+  const [fetchedStock, setFetchedStock] = useState(null)
+
+  useEffect(() => {
+    // If stock is not present in cart item or catalog, fetch live product stock
+    if (
+      product.stock === undefined &&
+      item.stock === undefined &&
+      (!catalogProduct || catalogProduct.stock === undefined) &&
+      productId
+    ) {
+      getProductById(productId)
+        .then((res) => {
+          const p = res?.product || res?.data || res
+          if (p && p.stock !== undefined) {
+            setFetchedStock(Number(p.stock))
+          }
+        })
+        .catch(() => {})
+    }
+  }, [productId, product.stock, item.stock, catalogProduct])
 
   const itemId = item._id || item.id || ''
   const name = item.name || product.name || product.title || 'Product'
@@ -35,10 +56,16 @@ export default function CartItemRow({
       ? product.stock
       : item.stock !== undefined && item.stock !== null
       ? item.stock
-      : catalogProduct?.stock
+      : catalogProduct?.stock !== undefined && catalogProduct?.stock !== null
+      ? catalogProduct.stock
+      : fetchedStock
 
-  const parsedStock = Number(rawStock)
-  const stock = !isNaN(parsedStock) && parsedStock > 0 ? parsedStock : 99
+  // If rawStock is known (e.g. 5 or 0), use it; only fallback to 99 if completely undefined
+  const stock =
+    rawStock !== null && rawStock !== undefined && !isNaN(Number(rawStock))
+      ? Number(rawStock)
+      : 99
+
   const isMaxReached = quantity >= stock
   const itemTotal = price * quantity
 
