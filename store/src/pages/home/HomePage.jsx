@@ -49,13 +49,13 @@ export default function HomePage() {
               Explore Devices
             </Button>
             <Button
-              variant="outline"
+              variant="primary"
               size="md"
               onClick={() => {
                 const catSection = document.getElementById('catSection')
                 if (catSection) catSection.scrollIntoView({ behavior: 'smooth' })
               }}
-              className="border-white/20 text-text-light hover:bg-white/5 hover:border-white/50"
+              className="border-white hover:bg-white/5 hover:border-white/50"
             >
               Browse Categories
             </Button>

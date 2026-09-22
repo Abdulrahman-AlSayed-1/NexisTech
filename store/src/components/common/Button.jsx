@@ -1,3 +1,5 @@
+import { twMerge } from 'tailwind-merge'
+
 /**
  * @typedef {'primary' | 'secondary' | 'outline' | 'gold' | 'danger' | 'ghost' | 'subtle' | 'none'} ButtonVariant
  * @typedef {'sm' | 'md' | 'lg' | 'none'} ButtonSize
@@ -29,8 +31,7 @@ export default function Button({
   type = 'button',
   ...props
 }) {
-  const hasDisplay = /\b(hidden|flex|inline-flex|block|inline|grid|inline-block)\b/.test(className)
-  const baseStyles = `${hasDisplay ? '' : 'inline-flex '}items-center justify-center font-heading font-semibold rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none`
+  const baseStyles = 'inline-flex items-center justify-center font-heading font-semibold rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none'
 
   const variants = {
     primary:
@@ -61,7 +62,7 @@ export default function Button({
     <button
       type={type}
       disabled={disabled || isLoading}
-      className={`${baseStyles} ${variants[variant] ?? variants.primary} ${sizes[size] ?? sizes.md} ${className}`}
+      className={twMerge(baseStyles, variants[variant] ?? variants.primary, sizes[size] ?? sizes.md, className)}
       {...props}
     >
       {isLoading ? (
