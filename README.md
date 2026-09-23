@@ -47,23 +47,30 @@ ecommerce-project/
     ├── src/
     │   ├── api/           # API service layer (auth, orders, products, carts, axios)
     │   ├── components/    # Modular component library
-    │   │   ├── common/    # Reusable UI primitives (Badge, Button, Counter, Dropdown, Input, Logo, Modal, Pagination, Rating)
+    │   │   ├── common/    # Reusable UI primitives (Badge, Button, Counter, Dropdown, Input, Logo, Modal, OtpInput, Pagination, Rating)
     │   │   ├── layout/    # Layout shells (MainLayout, AuthLayout, Navbar, Footer)
-    │   │   └── [features] # Feature folders for team implementation (auth, cart, checkout, orders, products, profile, wishlist)
+    │   │   ├── home/      # CategorySection, FeaturedProductsSection, OrderStepsSection, SubscribeSection
+    │   │   ├── auth/      # LoginForm, RegisterForm, VerifyOtpForm, ForgotPasswordForm, AuthCard
+    │   │   ├── products/  # ProductCard, ProductGrid, ProductFilters, ProductSort
+    │   │   ├── cart/      # CartItemRow, CartSummary, CartCouponBox
+    │   │   ├── checkout/  # AddressForm, PaymentMethods, OrderSuccessCard
+    │   │   ├── orders/    # OrderCard, OrderSummaryCard, OrderProgressStepper, CancelOrderModal
+    │   │   ├── profile/   # PersonalInfoTab, AddressesTab, SecurityTab
+    │   │   └── wishlist/  # WishlistCard
     │   ├── constants/     # Electronics categories & catalog rules (categories.js)
-    │   ├── pages/         # 15 SEF Academy 3.3 screen placeholders
-    │   │   ├── auth/      # LoginPage, RegisterPage, VerifyOtpPage, ForgotPasswordPage
-    │   │   ├── checkout/  # CheckoutPage, PaymentPage, OrderSuccessPage
-    │   │   ├── products/  # ProductsPage, ProductDetailPage
-    │   │   ├── orders/    # OrdersPage, OrderDetailPage
-    │   │   ├── profile/   # ProfilePage
-    │   │   ├── cart/      # CartPage
-    │   │   ├── wishlist/  # WishlistPage
-    │   │   ├── home/      # HomePage
-    │   │   └── NotFoundPage.jsx
+    │   ├── pages/         # Application page views
+    │   │   ├── home/      # HomePage.jsx (Route page)
+    │   │   ├── products/  # ProductsPage.jsx, ProductDetailPage.jsx
+    │   │   ├── cart/      # CartPage.jsx
+    │   │   ├── wishlist/  # WishlistPage.jsx
+    │   │   ├── checkout/  # CheckoutPage.jsx, PaymentPage.jsx, OrderSuccessPage.jsx
+    │   │   ├── orders/    # OrdersPage.jsx, OrderDetailPage.jsx
+    │   │   ├── profile/   # ProfilePage.jsx
+    │   │   ├── auth/      # LoginPage.jsx, RegisterPage.jsx, VerifyOtpPage.jsx, ForgotPasswordPage.jsx
+    │   │   └── NotFoundPage.jsx # Standalone full-screen 404 page
     │   ├── routes/        # AppRoutes.jsx, GuestRoute.jsx, ProtectedRoute.jsx
-    │   ├── store/         # Redux store & domain slices (auth, products, cart, wishlist, orders, filters, ui)
-    │   ├── utils/         # Utility formatters & helpers (formatters.js)
+    │   ├── store/         # Redux store & domain slices (auth, products, cart, wishlist, orders, checkout, ui)
+    │   ├── utils/         # formatters.js, productUtils.js, addressManager.js
     │   ├── index.css      # Tailwind v4 theme, Nexis Tech design tokens & fonts
     │   └── main.jsx       # App entry (Redux Provider, BrowserRouter, ToastContainer)
     └── vite.config.js     # Port 5173, @ alias, Tailwind v4
@@ -97,17 +104,23 @@ npm run dev:admin
 
 # Run Customer Store (http://localhost:5173)
 npm run dev:store
+
+# Build Admin Dashboard for Production
+npm run build:admin
+
+# Build Customer Store for Production
+npm run build:store
 ```
 
 Or navigate to each folder directly:
 ```bash
 # Admin Dashboard
 cd admin-dashboard
-npm run dev
+npm run dev      # or npm run build
 
 # Online Store
 cd store
-npm run dev
+npm run dev      # or npm run build
 ```
 
 ### Dedicated Ports:
@@ -115,6 +128,44 @@ npm run dev
 | :--- | :--- | :--- |
 | **Online Store** | `http://localhost:5173` | `5173` |
 | **Admin Dashboard** | `http://localhost:5174` | `5174` |
+
+---
+
+## Application Routes & Screens Map
+
+### Customer Storefront (`store`)
+| Path | Screen Name | Layout | Access | Key Features |
+| :--- | :--- | :--- | :--- | :--- |
+| `/` | **Home Page** | `MainLayout` | Public | Hero banner, hardware subcategory shortcuts, featured electronics showcase, 4-step delivery pipeline, Tech Club newsletter |
+| `/products` | **Shop / Catalog** | `MainLayout` | Public | Electronics isolation, subcategory pills, multi-criteria filtering (brand, price, rating, in-stock), search & pagination |
+| `/products/:id` | **Product Details** | `MainLayout` | Public | Interactive multi-angle image gallery, live stock indicators, technical specs table, review submission form, instant Add-to-Cart |
+| `/cart` | **Shopping Cart** | `MainLayout` | Protected | Quantity adjusters with stock clamping, coupon code engine, real-time totals (EGP) with free shipping progress bar |
+| `/wishlist` | **Saved Wishlist** | `MainLayout` | Protected | Favorite electronics grid, one-click transfer to cart, instant removal |
+| `/checkout` | **Shipping Checkout** | `MainLayout` | Protected | Saved address selector, new delivery address form, order delivery notes, total summary |
+| `/checkout/payment`| **Payment Gateway** | `MainLayout` | Protected | Payment method selector (Cash on Delivery vs. Credit Card), order placement trigger |
+| `/order-success` | **Order Success** | `MainLayout` | Protected | Live confirmation receipt, generated order reference ID, fast link to order tracking |
+| `/profile` | **Profile & Security** | `MainLayout` | Protected | Profile editor (name, phone, avatar), saved delivery address manager, password update with 6-digit OTP confirmation |
+| `/profile/orders` | **Order History** | `MainLayout` | Protected | Chronological order cards, slide-down line item preview drawers, status badges |
+| `/profile/orders/:id`| **Order Tracking**| `MainLayout` | Protected | 5-stage fulfillment progress stepper, complete price breakdown, customer order cancellation modal |
+| `/login` | **Customer Sign In** | `AuthLayout` | Guest Only | Email/password sign-in, redirect-destination memory, instant Guest Access bypass button |
+| `/register` | **Registration** | `AuthLayout` | Guest Only | Account creation form with immediate transition to 6-digit OTP verification |
+| `/verify-otp` | **Email Verification** | `AuthLayout` | Guest Only | 6-slot numerical OTP input (`OtpInput.jsx`), countdown resend timer |
+| `/forgot-password` | **Password Recovery** | `AuthLayout` | Guest Only | 2-step password reset with OTP confirmation and auto-redirect to login |
+| `*` | **404 Not Found** | Standalone | Public | Full-viewport centered layout (`h-screen overflow-hidden`), theme toggle, direct navigation links |
+
+### Admin Control Panel (`admin-dashboard`)
+| Path | Screen Name | Layout | Access | Key Features |
+| :--- | :--- | :--- | :--- | :--- |
+| `/` or `/dashboard` | **Executive Overview** | `AppLayout` | Protected | 6-KPI metrics grid (Revenue, Orders, Products, Carts, Users, Avg Order), fulfillment pipeline donut, top 5 best sellers, live recent orders |
+| `/products` | **Inventory Catalog** | `AppLayout` | Protected | Grid & table views, active/draft visibility tabs, multi-column search, category filters, quick edit modal |
+| `/products/add` | **Add New Product** | `AppLayout` | Protected | Modular 6-component form, client-side HTML5 canvas image compression (≤500KB), Cloudinary image upload, readiness checklist |
+| `/products/edit/:id`| **Edit Product** | `AppLayout` | Protected | Full product editor with pre-populated values and tag array validation |
+| `/orders` | **Order Pipeline** | `AppLayout` | Protected | Store-isolated orders list, fulfillment status updater (`pending` → `delivered`), customer details drawer, persistent admin order notes |
+| `/users` | **User Directory** | `AppLayout` | Protected | Customer & administrator table, role toggle actions, search by name/email, pagination |
+| `/carts` | **Abandoned Carts** | `AppLayout` | Protected | Real-time customer cart monitor, abandoned cart value analytics, item drawer |
+| `/settings` | **Preferences** | `AppLayout` | Protected | Theme switch (Dark Forest / Sage Mist), catalog currency selection (`EGP`, `USD`, `EUR`, `GBP`), table density, toast positioning |
+| `/login` | **Admin Authentication** | `AuthLayout` | Public | Secure JWT login with validation, show/hide password, instant Quick Fill Demo Credentials |
+| `*` | **404 Error Page** | `AppLayout` | Protected | Clean in-dashboard 404 message with quick return to `/dashboard` |
 
 ---
 
@@ -171,6 +222,7 @@ To eliminate duplicate code and enforce unified design standards across all page
 - **`Dropdown.jsx`**: Accessible custom select dropdown with keyboard support (`Escape`, outside-click dismiss), replacing unstylable native `<select>` elements.
 - **`Modal.jsx`**: Accessible dialog overlay with backdrop blur, scroll locking, Escape key listener, and modular header, body, and action footer slots.
 - **`Input.jsx`**: Standardized form inputs with floating/stacked labels, helper text, error states, and left/right Lucide icon slots.
+- **`OtpInput.jsx`** *(Store)*: Accessible 6-slot numerical OTP PIN input primitive featuring auto-focus progression, backspace regression, arrow navigation, and multi-digit clipboard paste parsing.
 - **`Pagination.jsx`**: Universal responsive pagination bar with active slice counters (`Showing X to Y of Z items`), boundary clamping, and sliding window page buttons.
 - **`Rating.jsx`** *(Store)*: Star rating display supporting fractional values (e.g. 4.8 / 5.0), optional numeric badge, review counts, and interactive review submission mode.
 - **`Counter.jsx`** *(Store)*: Micro-interaction animated number counter powered by `react-countup` with currency formatting (`EGP`, `USD`) for totals and milestones.
@@ -334,12 +386,48 @@ A catalog of **52 realistic electronics products** (MacBooks, iPhones, Sony head
   - Production build in <200ms (`vite build`).
   - Mobile responsive from 360px up to 4K displays.
 
-### Customer Store (`store`) — **Foundational Architecture 100% COMPLETE & PRODUCTION-AUDITED**
-- ✅ **Design System & Tokens**: Tailwind v4 `@theme` palette (`--color-primary-dark`, `--color-accent-gold`, etc.) with *Plus Jakarta Sans* and *Inter* typography.
-- ✅ **Common UI Primitive Library**: 9 fully typed, accessible primitives (`Button`, `Badge`, `Input`, `Dropdown`, `Modal`, `Pagination`, `Counter`, `Rating`, `Logo`).
-- ✅ **Dual-Layout Architecture**: `MainLayout` (with placeholder `Navbar` and production `Footer`) and `AuthLayout` (isolated guest authentication flow).
-- ✅ **Route Guard System**: `GuestRoute` (redirects logged-in users away from auth pages) and `ProtectedRoute` (redirects unauthenticated users to `/login` preserving intended destination).
-- ✅ **Feature Component Directory Isolation**: Clean subfolder structure (`auth`, `cart`, `checkout`, `orders`, `products`, `profile`, `wishlist`) reserved for team implementation.
-- ✅ **Redux State Management**: 7 domain slices with memoized selectors (`createSelector`) for cart totals, category counts, wishlist IDs, and order statistics.
-- 🎯 **Next Phase**: Team feature implementation (Authentication forms, interactive Navbar with drawer, Product catalog and details, Cart & Checkout flow, and Customer profile & order history).
+### Customer Store (`store`) — **100% COMPLETE & PRODUCTION-AUDITED**
+- ✅ **Authentication & Account Lifecycle**:
+  - Secure customer registration with 6-digit verification code sent via live backend API (`POST /auth/register/verify-otp`) and countdown resend timer.
+  - Two-step Forgot Password & Reset Password flow with automatic post-reset redirection.
+  - Customer login with instant prefill from registration/password reset.
+  - Dedicated **"Access as Guest"** bypass button with intelligent destination fallback (prevents infinite redirect loops).
+  - Protected account security tab with live password change and OTP confirmation.
+- ✅ **Guest User Authorization & Access Control**:
+  - Full unauthenticated browsing of hardware products, categories, and technical specifications.
+  - Cart and Wishlist actions gated with friendly informational toasts guiding guests to sign in.
+  - Dynamic Navbar gating: automatically hides Cart, Wishlist, My Orders, and notification badges for guest users, displaying only Home, Shop, Search, Theme, and Login.
+- ✅ **Interactive Navigation & Responsive Shell**:
+  - Fixed, scroll-reactive Navbar (`fixed top-0 inset-x-0 z-40`) smoothly transitioning from `h-16` to `h-14` with `backdrop-blur-md`.
+  - Responsive search bar (in-navbar expansion on desktop, full-width input inside mobile drawer).
+  - Real-time cart item and wishlist favorite counter badges.
+  - Content-sized mobile slide-down drawer with clean backdrop overlay.
+  - Responsive brand logo without mobile clipping.
+- ✅ **Hardware & Electronics Product Catalog**:
+  - Nexis Tech electronics catalog isolation (`isElectronicsOrHardwareProduct` filter).
+  - Dynamic subcategory chips (Laptops, Smartphones, Audio, Gaming, Wearables, Tablets, Cameras, Accessories) with real-time product counters.
+  - Interactive multi-criteria sorting, search querying, and pagination.
+  - Product detail page featuring multi-image gallery with zoom/navigation, stock indicators, specs table, and authentic customer reviews submission.
+- ✅ **Shopping Cart & Checkout Pipeline**:
+  - Dual-mode cart (live MongoDB sync via `/carts` + persistent local storage fallback).
+  - Quantity increment/decrement with stock boundary enforcement.
+  - Promo coupon redemption engine with discount deduction and free shipping thresholds (>5,000 EGP).
+  - Multi-step checkout pipeline: saved customer addresses selector, custom delivery details form, payment method selector (Cash on Delivery vs. Credit Card), order notes, and order success receipt screen.
+- ✅ **Order Tracking & Fulfillment**:
+  - Chronological order history grouped by date with complete timestamp fallback resolution (`orderDate`, `date`, `createdAt`, `created_at`).
+  - Compact order cards with interactive slide-down item drawers.
+  - Order details page with 5-stage fulfillment stepper (`Pending` → `Delivered`), itemized price breakdown (subtotal, shipping, VAT, discounts, total), and customer order cancellation modal.
+- ✅ **Customer Profile & Address Book**:
+  - Personal information manager with username, phone, email, and avatar updates.
+  - Address book manager extracting saved delivery locations from customer order history with default address selection.
+  - Security tab powered by the centralized `OtpInput` primitive for verified password changes.
+- ✅ **Standalone 404 Not Found Page**:
+  - Independent full-screen layout (`*` route) outside `MainLayout` eliminating footer overflow.
+  - Mathematically centered layout with brand logo, live theme toggle, bold 404 typography, and quick navigation links.
+- ✅ **Engineering & Code Quality**:
+  - Zero hardcoded colors across all views (100% Tailwind v4 `@theme` tokens and dark mode variants).
+  - Centralized atomic component library in `components/common/` (`Badge`, `Button`, `Counter`, `Dropdown`, `Input`, `Logo`, `Modal`, `OtpInput`, `Pagination`, `Rating`).
+  - Separation of concerns: home section components isolated in `components/home/`.
+  - Redux Toolkit single source of truth with memoized selectors (`createSelector`).
+  - Clean production build in <250ms (`vite build`) with 0 errors.
 
