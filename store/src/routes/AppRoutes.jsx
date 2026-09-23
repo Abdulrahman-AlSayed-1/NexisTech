@@ -57,10 +57,10 @@ export default function AppRoutes() {
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />
         </Route>
-
-        {/* 404 Fallback */}
-        <Route path="*" element={<NotFoundPage />} />
       </Route>
+
+      {/* 3. 404 Page*/}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

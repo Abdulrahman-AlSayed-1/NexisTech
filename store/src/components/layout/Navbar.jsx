@@ -138,7 +138,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className={`w-full sticky top-0 z-40 border-b transition-all duration-300 backdrop-blur-md ${headerStyle}`}>
+      <header className={`w-full fixed top-0 left-0 right-0 z-40 border-b transition-all duration-300 backdrop-blur-md ${headerStyle}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-3">
           {/* Left: Mobile Menu Toggle & Logo */}
           <div className="flex items-center gap-2 shrink-0">
@@ -177,13 +177,13 @@ export default function Navbar() {
 
           {/* Right: Actions (Search, Theme, Wishlist, Cart, Profile) */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Interactive Search Bar Toggle */}
+            {/* Interactive Search Bar Toggle (Desktop/Tablet only; on mobile search is inside hamburger menu) */}
             <form
               onSubmit={searchSubmit}
               onClick={() => {
                 if (!searchActive) handleToggleSearch()
               }}
-              className={`flex items-center rounded-full bg-bg-card/70 dark:bg-dark-bg-card border border-border-medium/50 dark:border-primary-medium/30 shadow-2xs transition-all duration-300 cursor-pointer ${
+              className={`hidden sm:flex items-center rounded-full bg-bg-card/70 dark:bg-dark-bg-card border border-border-medium/50 dark:border-primary-medium/30 shadow-2xs transition-all duration-300 cursor-pointer ${
                 searchActive
                   ? 'w-48 sm:w-64 px-3 py-1.5 border-accent-gold dark:border-accent-gold shadow-xs'
                   : 'w-8 h-8 justify-center hover:text-accent-gold dark:hover:text-accent-gold hover:border-accent-gold/40'

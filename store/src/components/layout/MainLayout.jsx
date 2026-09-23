@@ -17,7 +17,7 @@ export default function MainLayout() {
   }, [theme])
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-main dark:bg-dark-bg-main text-text-primary dark:text-text-light transition-colors duration-200">
+    <div className="min-h-screen flex flex-col pt-16 bg-bg-main dark:bg-dark-bg-main text-text-primary dark:text-text-light transition-colors duration-200">
       <Navbar />
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <Outlet />
