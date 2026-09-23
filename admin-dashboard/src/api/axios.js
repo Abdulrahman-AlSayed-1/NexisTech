@@ -1,6 +1,17 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://e-commerce-api-3wara.vercel.app'
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'https://e-commerce-api-3wara.vercel.app') {
+    return import.meta.env.VITE_API_URL
+  }
+  // In production (Vercel), route through /api-proxy to bypass backend CORS whitelist restrictions
+  if (import.meta.env.PROD) {
+    return '/api-proxy'
+  }
+  return 'https://e-commerce-api-3wara.vercel.app'
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 const api = axios.create({
   baseURL: API_BASE_URL,
