@@ -4,6 +4,18 @@ Welcome to the **Nexis Tech** e-commerce project repository. This project is bui
 
 ---
 
+## 🌐 Live Production Deployments
+
+
+> **Nexis Tech is live and deployed on Vercel!** Experience both applications in real-time:
+>
+> | Application | Live URL | Description |
+> | :--- | :--- | :--- |
+> | **Customer Storefront** | **[https://nexistech.vercel.app/](https://nexistech.vercel.app/)** | Full customer shopping experience, catalog filters, cart, checkout & order tracking |
+> | **Admin Dashboard** | **[https://nexistech-dashboard.vercel.app/](https://nexistech-dashboard.vercel.app/)** | Real-time operations, 6-KPI metrics, product inventory management & order pipelines |
+
+---
+
 ## Monorepo Structure
 
 ```text
@@ -123,11 +135,11 @@ cd store
 npm run dev      # or npm run build
 ```
 
-### Dedicated Ports:
-| App | Local URL | Port |
-| :--- | :--- | :--- |
-| **Online Store** | `http://localhost:5173` | `5173` |
-| **Admin Dashboard** | `http://localhost:5174` | `5174` |
+### Dedicated Ports & Environments:
+| Application | Local URL | Port | Live Production URL |
+| :--- | :--- | :--- | :--- |
+| **Customer Storefront** | `http://localhost:5173` | `5173` | [https://nexistech.vercel.app/](https://nexistech.vercel.app/) |
+| **Admin Dashboard** | `http://localhost:5174` | `5174` | [https://nexistech-dashboard.vercel.app/](https://nexistech-dashboard.vercel.app/) |
 
 ---
 
